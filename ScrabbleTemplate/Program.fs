@@ -49,7 +49,7 @@ let main argv =
         None
         
     // Uncomment this line to call your client
-    let players    = [("theis", YourClientName.Scrabble.startGame)]
+    let players    = [("theis", ScrabbleClient.Scrabble.startGame)] //ScrabbleClient is the name of the namespace in scrabble.fs and scrabble.fsi
     let (dictionary, time) =
         time (fun () -> ScrabbleUtil.Dictionary.mkDict words dictAPI)
 

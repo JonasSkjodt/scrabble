@@ -55,7 +55,7 @@ module internal Eval
        | Conj of bExp * bExp  (* boolean conjunction *)
 
        | IsVowel of cExp      (* check for vowel *)
-       | IsConsonant of cExp  (* check for constant <---- look for this one letter*)
+       //| IsConsonant of cExp  (* check for constant <---- look for this one letter*)
        | IsLetter of cExp     (* check for letter *)
        | IsDigit of cExp      (* check for digit *)
 
