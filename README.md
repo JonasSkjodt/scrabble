@@ -1,0 +1,2 @@
+# scrabble
+F# scrabble project
