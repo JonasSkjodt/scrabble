@@ -42,10 +42,6 @@ module internal Parser
     let (.>*>) p1 p2  = p1 .>> spaces .>> p2
     let (>*>.) p1 p2  = p1 .>> spaces >>. p2
 
-    //pchar '(' >*>. p .>*> pchar ')'
-    //Create a parser parenthesise : Parser<'a> -> Parser<'a>
-    //that given a parser p returns a parser that parses a string of the form
-    //(<arbitrary many spaces><whatever p parses><arbitrary many spaces>)
     let parenthesise p = pchar '(' >*>. p .>*> pchar ')'
     let curlyBrackets p = pchar '{' >*>. p .>*> pchar '}'
 
@@ -100,10 +96,22 @@ module internal Parser
         | toUpper ( C )
         | toLower ( C )*)
     //now watch how choice is set up:
-    do cref := choice [charValueParse; intToCharParse; toUpperParse; toLowerParse; charParse]
+    do
+        cref
+        := choice [ charValueParse
+                    intToCharParse
+                    toUpperParse
+                    toLowerParse
+                    charParse ]
     let CharToIntParse = unop pCharToInt (parenthesise CParse) |>> CharToInt <?> "CharToInt"
-    //same as cref above, just with aref
-    do aref := choice [CharToIntParse; NegParse; PVParse; VParse; NParse; ParParse]
+    do
+        aref
+        := choice [ CharToIntParse
+                    NegParse
+                    PVParse
+                    VParse
+                    NParse
+                    ParParse]
 
     let CexpParse = CParse
 

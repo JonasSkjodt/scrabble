@@ -68,26 +68,17 @@ module internal StateMonad
     //remember
     //"Monads in F# are a way to structure computations that might succeed with a value,
     //fail with an error, or involve side effects, all wrapped in a uniform type."
-    let wordLength : SM<int> =
-        S (fun s ->
-            match s.word with
-            | [] -> Success(0, s) //word is empty, so its length is 0
-            | _ -> Success(List.length s.word, s) //returns the length of the word
-        )
+    let wordLength : SM<int> = S (fun s -> Success (s.word.Length, s))   
 
     let characterValue (pos : int) : SM<char> =
-        S (fun s ->
-            match List.tryItem pos s.word with
-            | Some (charValue, _) -> Success(charValue, s) //extract char from the tuple
-            | None -> Failure(IndexOutOfBounds pos) // fail if position is invalid
-        )
-
-    let pointValue (pos : int) : SM<int> =
-        S (fun s ->
-            match List.tryItem pos s.word with
-            | Some (_, pointValue) -> Success(pointValue, s) //extract int from the tuple
-            | None -> Failure(IndexOutOfBounds pos) //fail if position is invalid
-        )
+        S (fun s -> 
+        if pos >= s.word.Length || pos < 0 then Failure(IndexOutOfBounds pos)
+        else Success(fst s.word.[pos], s)
+    )
+    let pointValue (pos : int) : SM<int> = S (fun s ->
+        if pos >= s.word.Length || pos < 0 then Failure(IndexOutOfBounds pos)
+        else Success(snd s.word.[pos], s)     
+    )
     let lookup (x : string) : SM<int> = 
         let rec aux =
             function

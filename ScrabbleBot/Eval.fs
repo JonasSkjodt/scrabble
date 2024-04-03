@@ -4,18 +4,27 @@ module internal Eval
 
     open StateMonad
 
-    let add (sm1 : SM<int>) (sm2 : SM<int>) : SM<int> =
-        sm1 >>= fun a ->
-        sm2 >>= fun b ->
-        ret (a + b)
+    
+    let arithEv (a: SM<int>) (b: SM<int>) (f: (int -> int -> int)) =
+        a >>= (fun x -> b >>= (fun y -> ret (f x y)))
 
-    let div (sm1 : SM<int>) (sm2 : SM<int>) : SM<int> =
-        sm1 >>= fun a ->
-        sm2 >>= fun b ->
-        match b with
-        | 0 -> fail DivisionByZero // fails with DivisionByZero
-        | _ -> ret (a / b)  // b is not zero and returns the division
-
+    let add a b = arithEv a b (fun a b -> a + b)    
+    let div a (b : SM<int>) =
+        a >>= (
+            fun a -> b >>= (
+                fun b ->
+                    if b <= 0 then fail DivisionByZero
+                    else ret (a / b)
+                    )
+                )
+    let modulo a b = 
+        a >>= (
+            fun a -> b >>= (
+                fun b ->
+                if b <= 0 then fail DivisionByZero
+                else ret (a % b)
+                )
+            )  
     type aExp =
         | N of int
         | V of string
@@ -68,69 +77,50 @@ module internal Eval
     let (.>=.) a b = ~~(a .<. b)                (* numeric greater than or equal to *)
     let (.>.) a b = ~~(a .=. b) .&&. (a .>=. b) (* numeric greater than *)    
 
-    let rec arithEval (a : aExp) : SM<int> =
+    let rec arithEval a : SM<int> =  
         match a with
-        | N n -> ret n
-        | V varName -> lookup varName
+        | N n -> ret n 
+        | V v -> lookup v
         | WL -> wordLength
-        | PV expr -> arithEval expr >>= pointValue
-        | Add (expr1, expr2) ->
-            arithEval expr1 >>= fun val1 ->
-            arithEval expr2 >>= fun val2 ->
-            ret (val1 + val2)
-        | Sub (expr1, expr2) ->
-            arithEval expr1 >>= fun val1 ->
-            arithEval expr2 >>= fun val2 ->
-            ret (val1 - val2)
-        | Mul (expr1, expr2) ->
-            arithEval expr1 >>= fun val1 ->
-            arithEval expr2 >>= fun val2 ->
-            ret (val1 * val2)
-        | Div (expr1, expr2) ->
-            arithEval expr1 >>= fun val1 ->
-            arithEval expr2 >>= fun val2 ->
-            if val2 = 0 then fail DivisionByZero else ret (val1 / val2)
-        | Mod (expr1, expr2) ->
-            arithEval expr1 >>= fun val1 ->
-            arithEval expr2 >>= fun val2 ->
-            if val2 = 0 then fail DivisionByZero else ret (val1 % val2)
-        | CharToInt cExpr -> charEval cExpr >>= fun c -> ret (int c)
-    and charEval (c : cExp) : SM<char> =
+        | PV pv -> arithEval pv >>= (fun pv -> pointValue pv)
+        | Add (a, b) -> add (arithEval a) (arithEval b) 
+        | Sub (a,b) -> arithEv (arithEval a) (arithEval b) (fun a b -> a - b)
+        | Mul (a,b) -> arithEv (arithEval a) (arithEval b) (fun a b -> a * b)
+        | Div (a,b) -> div (arithEval a) (arithEval b) 
+        | Mod (a,b) -> modulo (arithEval a) (arithEval b)
+        | CharToInt cti -> (charEval cti) >>= (fun cti -> ret (int cti))
+    and charEval c : SM<char> = 
         match c with
-        | C ch -> ret ch
-        | CV expr -> arithEval expr >>= characterValue
-        | ToUpper cExpr -> charEval cExpr >>= fun ch -> ret (System.Char.ToUpper ch)
-        | ToLower cExpr -> charEval cExpr >>= fun ch -> ret (System.Char.ToLower ch)
-        | IntToChar expr -> arithEval expr >>= fun i -> ret (char i)
-    and boolEval (b : bExp) : SM<bool> =
+        | C c -> ret c
+        | CV cv -> arithEval cv >>= (fun cv -> characterValue cv)
+        | ToUpper c -> charEval c >>= (fun c -> ret (System.Char.ToUpper c))
+        | ToLower c -> charEval c >>= (fun c -> ret (System.Char.ToLower c))
+        | IntToChar itc -> arithEval itc >>= (fun itc -> ret (char itc))
+
+    let numComp a b f =
+        arithEval a >>= (fun x -> arithEval b >>= (fun y -> ret (f x y)))
+
+    let vowel c = 
+        match (System.Char.ToLower c) with
+        | 'a' -> true
+        | 'e' -> true
+        | 'i' -> true
+        | 'o' -> true
+        | 'u' -> true
+        | _ -> false
+
+    let rec boolEval b : SM<bool> = 
         match b with
         | TT -> ret true
         | FF -> ret false
-        | AEq (expr1, expr2) ->
-            arithEval expr1 >>= fun val1 ->
-            arithEval expr2 >>= fun val2 ->
-            ret (val1 = val2)
-        | ALt (expr1, expr2) ->
-            arithEval expr1 >>= fun val1 ->
-            arithEval expr2 >>= fun val2 ->
-            ret (val1 < val2)
-        | Not bExpr ->
-            boolEval bExpr >>= fun value ->
-            ret (not value)
-        | Conj (bExpr1, bExpr2) ->
-            boolEval bExpr1 >>= fun val1 ->
-            boolEval bExpr2 >>= fun val2 ->
-            ret (val1 && val2)
-        | IsVowel cExpr -> 
-            charEval cExpr >>= fun ch ->
-            let vowels = ['a'; 'e'; 'i'; 'o'; 'y'; 'u'; 'A'; 'E'; 'I'; 'O'; 'Y'; 'U']
-            ret (List.contains ch vowels)
-        | IsLetter cExpr -> 
-            charEval cExpr >>= fun ch ->
-            ret (System.Char.IsLetter ch)
-        | IsDigit cExpr -> 
-            charEval cExpr >>= fun ch ->
-            ret (System.Char.IsDigit ch)
+        | AEq (a, b) -> numComp a b (fun a b -> a = b)
+        | ALt (a, b) -> numComp a b (fun a b -> a < b)
+        | Not b -> boolEval b >>= (fun b -> ret (not b))
+        | Conj (b1, b2) -> boolEval b1 >>= (fun x -> boolEval b2 
+                                                    >>= (fun y -> ret (x && y)))
+        | IsVowel c -> charEval c >>= (fun c -> ret (vowel c))
+        | IsLetter c -> charEval c >>= (fun c -> ret (System.Char.IsLetter c))
+        | IsDigit c -> charEval c >>= (fun c -> ret (System.Char.IsDigit c)) 
 
     type stm =                (* statements *)
     | Declare of string       (* variable declaration *)
