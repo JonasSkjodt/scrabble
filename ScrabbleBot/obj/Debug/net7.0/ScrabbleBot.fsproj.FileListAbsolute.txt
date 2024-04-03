@@ -1,0 +1,13 @@
+C:\Users\jonas\Desktop\ScrabbleTemplate\ScrabbleBot\bin\Debug\net7.0\ScrabbleBot.deps.json
+C:\Users\jonas\Desktop\ScrabbleTemplate\ScrabbleBot\bin\Debug\net7.0\ScrabbleBot.dll
+C:\Users\jonas\Desktop\ScrabbleTemplate\ScrabbleBot\bin\Debug\net7.0\ScrabbleBot.pdb
+C:\Users\jonas\Desktop\ScrabbleTemplate\ScrabbleBot\bin\Debug\net7.0\ScrabbleUtil.dll
+C:\Users\jonas\Desktop\ScrabbleTemplate\ScrabbleBot\obj\Debug\net7.0\ScrabbleBot.fsproj.AssemblyReference.cache
+C:\Users\jonas\Desktop\ScrabbleTemplate\ScrabbleBot\obj\Debug\net7.0\ScrabbleBot.AssemblyInfoInputs.cache
+C:\Users\jonas\Desktop\ScrabbleTemplate\ScrabbleBot\obj\Debug\net7.0\ScrabbleBot.AssemblyInfo.fs
+C:\Users\jonas\Desktop\ScrabbleTemplate\ScrabbleBot\obj\Debug\net7.0\ScrabbleBot.fsproj.CoreCompileInputs.cache
+C:\Users\jonas\Desktop\ScrabbleTemplate\ScrabbleBot\obj\Debug\net7.0\ScrabbleBot.fsproj.CopyComplete
+C:\Users\jonas\Desktop\ScrabbleTemplate\ScrabbleBot\obj\Debug\net7.0\ScrabbleBot.dll
+C:\Users\jonas\Desktop\ScrabbleTemplate\ScrabbleBot\obj\Debug\net7.0\refint\ScrabbleBot.dll
+C:\Users\jonas\Desktop\ScrabbleTemplate\ScrabbleBot\obj\Debug\net7.0\ScrabbleBot.pdb
+C:\Users\jonas\Desktop\ScrabbleTemplate\ScrabbleBot\obj\Debug\net7.0\ref\ScrabbleBot.dll
