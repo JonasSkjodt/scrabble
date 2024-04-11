@@ -78,25 +78,27 @@ module Scrabble =
             | RCM (CMPlaySuccess(ms, points, newPieces)) ->
                 (* Successful play by you. Update your state (remove old tiles, add the new ones, change turn, etc) *)
                 
-                let rec removeTiles (ms : list<coord * (uint32 * (char * int))>) hand = 
-                    match ms with
-                    | (_, (tileID, _)) :: tail ->
-                        if MultiSet.contains tileID hand then
-                            removeTiles tail (MultiSet.removeSingle tileID hand)
+                let rec removeTiles (move : list<coord * (uint32 * (char * int))>) hand = 
+                    match move with
+                    | (coords, (tileId,_)) :: tail ->
+                        if MultiSet.contains tileId hand then
+                            let updatedHand = MultiSet.removeSingle tileId hand 
+                            removeTiles tail updatedHand
                         else
                             failwith "Tile played could not be found in player hand"
                     | [] -> hand // if no more tiles to remove, return the hand
             
                 let rec addNewTiles newPieces hand =
                     match newPieces with
-                    | newTile :: tail -> addNewTiles tail (MultiSet.addSingle (fst newTile) hand)
-                    | [] -> hand
-                    
+                    | newTile :: tail -> 
+                    //let updatedHand = MultiSet.addSingle (fst newTile) hand 
+                    addNewTiles tail (MultiSet.addSingle (fst newTile) hand)
+                    | [] -> hand 
 
                 //chatgpt
                 // let rec removeTiles (ms : list<coord * (uint32 * (char * int))>) hand =
                 //     match ms with
-                //     | (_, (tileId, _)) :: tail ->
+                //     | (coords, (tileId, _)) :: tail ->
                 //         // Check if the tileId exists in the hand.
                 //         if MultiSet.contains tileId hand then
                 //             // Remove the tile from the hand and continue recursively.
@@ -114,18 +116,14 @@ module Scrabble =
                 //         addNewTiles tail updatedHand
                 //     | [] -> hand // If no more new tiles to add, return the updated hand
 
-                // Successful play by you. Update your state (remove old tiles, add the new ones, etc.)
-                // let st' = 
-                //     let handAfterRemoval = removeTiles move st.hand
-                //     let handAfterAddition = addNewTiles newPieces handAfterRemoval
-                //     { st with hand = handAfterAddition } // This creates a new state with the updated hand
-                let st' = {st with hand = addNewTiles newPieces (removeTiles ms st.hand)}
+                //Successful play by you. Update your state (remove old tiles, add the new ones, etc.)
+                let st' = 
+                    let handAfterRemoval = removeTiles move st.hand
+                    let handAfterAddition = addNewTiles newPieces handAfterRemoval
+                    { st with hand = handAfterAddition } // This creates a new state with the updated hand
+                //let st' = {st with hand = addNewTiles newPieces (removeTiles move st.hand)}
 
                 aux st'
-                //aux st'
-
-                // Successful play by you. Update your state (remove old tiles, add the new ones, etc.)
-                
             | RCM (CMPlayed (pid, ms, points)) ->
                 (* Successful play by other player. Update your state *)
                 // Code to update your board
