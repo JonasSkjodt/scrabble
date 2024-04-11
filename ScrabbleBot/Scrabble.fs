@@ -76,34 +76,56 @@ module Scrabble =
 
             match msg with
             | RCM (CMPlaySuccess(ms, points, newPieces)) ->
-                //ms (coord * (uint32 * (char * int))) list
+                (* Successful play by you. Update your state (remove old tiles, add the new ones, change turn, etc) *)
                 
-                // Hope: newPieces has the correct  amount
-                
-                fst (snd ms.Head)
-                let rec removeTiles (ms : list<coord * (uint32 * (char * int))>) = 
+                let rec removeTiles (ms : list<coord * (uint32 * (char * int))>) hand = 
                     match ms with
-                    // | tile :: tail -> if MultiSet.contains tile st.hand then MultiSet.removeSingle tile st.hand 
-                    //                     else failwith "Tile played could not be found in player hand"
-                    | tile :: tail ->
-                        if MultiSet.contains (fst (snd tile)) st.hand then
-                            MultiSet.removeSingle (fst (snd tile)) st.hand removeTiles tail
+                    | (_, (tileID, _)) :: tail ->
+                        if MultiSet.contains tileID hand then
+                            removeTiles tail (MultiSet.removeSingle tileID hand)
                         else
                             failwith "Tile played could not be found in player hand"
-                    | [] -> st.hand // if no more tiles to remove, return the hand
-                
-                let rec addNewTiles newPieces =
-                    function
-                    | newTile :: tail -> MultiSet.add (fst newTile) (snd newTile) st.hand
-                    | [] -> st.hand 
-                //let newhand = handSet st.hand + newPieces
-                
-                //tile :: tail -> if MultiSet.contains tile st.hand then let updatedHand = MultiSet.removeSingle tile st.hand removeTiles updatedHand tail else failwith "yadda"
-                
-                (* Successful play by you. Update your state (remove old tiles, add the new ones, change turn, etc) *)
-                let st' = st // This state needs to be updated
-                
+                    | [] -> hand // if no more tiles to remove, return the hand
+            
+                let rec addNewTiles newPieces hand =
+                    match newPieces with
+                    | newTile :: tail -> addNewTiles tail (MultiSet.addSingle (fst newTile) hand)
+                    | [] -> hand
+                    
+
+                //chatgpt
+                // let rec removeTiles (ms : list<coord * (uint32 * (char * int))>) hand =
+                //     match ms with
+                //     | (_, (tileId, _)) :: tail ->
+                //         // Check if the tileId exists in the hand.
+                //         if MultiSet.contains tileId hand then
+                //             // Remove the tile from the hand and continue recursively.
+                //             let updatedHand = MultiSet.removeSingle tileId hand
+                //             removeTiles tail updatedHand
+                //         else
+                //             failwith "Tile played could not be found in player hand"
+                //     | [] -> hand // If no more tiles to remove, return the updated hand
+
+                // let rec addNewTiles newPieces hand =
+                //     match newPieces with
+                //     | newTile :: tail ->
+                //         // Add the new tile to the hand and continue recursively.
+                //         let updatedHand = MultiSet.addSingle (fst newTile) hand
+                //         addNewTiles tail updatedHand
+                //     | [] -> hand // If no more new tiles to add, return the updated hand
+
+                // Successful play by you. Update your state (remove old tiles, add the new ones, etc.)
+                // let st' = 
+                //     let handAfterRemoval = removeTiles move st.hand
+                //     let handAfterAddition = addNewTiles newPieces handAfterRemoval
+                //     { st with hand = handAfterAddition } // This creates a new state with the updated hand
+                let st' = {st with hand = addNewTiles newPieces (removeTiles ms st.hand)}
+
                 aux st'
+                //aux st'
+
+                // Successful play by you. Update your state (remove old tiles, add the new ones, etc.)
+                
             | RCM (CMPlayed (pid, ms, points)) ->
                 (* Successful play by other player. Update your state *)
                 // Code to update your board
