@@ -76,11 +76,37 @@ module Scrabble =
 
             match msg with
             | RCM (CMPlaySuccess(ms, points, newPieces)) ->
+                //ms (coord * (uint32 * (char * int))) list
+                
+                // Hope: newPieces has the correct  amount
+                
+                fst (snd ms.Head)
+                let rec removeTiles (ms : list<coord * (uint32 * (char * int))>) = 
+                    match ms with
+                    // | tile :: tail -> if MultiSet.contains tile st.hand then MultiSet.removeSingle tile st.hand 
+                    //                     else failwith "Tile played could not be found in player hand"
+                    | tile :: tail ->
+                        if MultiSet.contains (fst (snd tile)) st.hand then
+                            MultiSet.removeSingle (fst (snd tile)) st.hand removeTiles tail
+                        else
+                            failwith "Tile played could not be found in player hand"
+                    | [] -> st.hand // if no more tiles to remove, return the hand
+                
+                let rec addNewTiles newPieces =
+                    function
+                    | newTile :: tail -> MultiSet.add (fst newTile) (snd newTile) st.hand
+                    | [] -> st.hand 
+                //let newhand = handSet st.hand + newPieces
+                
+                //tile :: tail -> if MultiSet.contains tile st.hand then let updatedHand = MultiSet.removeSingle tile st.hand removeTiles updatedHand tail else failwith "yadda"
+                
                 (* Successful play by you. Update your state (remove old tiles, add the new ones, change turn, etc) *)
                 let st' = st // This state needs to be updated
+                
                 aux st'
             | RCM (CMPlayed (pid, ms, points)) ->
                 (* Successful play by other player. Update your state *)
+                // Code to update your board
                 let st' = st // This state needs to be updated
                 aux st'
             | RCM (CMPlayFailed (pid, ms)) ->
