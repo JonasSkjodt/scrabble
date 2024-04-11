@@ -1,5 +1,7 @@
 ﻿// Learn more about F# at http://fsharp.org
 
+open DictionarySimple
+
 let time f =
     let start = System.DateTime.Now
     let res = f ()
@@ -45,21 +47,37 @@ let main argv =
 
     let dictAPI =
         // Uncomment if you have implemented a dictionary. last element None if you have not implemented a GADDAG
-        // Some (Dictionary.empty, Dictionary.insert, Dictionary.step, Some Dictionary.reverse) 
+        //Some (DictionarySimple.empty, DictionarySimple.insert, DictionarySimple.lookup) //DictionarySimple.step(*, Some DictionarySimple.reverse*)) 
         None
-        
+
+    let playerDictAPI =
+        // Uncomment if you have implemented a dictionary. last element None if you have not implemented a GADDAG
+        Some (DictionarySimple.empty, DictionarySimple.insert, DictionarySimple.lookup) //DictionarySimple.step, Some DictionarySimple.reverse) 
+        None
+    
+    let (playerDict, playerTime) = time (fun () -> ScrabbleUtil.Dictionary.mkDict words playerDictAPI)
+    
     // Uncomment this line to call your client
-    let players    = [("theis", ScrabbleClient.Scrabble.startGame)] //ScrabbleClient is the name of the namespace in scrabble.fs and scrabble.fsi
+    let players    = [("Scrabble botter", playerDict, ScrabbleClient.Scrabble.startGame)]  //ScrabbleClient is the name of the namespace in scrabble.fs and scrabble.fsi
+    
     let (dictionary, time) =
         time (fun () -> ScrabbleUtil.Dictionary.mkDict words dictAPI)
+    
 
-    let players = spawnMultiples "OxyphenButazone" dictionary Oxyphenbutazone.Scrabble.startGame 2
+    // int at the end is amount of bots 
+    //let players = spawnMultiples "OxyphenButazone" dictionary Oxyphenbutazone.Scrabble.startGame 2
 
+    // 0 0 19S1 0 1 1A1 0 2 22V4 0 3 5E1    save
 
+    // 0 0 19S1 <----- placening 'S' on the board
+    // 0            0            19-----------S---------1
+    // ^placementX  ^placementY  ^tileID      ^Char     ^point value
+    
+    // 0 0 1A1 0 1 1A1 0 2 8H4     a
     do ScrabbleServer.Comm.startGame 
           board dictionary handSize timeout tiles seed port players
     
     ScrabbleUtil.DebugPrint.forcePrint ("Server has terminated. Press Enter to exit program.\n")
-    System.Console.ReadLine () |> ignore
-
+    System.Console.ReadLine () |> ignore 
+    
     0
