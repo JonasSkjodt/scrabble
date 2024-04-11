@@ -38,3 +38,17 @@ C:/Users/jonas/Desktop/scrabble/scrabble/ScrabbleBot/obj/Debug/net7.0/ref/Scrabb
 /home/slug/Documents/GitRepos/Fsharp_project_scrabble/scrabble/ScrabbleBot/obj/Debug/net7.0/refint/ScrabbleBot.dll
 /home/slug/Documents/GitRepos/Fsharp_project_scrabble/scrabble/ScrabbleBot/obj/Debug/net7.0/ScrabbleBot.pdb
 /home/slug/Documents/GitRepos/Fsharp_project_scrabble/scrabble/ScrabbleBot/obj/Debug/net7.0/ref/ScrabbleBot.dll
+C:\Users\jonas\Desktop\scrabble\scrabble\ScrabbleBot\bin\Debug\net7.0\ScrabbleBot.deps.json
+C:\Users\jonas\Desktop\scrabble\scrabble\ScrabbleBot\bin\Debug\net7.0\ScrabbleBot.dll
+C:\Users\jonas\Desktop\scrabble\scrabble\ScrabbleBot\bin\Debug\net7.0\ScrabbleBot.pdb
+C:\Users\jonas\Desktop\scrabble\scrabble\ScrabbleBot\bin\Debug\net7.0\ScrabbleUtil.dll
+C:\Users\jonas\Desktop\scrabble\scrabble\ScrabbleBot\obj\Debug\net7.0\ScrabbleBot.fsproj.AssemblyReference.cache
+C:\Users\jonas\Desktop\scrabble\scrabble\ScrabbleBot\obj\Debug\net7.0\ScrabbleBot.AssemblyInfoInputs.cache
+C:\Users\jonas\Desktop\scrabble\scrabble\ScrabbleBot\obj\Debug\net7.0\ScrabbleBot.AssemblyInfo.fs
+C:\Users\jonas\Desktop\scrabble\scrabble\ScrabbleBot\obj\Debug\net7.0\ScrabbleBot.fsproj.CoreCompileInputs.cache
+C:\Users\jonas\Desktop\scrabble\scrabble\ScrabbleBot\obj\Debug\net7.0\ScrabbleBot.sourcelink.json
+C:\Users\jonas\Desktop\scrabble\scrabble\ScrabbleBot\obj\Debug\net7.0\ScrabbleBot.fsproj.CopyComplete
+C:\Users\jonas\Desktop\scrabble\scrabble\ScrabbleBot\obj\Debug\net7.0\ScrabbleBot.dll
+C:\Users\jonas\Desktop\scrabble\scrabble\ScrabbleBot\obj\Debug\net7.0\refint\ScrabbleBot.dll
+C:\Users\jonas\Desktop\scrabble\scrabble\ScrabbleBot\obj\Debug\net7.0\ScrabbleBot.pdb
+C:\Users\jonas\Desktop\scrabble\scrabble\ScrabbleBot\obj\Debug\net7.0\ref\ScrabbleBot.dll
