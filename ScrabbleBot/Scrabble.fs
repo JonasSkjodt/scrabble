@@ -91,6 +91,7 @@ module Scrabble =
                     | [] -> hand
 
                 let st' = { st with hand = addNewTiles newPieces (removeTiles ms st.hand) }
+                printfn "Updated hand: %A" (st'.hand)
                 aux st'
 
                 // Successful play by you. Update your state (remove old tiles, add the new ones, etc.)
