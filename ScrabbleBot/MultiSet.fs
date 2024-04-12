@@ -34,11 +34,23 @@ module internal MultiSet
         match s with
         | R(m) -> add a 1u s
     
+    //The remove function attempts to subtract n from the count of element a and
+    //then adds the updated count back into the map.
+    //However, the way it's currently written, it first removes the key a entirely
+    //with m.Remove(a) and then adds it back with the decreased count. This is
+    //problematic because if the count goes to zero, m.Remove(a) would remove the
+    //key, which is correct, but the subsequent Add would reintroduce it with a
+    //count of zero, which is unnecessary.
+    //It should instead only add the key back with the updated count if the count is greater than zero
     let remove (a : 'a) (n : uint32) (s : MultiSet<'a>) : MultiSet<'a> = 
-        let getCurrent = numItems a s
-        match s with // m.Remove(a) |> R (m.Add(a, ((numItems a s) - n)))
-        | R (m) when getCurrent > n  -> R (m.Remove(a).Add(a, (getCurrent - n)))
-        | R (m) -> R (m.Remove a)
+        let currentCount = numItems a s
+        match s with
+        | R (m) ->
+            let newCount = currentCount - n
+            if newCount > 0u then
+                R (m.Add(a, newCount))
+            else
+                R (m.Remove a)
     
     let removeSingle (a : 'a) (s : MultiSet<'a>) : MultiSet<'a> = 
         match s with

@@ -78,8 +78,8 @@ module Scrabble =
             | RCM (CMPlaySuccess(ms, points, newPieces)) ->
                 (* Successful play by you. Update your state (remove old tiles, add the new ones, change turn, etc) *)
                 
-                let rec removeTiles (ms : list<coord * (uint32 * (char * int))>) hand =
-                    match ms with
+                let rec removeTiles (move : list<coord * (uint32 * (char * int))>) hand =
+                    match move with
                     | (_, (tileID, _)) :: tail when MultiSet.contains tileID hand ->
                         removeTiles tail (MultiSet.removeSingle tileID hand)
                     | [] -> hand
