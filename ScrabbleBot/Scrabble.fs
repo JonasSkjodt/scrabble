@@ -62,6 +62,7 @@ module Scrabble =
 
         let rec aux (st : State.state) =
             Print.printHand pieces (State.hand st)
+            //printfn "Updated hand: %A" (st.hand)
 
             // remove the force print when you move on from manual input (or when you have learnt the format)
             forcePrint "Input move (format '(<x-coordinate> <y-coordinate> <piece id><character><point-value> )*', note the absence of space between the last inputs)\n\n"
@@ -90,8 +91,18 @@ module Scrabble =
                     | newTile :: tail -> addNewTiles tail (MultiSet.addSingle (fst newTile) hand)
                     | [] -> hand
 
-                let st' = { st with hand = addNewTiles newPieces (removeTiles ms st.hand) }
-                printfn "Updated hand: %A" (st'.hand)
+                let newHand = (removeTiles ms st.hand)
+                let newHand' = addNewTiles newPieces newHand
+                
+                // We tried to update the state in a functional way, but it didn't work. Aux doesn't print 
+                // the new hand, so we have to do an empty print to slow the code down enough to actually update the 
+                // state. 
+                //let st' = State.mkState (State.board st) (State.dict st) (State.playerNumber st) newHand'
+                
+                let st' = { st with hand = newHand'} 
+
+                printfn " " |> ignore
+                
                 aux st'
 
                 // Successful play by you. Update your state (remove old tiles, add the new ones, etc.)
