@@ -75,9 +75,10 @@ let main argv =
     
     // 0 0 1A1 0 1 1A1 0 2 8H4     a
     do ScrabbleServer.Comm.startGame 
-          board dictionary handSize timeout tiles seed port players
+          board playerDict handSize timeout tiles seed port players
     
     ScrabbleUtil.DebugPrint.forcePrint ("Server has terminated. Press Enter to exit program.\n")
     System.Console.ReadLine () |> ignore 
     
     0
+    

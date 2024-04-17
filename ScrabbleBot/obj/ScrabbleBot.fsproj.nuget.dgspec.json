@@ -1,26 +1,26 @@
 {
   "format": 1,
   "restore": {
-    "/Users/karpe/Documents/ITU/4_Semester/Functional_Programming_exercise/ScrabbleProject/scrabble/ScrabbleBot/ScrabbleBot.fsproj": {}
+    "c:\\Users\\Alexa\\UNI\\Semester_4\\Uni_Semester_4\\FuncSharp\\Project\\scrabble\\ScrabbleBot\\ScrabbleBot.fsproj": {}
   },
   "projects": {
-    "/Users/karpe/Documents/ITU/4_Semester/Functional_Programming_exercise/ScrabbleProject/scrabble/ScrabbleBot/ScrabbleBot.fsproj": {
+    "c:\\Users\\Alexa\\UNI\\Semester_4\\Uni_Semester_4\\FuncSharp\\Project\\scrabble\\ScrabbleBot\\ScrabbleBot.fsproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "/Users/karpe/Documents/ITU/4_Semester/Functional_Programming_exercise/ScrabbleProject/scrabble/ScrabbleBot/ScrabbleBot.fsproj",
+        "projectUniqueName": "c:\\Users\\Alexa\\UNI\\Semester_4\\Uni_Semester_4\\FuncSharp\\Project\\scrabble\\ScrabbleBot\\ScrabbleBot.fsproj",
         "projectName": "ScrabbleBot",
-        "projectPath": "/Users/karpe/Documents/ITU/4_Semester/Functional_Programming_exercise/ScrabbleProject/scrabble/ScrabbleBot/ScrabbleBot.fsproj",
-        "packagesPath": "/Users/karpe/.nuget/packages/",
-        "outputPath": "/Users/karpe/Documents/ITU/4_Semester/Functional_Programming_exercise/ScrabbleProject/scrabble/ScrabbleBot/obj/",
+        "projectPath": "c:\\Users\\Alexa\\UNI\\Semester_4\\Uni_Semester_4\\FuncSharp\\Project\\scrabble\\ScrabbleBot\\ScrabbleBot.fsproj",
+        "packagesPath": "C:\\Users\\Alexa\\.nuget\\packages\\",
+        "outputPath": "c:\\Users\\Alexa\\UNI\\Semester_4\\Uni_Semester_4\\FuncSharp\\Project\\scrabble\\ScrabbleBot\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
-          "/Users/karpe/.nuget/NuGet/NuGet.Config"
+          "C:\\Users\\Alexa\\AppData\\Roaming\\NuGet\\NuGet.Config"
         ],
         "originalTargetFrameworks": [
           "net7.0"
         ],
         "sources": {
-          "/usr/local/share/dotnet/sdk/7.0.407/FSharp/library-packs": {},
+          "C:\\Program Files\\dotnet\\sdk\\8.0.104\\FSharp\\library-packs": {},
           "https://api.nuget.org/v3/index.json": {}
         },
         "frameworks": {
@@ -62,7 +62,7 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "/usr/local/share/dotnet/sdk/7.0.407/RuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\8.0.104\\RuntimeIdentifierGraph.json"
         }
       }
     }
