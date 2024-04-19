@@ -1,6 +1,6 @@
 ﻿// Learn more about F# at http://fsharp.org
 
-open DictionarySimple
+open DictionaryTrie
 
 let time f =
     let start = System.DateTime.Now
@@ -52,7 +52,8 @@ let main argv =
 
     let playerDictAPI =
         // Uncomment if you have implemented a dictionary. last element None if you have not implemented a GADDAG
-        Some (DictionarySimple.empty, DictionarySimple.insert, DictionarySimple.lookup) //DictionarySimple.step, Some DictionarySimple.reverse) 
+        //Some (DictionarySimple.empty, DictionarySimple.insert, DictionarySimple.lookup) //DictionarySimple.step, Some DictionarySimple.reverse) 
+        //Some (DictionaryTrie.empty, DictionaryTrie.insert, DictionaryTrie.lookup, None)
         None
     
     let (playerDict, playerTime) = time (fun () -> ScrabbleUtil.Dictionary.mkDict words playerDictAPI)

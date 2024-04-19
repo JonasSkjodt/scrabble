@@ -10,7 +10,7 @@ open System.Reflection
 [<assembly: System.Reflection.AssemblyCompanyAttribute("ScrabbleBot")>]
 [<assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")>]
 [<assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")>]
-[<assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+2ab94d5bf06e241e5b7c600a5b2f4507a5ad086f")>]
+[<assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+057557d3a3c646f226201a0dc3c1cb4e82e7b9e7")>]
 [<assembly: System.Reflection.AssemblyProductAttribute("ScrabbleBot")>]
 [<assembly: System.Reflection.AssemblyTitleAttribute("ScrabbleBot")>]
 [<assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")>]
