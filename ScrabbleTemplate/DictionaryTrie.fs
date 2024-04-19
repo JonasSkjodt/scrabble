@@ -74,7 +74,40 @@ module DictionaryTrie
     
     let step word2 = "not implemented"
 
-    let lookup word3 = "not implemented"
+    let lookup word =
+        let rec lookupRec x =
+            function
+            | Leaf (ch, str) when str = word -> Leaf (ch, str)
+
+            | Node ((ch, str), _, _, _) when str = word -> Leaf (ch, str)
+            
+            | Node ((ch, str), l, m, r) when char2num ch < char2num x.[0]  -> Node ((ch, str), lookupRec (x.[1..]) l, m, r)
+
+            | Node ((ch, str), l, m, r) when char2num ch > char2num x.[0]  -> Node ((ch, str),  l, m, lookupRec (x.[1..]) r)
+
+            | Node ((ch, str), l, m, r) when char2num ch = char2num x.[0] -> Node ((ch, str),  l, lookupRec (x.[1..]) m, r)
+        
+            | _ -> Leaf ('<', "No word found")
+        
+        lookupRec word
+        
+        
+        
+        
+        // | Leaf b when x = 0u -> b
+        
+        // | Leaf _ -> false
+        
+        // | Node (b, _, _) when x = 0u -> b
+        
+        // | Node (_, l, _) when x % 2u = 0u ->
+        //     lookup (x / 2u) l
+        
+        // | Node (_, _, r) ->
+        //     lookup (x / 2u) r
+    
+
+
     // //boom
     // let rec findAndPrintWord word (trie: CTrie) =
     //     match trie with
@@ -106,19 +139,6 @@ module DictionaryTrie
     //     printfn "%s" str;;
 
 
-    // let rec lookup x =
-    //     function
-    //     | Leaf b when x = 0u -> b
-        
-    //     | Leaf _ -> false
-        
-    //     | Node (b, _, _) when x = 0u -> b
-        
-    //     | Node (_, l, _) when x % 2u = 0u ->
-    //         lookup (x / 2u) l
-        
-    //     | Node (_, _, r) ->
-    //         lookup (x / 2u) r
 
     // let rec lookup word (trie: CTrie) : bool =
     //     match trie, word with
