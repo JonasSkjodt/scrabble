@@ -20,6 +20,25 @@ let spawnMultiples name dict bot =
 
 [<EntryPoint>]
 let main argv =
+    
+    // DictionaryTrie.insert "hey"
+    // DictionaryTrie.insert "cats"
+    // DictionaryTrie.insert "dog"
+
+    // for testing
+    // let words1     = readLines "./Dictionaries/English.txt"
+    // let something =
+    //     Some (DictionaryTrie.empty, DictionaryTrie.insert, DictionaryTrie.lookup, DictionaryTrie.step)
+    //     None
+    // let (playerDict1, playerTime1) = time (fun () -> ScrabbleUtil.Dictionary.mkDict words1 something)
+    // let (playerDict, playerTime) = time (fun () ->  ScrabbleUtil.Dictionary.test words1 10 playerDict1)
+    
+
+    
+
+    
+    
+    
     ScrabbleUtil.DebugPrint.toggleDebugPrint false // Change to false to supress debug output
 
     //System.Console.BackgroundColor <- System.ConsoleColor.White
@@ -61,7 +80,8 @@ let main argv =
     // Uncomment this line to call your client
     let players    = [("Scrabble botter", playerDict, ScrabbleClient.Scrabble.startGame)]  //ScrabbleClient is the name of the namespace in scrabble.fs and scrabble.fsi
     
-    let (dictionary, time) =
+
+    let (dictionary, time: System.TimeSpan) =
         time (fun () -> ScrabbleUtil.Dictionary.mkDict words dictAPI)
     
 
@@ -75,6 +95,8 @@ let main argv =
     // ^placementX  ^placementY  ^tileID      ^Char     ^point value
     
     // 0 0 1A1 0 1 1A1 0 2 8H4     a
+
+    
     do ScrabbleServer.Comm.startGame 
           board playerDict handSize timeout tiles seed port players
     

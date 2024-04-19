@@ -72,6 +72,9 @@ module DictionaryTrie
         insertRec word root;;
         //printfn "2"
     
+    let step word2 = "not implemented"
+
+    let lookup word3 = "not implemented"
     // //boom
     // let rec findAndPrintWord word (trie: CTrie) =
     //     match trie with
