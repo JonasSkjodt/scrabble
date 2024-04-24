@@ -5,7 +5,9 @@ module DictionaryTrie
         | Node of (char * string) * CTrie * CTrie * CTrie
     
     let empty = Leaf (System.Char.MinValue, "")
-
+    
+    //let sDict = (System.Char.MinValue, ""), empty, empty, empty
+    
     let char2num char = (int char - int 'a') + 1 
 
     let trie2bool trie ch = 
@@ -69,8 +71,7 @@ module DictionaryTrie
             
             | _ -> insertRec (x) empty
         
-        insertRec word root;;
-        //printfn "2"
+        let root = insertRec word root;;
     
     let step word2 = "not implemented"
 

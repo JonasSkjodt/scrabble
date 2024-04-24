@@ -66,8 +66,8 @@ let main argv =
 
     let dictAPI =
         // Uncomment if you have implemented a dictionary. last element None if you have not implemented a GADDAG
-        //Some (DictionarySimple.empty, DictionarySimple.insert, DictionarySimple.lookup) //DictionarySimple.step(*, Some DictionarySimple.reverse*)) 
-        None
+        Some (DictionarySimple.empty, DictionarySimple.insert, DictionarySimple.lookup, ) //DictionarySimple.step(*, Some DictionarySimple.reverse*)) 
+        // None
 
     let playerDictAPI =
         // Uncomment if you have implemented a dictionary. last element None if you have not implemented a GADDAG
