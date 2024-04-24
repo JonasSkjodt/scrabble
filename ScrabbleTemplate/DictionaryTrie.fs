@@ -25,9 +25,12 @@ module DictionaryTrie
     //     | Node ((char, str), l, m, r) when word = str -> Node((char, str), l, m, r)
 
     //TODO make root ctrie -> ctrie
-    let root = Node ((System.Char.MinValue, ""), empty, empty, empty )
+    //let root = Node ((System.Char.MinValue, ""), empty, empty, empty )
     // string -> (string -> Ctrie -> Ctrie)
-    let insert word =
+
+
+    // let ac = empty |> insert "dogs" |> insert "dogge";;
+    let insert word root =
         let rec insertRec x =
             function
             | Node ((ch, str), l,m,r) when x = "" ->
@@ -71,7 +74,7 @@ module DictionaryTrie
             
             | _ -> insertRec (x) empty
         
-        let root = insertRec word root;;
+        insertRec word root
     
     let step word2 = "not implemented"
 

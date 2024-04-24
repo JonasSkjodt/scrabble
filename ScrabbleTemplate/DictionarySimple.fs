@@ -7,4 +7,6 @@ module DictionarySimple
     let insert (s: string) (DI(set)) = DI(Set.add(s) set)
 
     let lookup (s: string) (DI(set)) = Set.contains(s) set
+
+    let step = "not implemented"
     
