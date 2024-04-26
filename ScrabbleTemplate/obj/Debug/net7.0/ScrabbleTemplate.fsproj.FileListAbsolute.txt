@@ -71,7 +71,6 @@ C:/Users/jonas/Desktop/scrabble/scrabble/ScrabbleTemplate/obj/Debug/net7.0/Scrab
 C:/Users/jonas/Desktop/scrabble/scrabble/ScrabbleTemplate/obj/Debug/net7.0/ScrabbleTemplate.AssemblyInfo.fs
 C:/Users/jonas/Desktop/scrabble/scrabble/ScrabbleTemplate/obj/Debug/net7.0/ScrabbleTemplate.fsproj.CoreCompileInputs.cache
 C:/Users/jonas/Desktop/scrabble/scrabble/ScrabbleTemplate/obj/Debug/net7.0/ScrabbleTemplate.sourcelink.json
-C:/Users/jonas/Desktop/scrabble/scrabble/ScrabbleTemplate/obj/Debug/net7.0/ScrabbleTemplate.fsproj.CopyComplete
 C:/Users/jonas/Desktop/scrabble/scrabble/ScrabbleTemplate/obj/Debug/net7.0/ScrabbleTemplate.dll
 C:/Users/jonas/Desktop/scrabble/scrabble/ScrabbleTemplate/obj/Debug/net7.0/refint/ScrabbleTemplate.dll
 C:/Users/jonas/Desktop/scrabble/scrabble/ScrabbleTemplate/obj/Debug/net7.0/ScrabbleTemplate.pdb
@@ -229,9 +228,9 @@ C:\Users\jonas\Desktop\scrabble\scrabble\ScrabbleTemplate\obj\Debug\net7.0\Scrab
 C:\Users\jonas\Desktop\scrabble\scrabble\ScrabbleTemplate\obj\Debug\net7.0\ScrabbleTemplate.AssemblyInfo.fs
 C:\Users\jonas\Desktop\scrabble\scrabble\ScrabbleTemplate\obj\Debug\net7.0\ScrabbleTemplate.fsproj.CoreCompileInputs.cache
 C:\Users\jonas\Desktop\scrabble\scrabble\ScrabbleTemplate\obj\Debug\net7.0\ScrabbleTemplate.sourcelink.json
-C:\Users\jonas\Desktop\scrabble\scrabble\ScrabbleTemplate\obj\Debug\net7.0\ScrabbleTemplate.fsproj.CopyComplete
 C:\Users\jonas\Desktop\scrabble\scrabble\ScrabbleTemplate\obj\Debug\net7.0\ScrabbleTemplate.dll
 C:\Users\jonas\Desktop\scrabble\scrabble\ScrabbleTemplate\obj\Debug\net7.0\refint\ScrabbleTemplate.dll
 C:\Users\jonas\Desktop\scrabble\scrabble\ScrabbleTemplate\obj\Debug\net7.0\ScrabbleTemplate.pdb
 C:\Users\jonas\Desktop\scrabble\scrabble\ScrabbleTemplate\obj\Debug\net7.0\ScrabbleTemplate.genruntimeconfig.cache
 C:\Users\jonas\Desktop\scrabble\scrabble\ScrabbleTemplate\obj\Debug\net7.0\ref\ScrabbleTemplate.dll
+C:\Users\jonas\Desktop\scrabble\scrabble\ScrabbleTemplate\obj\Debug\net7.0\Scrabble.4C101693.Up2Date

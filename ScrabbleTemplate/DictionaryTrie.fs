@@ -2,7 +2,7 @@ module DictionaryTrie
     
     type CTrie =
         | Leaf of char * string
-        | Node of (char * string) * CTrie * CTrie * CTrie
+        | Node of (char * string) * CTrie * CTrie * CTrie;;
     
     let empty = Leaf (System.Char.MinValue, "")
     
@@ -31,19 +31,20 @@ module DictionaryTrie
 
     // let ac = empty |> insert "dogs" |> insert "dogge";;
     let insert word root =
-        let rec insertRec x =
-            function
-            | Node ((ch, str), l,m,r) when x = "" ->
-                Node((ch, word), l, m, r)
-            
+        let rec insertRec x currentCtrie =
+            match currentCtrie with
+            //this is where the error is, it goes to a leaf when its a node when doing piping operators
             | Leaf (ch, str) when x = "" ->
                 Leaf (ch, word)
+            
+            | Node ((ch, str), l,m,r) when x = "" ->
+                Node((ch, word), l, m, r)
             
             // This will change an already existing leaf to a node and continue down the middle to the new leaf
             | Leaf (ch, str)   -> 
                 match ch with
                 | ch when ch = x.[0] -> Node((ch, str),  empty, insertRec (x.[1..]) empty, empty)
-                | ch when ch = System.Char.MinValue && String.length (word) = 1 -> Leaf (x.[0], word) //Node((ch, str),  empty, insertRec (x.[1..]) empty, empty)
+                | ch when ch = System.Char.MinValue && String.length (x) = 1 -> Leaf (x.[0], word) //Node((ch, str),  empty, insertRec (x.[1..]) empty, empty)
                 | _ -> Node((x.[0], str),  empty, insertRec (x.[1..]) empty, empty)
 
             // This will continue down the left
@@ -78,22 +79,18 @@ module DictionaryTrie
     
     let step word2 = "not implemented"
 
-    let lookup word =
-        let rec lookupRec x =
-            function
-            | Leaf (ch, str) when str = word -> Leaf (ch, str)
-
-            | Node ((ch, str), _, _, _) when str = word -> Leaf (ch, str)
-            
-            | Node ((ch, str), l, m, r) when char2num ch < char2num x.[0]  -> Node ((ch, str), lookupRec (x.[1..]) l, m, r)
-
-            | Node ((ch, str), l, m, r) when char2num ch > char2num x.[0]  -> Node ((ch, str),  l, m, lookupRec (x.[1..]) r)
-
-            | Node ((ch, str), l, m, r) when char2num ch = char2num x.[0] -> Node ((ch, str),  l, lookupRec (x.[1..]) m, r)
+    let lookup word root =
+        let rec lookupRec x currentTrie =
+            match currentTrie, x with
+            | _, "" -> false // return true only if we are at a complete word node
+            | Leaf (ch, str), _ when str = word -> true
+            | Node ((ch, str), _, _, _), _ when str = word -> true
+            | Node ((ch, str), l, m, r), _ when char2num ch < char2num x.[0] -> lookupRec x l
+            | Node ((ch, str), _, m, _), _ when char2num ch = char2num x.[0] -> lookupRec (x.[1..]) m
+            | Node ((ch, str), _, _, r), _ when char2num ch > char2num x.[0] -> lookupRec x r
+            | _ -> false // No matching word found
         
-            | _ -> Leaf ('<', "No word found")
-        
-        lookupRec word
+        lookupRec word root
         
         
         
