@@ -20,6 +20,10 @@ let spawnMultiples name dict bot =
 
 [<EntryPoint>]
 let main argv =
+    // let ch = 'd'
+    // let chTin ch = (int ch - int 'a') + 1
+    // let something = chTin System.Char.MinValue > (chTin ch)
+
     
     let ac =  DictionaryTrie.empty |> DictionaryTrie.insert "dogs" |> DictionaryTrie.insert "dogge"
     

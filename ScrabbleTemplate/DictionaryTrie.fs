@@ -45,30 +45,39 @@ module DictionaryTrie
                 match ch with
                 | ch when ch = x.[0] -> Node((ch, str),  empty, insertRec (x.[1..]) empty, empty)
                 | ch when ch = System.Char.MinValue && String.length (x) = 1 -> Leaf (x.[0], word) //Node((ch, str),  empty, insertRec (x.[1..]) empty, empty)
-                | _ -> Node((x.[0], str),  empty, insertRec (x.[1..]) empty, empty)
+                
+                | _ -> insertRec (x) (Node((ch, str),  empty, empty, empty))
+
+                // old with error
+                // | _ -> Node((x.[0], str),  empty, insertRec (x.[1..]) empty, empty)
+
+            // base case for ch != System.Char.MinValue
+            | Node ((ch, str), l, m, r) when ch = System.Char.MinValue -> Node ((x.[0], str), l, insertRec (x.[1..]) m, r)
+            
 
             // This will continue down the left
-            | Node ((ch, str), l, m, r) when char2num ch < char2num x.[0]  ->
+            | Node ((ch, str), l, m, r) when char2num x.[0] < char2num ch   ->
                 match l with 
                 | l when l = empty && String.length(x) = 1 -> Node((ch, str), Leaf(x.[0], word), m, r)
-                | l when l = empty && String.length(x) > 1 -> Node((ch, str), insertRec (x.[1..]) (Node((x.[0],""), empty, empty, empty)), m, r)
+                // | l when l = empty && String.length(x) > 1 -> Node((ch, str), insertRec (x.[1..]) (Node((x.[0],""), empty, empty, empty)), m, r) // Maybe remove
                 | l when String.length(x) >= 1 -> Node((ch, str), insertRec (x) l, m, r)
+                
 
             // This will continue down the right
-            | Node ((ch, str), l, m, r) when char2num ch > char2num x.[0]  ->
+            | Node ((ch, str), l, m, r) when char2num x.[0] > char2num ch ->
                 match r with 
                 | r when r = empty && String.length(x) = 1 -> Node((ch, str), Leaf(x.[0], word), m, r)
-                | r when r = empty && String.length(x) > 1 -> Node((ch, str), l, m, insertRec (x.[1..]) (Node((x.[0],""), empty, empty, empty)))
+                //| r when r = empty && String.length(x) > 1 -> Node((ch, str), l, m, insertRec (x.[1..]) (Node((x.[0],""), empty, empty, empty))) //perhaps this should be Node((ch, str), l, m, insertRec (x) r) instead
                 | r when String.length(x) >= 1 -> Node((ch, str), l, m, insertRec (x) r)
 
             // if middle child node is empty insert
             | Node ((ch, str), l,m,r) when m = empty -> Node((ch,str), l, insertRec x.[1..] (Leaf(x.[0],"")), r)
 
             // This will continue down the middle
-            | Node ((ch, str), l, m, r) when char2num ch  = char2num x.[0]  ->
+            | Node ((ch, str), l, m, r) when char2num x.[0] = char2num ch   ->
                 match m, str with
                 | m, _ when m = empty && String.length(x) = 1 -> Node((ch, str), l, Leaf(x.[0], word), r)
-                | m, _ when m = empty && String.length(x) > 1 -> Node((ch, str), l, insertRec (x.[1..]) (Node((x.[0],""), empty, empty, empty)), r)
+                //| m, _ when m = empty && String.length(x) > 1 -> Node((ch, str), l, insertRec (x.[1..]) (Node((x.[0],""), empty, empty, empty)), r)
                 | m, _ when String.length(x) >= 1 -> Node((ch, str), l, insertRec (x.[1..]) m, r)
                 | _, str when str = "" && String.length(x) = 0 -> Node((ch, word), l, m, r) 
             
