@@ -24,8 +24,12 @@ let main argv =
     // let chTin ch = (int ch - int 'a') + 1
     // let something = chTin System.Char.MinValue > (chTin ch)
 
+    // let ac =  DictionaryTrie.empty |> DictionaryTrie.insert "dogs" |> DictionaryTrie.insert "dogge"
     
-    let ac =  DictionaryTrie.empty |> DictionaryTrie.insert "dogs" |> DictionaryTrie.insert "dogge"
+    // let dc =  DictionaryTrie.empty |> DictionaryTrie.insert "dogs" |> DictionaryTrie.insert "dogge" |> DictionaryTrie.insert "come" |> DictionaryTrie.insert "big"
+    // let dcLookup = DictionaryTrie.lookup "big" dc
+
+    // let stepper2 =  dc |> DictionaryTrie.step 'd' |> snd |> DictionaryTrie.step 'o' |> snd |> DictionaryTrie.step 'g' 
     
     // DictionaryTrie.insert "cats"
     // DictionaryTrie.insert "dog"
@@ -77,8 +81,8 @@ let main argv =
     let playerDictAPI =
         // Uncomment if you have implemented a dictionary. last element None if you have not implemented a GADDAG
         //Some (DictionarySimple.empty, DictionarySimple.insert, DictionarySimple.lookup) //DictionarySimple.step, Some DictionarySimple.reverse) 
-        //Some (DictionaryTrie.empty, DictionaryTrie.insert, DictionaryTrie.lookup, None)
-        None
+        Some (DictionaryTrie.empty, DictionaryTrie.insert, DictionaryTrie.lookup, DictionaryTrie.step)
+        //None
     
     let (playerDict, playerTime) = time (fun () -> ScrabbleUtil.Dictionary.mkDict words playerDictAPI)
     

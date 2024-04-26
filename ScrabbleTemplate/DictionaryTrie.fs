@@ -6,34 +6,22 @@ module DictionaryTrie
     
     let empty = Leaf (System.Char.MinValue, "")
     
-    //let sDict = (System.Char.MinValue, ""), empty, empty, empty
-    
     let char2num char = (int char - int 'a') + 1 
 
-    let trie2bool trie ch = 
-        match trie with
-        | Leaf (cha, _) -> if (cha = ch) then true else false
-        | Node ((cha, _), _ , _ ,_) when (cha = ch) -> true 
-        | Node ((cha, _), _ , _ ,_) when (cha > ch) -> true 
-        | Node ((cha, _), _ , _ ,_) when (cha < ch) -> true 
+    // let trie2bool trie ch = 
+    //     match trie with
+    //     | Leaf (cha, _) -> if (cha = ch) then true else false
+    //     | Node ((cha, _), _ , _ ,_) when (cha = ch) -> true 
+    //     | Node ((cha, _), _ , _ ,_) when (cha > ch) -> true 
+    //     | Node ((cha, _), _ , _ ,_) when (cha < ch) -> true 
 
-    // let lookup x = 
-    //     let word = x
-    //     let x = insertRec x
-    //     match x with
-    //     | Leaf (char, str) when word = str -> Leaf (char, str)
-    //     | Node ((char, str), l, m, r) when word = str -> Node((char, str), l, m, r)
-
-    //TODO make root ctrie -> ctrie
-    //let root = Node ((System.Char.MinValue, ""), empty, empty, empty )
-    // string -> (string -> Ctrie -> Ctrie)
-
-
+    // insert function
+    // example to use insert in the terminalw
     // let ac = empty |> insert "dogs" |> insert "dogge";;
     let insert word root =
         let rec insertRec x currentCtrie =
             match currentCtrie with
-            //this is where the error is, it goes to a leaf when its a node when doing piping operators
+
             | Leaf (ch, str) when x = "" ->
                 Leaf (ch, word)
             
@@ -84,153 +72,70 @@ module DictionaryTrie
             
             | _ -> insertRec (x) empty
         
-        insertRec word root
+        insertRec (word.ToLower()) root
     
-    let step word2 = "not implemented"
-
+    // Lookup function
+    // continue from our example before, use lookup like so:
+    // lookup "dogge" ac;;
+    // TODO: figure out .ToLower on the words / chars later
     let lookup word root =
-        let rec lookupRec x currentTrie =
-            match currentTrie, x with
-            | _, "" -> false // return true only if we are at a complete word node
-            | Leaf (ch, str), _ when str = word -> true
-            | Node ((ch, str), _, _, _), _ when str = word -> true
-            | Node ((ch, str), l, m, r), _ when char2num ch < char2num x.[0] -> lookupRec x l
-            | Node ((ch, str), _, m, _), _ when char2num ch = char2num x.[0] -> lookupRec (x.[1..]) m
-            | Node ((ch, str), _, _, r), _ when char2num ch > char2num x.[0] -> lookupRec x r
+        let rec lookupRec (x : string) currentTrie =
+            match currentTrie with
+            | Leaf (ch, str) when str = word -> true
+            | Node ((ch, str), _, _, _) when str = word -> true
+            | Node ((ch, str), l, _, _) when char2num x.[0] < char2num ch -> lookupRec x l // going left
+            | Node ((ch, str), _, _, r) when char2num x.[0] > char2num ch -> lookupRec x r // going right
+            | Node ((ch, str), _, m, _) when char2num x.[0] = char2num ch -> lookupRec (x.[1..]) m // found correct letter, going middle
             | _ -> false // No matching word found
+            // | _, "" -> false // return true only if we are at a complete word node
         
         lookupRec word root
-        
-        
-        
-        
-        // | Leaf b when x = 0u -> b
-        
-        // | Leaf _ -> false
-        
-        // | Node (b, _, _) when x = 0u -> b
-        
-        // | Node (_, l, _) when x % 2u = 0u ->
-        //     lookup (x / 2u) l
-        
-        // | Node (_, _, r) ->
-        //     lookup (x / 2u) r
     
 
+    // val step : char -> Dict -> (bool * Dict) option
+    // that given a character c and a
+    // dictionary d takes one step down the trie and returns a tuple (b, d') where b is
+    // true if traversing c completed a word and false otherwise, and where d' is
+    // the next level of the trie.
+    let step char  root = 
+        match root with
+        | Leaf (ch, str) when str <> "" -> (false, empty)
 
-    // //boom
-    // let rec findAndPrintWord word (trie: CTrie) =
-    //     match trie with
-    //     | Leaf (ch, str) -> 
-    //         if str = word then printfn "%s" str // Found the word, print it
-    //     | Node ((ch, str), l, m, r) ->
-    //         if word.StartsWith(str) then
-    //             // If the current path string of the node matches the starting substring of the word,
-    //             // continue searching down the middle path
-    //             findAndPrintWord (word.Substring(str.Length)) m
-    //         else
-    //             // Otherwise, choose the left or right path based on the character comparison
-    //             if ch < word.[0] then findAndPrintWord word r
-    //             else findAndPrintWord word l
-    //     | _ -> () // If we reach an empty branch, do nothing
+        //go left
+        | Node ((ch, str), l, m, r) when char2num char > char2num ch  -> 
+            match l with
+            //base case
+            | Node ((ch, str), l, m, r) when str = "" -> (false, Node ((ch, str), l, m, r))
+            
+            | Leaf (ch, str) -> (true, Leaf(ch, str))
+            | Node ((ch, str), l, m, r) -> (true, Node ((ch, str), l, m, r))
+        
+        //go right
+        | Node ((ch, str), l, m, r) when char2num char < char2num ch  -> 
+            match r with
+            //base case
+            | Node ((ch, str), l, m, r) when str = "" -> (false, Node ((ch, str), l, m, r))
+            
+            | Leaf (ch, str) -> (true, Leaf(ch, str))
+            | Node ((ch, str), l, m, r) -> (true, Node ((ch, str), l, m, r))
 
-    // let rec trieToString trie =
-    //     match trie with
-    //     | Leaf (ch, str) -> sprintf "Leaf(%c, \"%s\")" ch str
-    //     | Node ((ch, str), l, m, r) ->
-    //         let lStr = trieToString l
-    //         let mStr = trieToString m
-    //         let rStr = trieToString r
-    //         sprintf "Node((%c, \"%s\"), %s, %s, %s)" ch str lStr mStr rStr
-
-    // // Now you can use this function to get a string representation of your trie and print it
-    // let printTrie trie =
-    //     let str = trieToString trie
-    //     printfn "%s" str;;
-
-
-
-    // let rec lookup word (trie: CTrie) : bool =
-    //     match trie, word with
-    //     | Leaf (ch, str), "" -> str = word  // If we're at a leaf with an empty word, check if we found the word
-    //     | Node ((ch, str), l, m, r), "" -> str = word  // Same as above but for nodes
-    //     | Leaf _, _ -> false  // If we're at a leaf but haven't finished the word, it's not here
-    //     // | Leaf _, _ -> false
-    //     //| Node ((ch, _), _, _, _), _ when ch > word.[0] -> false  // If the current node's char is greater, the word is not here
-    //     | Node ((ch, _), l, _, _), _ when char2num ch < char2num word.[0] -> lookup word l  // If the current node's char is less, go left
-    //     | Node ((ch, _), _, _, r), _ when char2num ch > char2num word.[0] -> lookup word r  // If the current node's char is more, go right
-    //     | Node ((ch, str), _, m, _), _ when ch = word.[0] ->
-    //         if word.Length = 1 && (str = word || str = "") then
-    //             true  // If we're at the right node and it's the last letter, check the word
-    //         else
-    //             lookup word.[1..] m  // If there are more letters, go down the middle
-    //     | _, _ -> false
+        //go middle
+        | Node ((ch, str), l, m, r) when char2num char = char2num ch  -> 
+            match m with
+            //base case
+            | Node ((ch, str), l, m, r) when str = "" -> (false, Node ((ch, str), l, m, r))
+            
+            | Leaf (ch, str) -> (true, Leaf(ch, str))
+            | Node ((ch, str), l, m, r) -> (true, Node ((ch, str), l, m, r))
+        
+        | _ -> (false, empty)
 
 
 
+    // // // for testing
+    // let dc =  empty |> insert "dogs" |> insert "dogge" |> insert "come" |> insert "big" |> insert "zip" |> insert "yoyo" |> insert "dad"|> insert "boy"|> insert "year" |> insert "copper" |> insert "bulgur" |> insert "vortex" |> insert "cannopy" |> insert "terrordome" |> insert "jesper"|> insert "abe"|> insert "bee" |> insert "dyslexia" |> insert "jens"|> insert "me"|> insert "hear"
+    // let dcLookup = lookup "terrordome" dc
 
+    // let stepper =  dc |> step 'z'
 
-// type GaddagNode =
-//     | Leaf
-//     | Node of Map<char, GaddagNode>
-
-// let emptyGaddagNode = Node Map.empty
-
-// let addWord (word: string) (root: GaddagNode) : GaddagNode =
-//     let rec addRevPrefix currNode revPrefix restOfWord =
-//         match revPrefix, restOfWord with
-//         | "", "" -> currNode
-//         | _ ->
-//             let Node children = currNode
-//             let nextChar = if revPrefix = "" then '+' else revPrefix.[0]
-//             let newRevPrefix = if revPrefix = "" then "" else revPrefix.[1..]
-//             let newNode =
-//                 match children |> Map.tryFind nextChar with
-//                 | Some childNode -> addRevPrefix childNode newRevPrefix restOfWord
-//                 | None -> addRevPrefix emptyGaddagNode newRevPrefix restOfWord
-//             Node (children |> Map.add nextChar newNode)
-    
-//     let rec addBranches currNode i =
-//         if i = -1 then
-//             addRevPrefix currNode (word.[i..]) ""
-//         else
-//             let revPrefix = word.[0..i] |> String.rev
-//             let restOfWord = word.[i+1..]
-//             addRevPrefix (addBranches currNode (i - 1)) revPrefix restOfWord
-    
-//     addBranches root (word.Length - 1)
-
-// // Usage example:
-// let root = emptyGaddagNode
-// let updatedRoot = addWord "word" root
-
-
-    // alternative
-
-    // type CTrie =
-    //     | Node of Map<char, CTrie> * bool
-    
-    // let empty = Node (Map.empty, false)
-    
-    // let rec insert word (ctrie: CTrie) =
-    //     match ctrie, word with
-    //     | Node (children, _), "" -> Node (children, true)  // Mark the end of a valid word
-    //     | Node (children, isWord), _ ->
-    //         let char = word.[0]
-    //         let restWord = word.Substring(1)
-    //         let childTrie =
-    //             match Map.tryFind char children with
-    //             | Some child -> insert restWord child  // Recurse down the child if it exists
-    //             | None -> insert restWord (Node (Map.empty, false))  // Create a new child if it doesn't
-    //         Node (Map.add char childTrie children, isWord)  // Reconstruct the node with the updated map
-
-    // let rec lookup word (ctrie: CTrie) =
-    //     match ctrie, word with
-    //     | Node (_, true), "" -> true  // If it's the end of the word and the node is marked as a word, it's valid
-    //     | Node (_, false), "" -> false  // If it's not marked as a word, it's invalid
-    //     | Node (children, _), _ ->
-    //         let char = word.[0]
-    //         let restWord = word.Substring(1)
-    //         match Map.tryFind char children with
-    //         | Some child -> lookup restWord child  // Recurse down the child
-    //         | None -> false  // If the path doesn't exist, the word is invalid
+    // let stepper2 =  dc |> step 'd' |> snd |> step 'o' |> snd |> step 'g' 
