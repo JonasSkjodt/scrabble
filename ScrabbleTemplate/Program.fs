@@ -20,6 +20,19 @@ let spawnMultiples name dict bot =
 
 [<EntryPoint>]
 let main argv =
+
+
+    // let dc =  empty() |> insert "dog" |> insert "dogge" |> insert "come" |> insert "big" |> insert "zip" |> insert "yoyo" |> insert "dad"|> insert "boy"|> insert "year" |> insert "copper" |> insert "bulgur" |> insert "vortex" |> insert "cannopy" |> insert "terrordome" |> insert "jesper"|> insert "abe"|> insert "bee" |> insert "dyslexia" |> insert "jens"|> insert "me"|> insert "hear" |> insert "moose"
+    // //let stepper =  dc |> step 'd'
+
+    // let stepper2 =  
+    //     match dc |> step 'z' with
+    //     | Some (_, trie1) -> 
+    //         match trie1 |> step 'i' with
+    //         | Some (_, trie2) ->
+    //             match trie2 |> step 't' with
+    //             | Some (t, trie: CTrie) -> (t, trie)
+
     // let ch = 'd'
     // let chTin ch = (int ch - int 'a') + 1
     // let something = chTin System.Char.MinValue > (chTin ch)
@@ -50,7 +63,7 @@ let main argv =
     
     
     
-    ScrabbleUtil.DebugPrint.toggleDebugPrint false // Change to false to supress debug output
+    ScrabbleUtil.DebugPrint.toggleDebugPrint true // Change to false to supress debug output
 
     //System.Console.BackgroundColor <- System.ConsoleColor.White
     //System.Console.ForegroundColor <- System.ConsoleColor.Black
@@ -88,8 +101,18 @@ let main argv =
     
     let (playerDict, playerTime) = time (fun () -> ScrabbleUtil.Dictionary.mkDict words playerDictAPI)
     
+    
+    ScrabbleUtil.DebugPrint.debugPrint ("Dictionary test sucessful\n")
+    let incorrectWords = ScrabbleUtil.Dictionary.test words 10 (playerDict false) // change the boolean to true if using a GADDAG
+    match incorrectWords with
+    | [] -> ScrabbleUtil.DebugPrint.debugPrint ("Dictionary test sucessful!\n")
+    | _ -> ScrabbleUtil.DebugPrint.debugPrint ("Dictionary test failed for at least the following words: \n")
+    List.iter (fun str -> ScrabbleUtil.DebugPrint.debugPrint (sprintf "%s\n" str)) incorrectWords
+
+
+
     // Uncomment this line to call your client
-    let players    = [("Scrabble botter", playerDict, ScrabbleClient.Scrabble.startGame)]  //ScrabbleClient is the name of the namespace in scrabble.fs and scrabble.fsi
+    let players    = [("Player 1", playerDict, ScrabbleClient.Scrabble.startGame)]  //ScrabbleClient is the name of the namespace in scrabble.fs and scrabble.fsi
     
 
     // let (dictionary, time: System.TimeSpan) =
@@ -106,6 +129,7 @@ let main argv =
     // ^placementX  ^placementY  ^tileID      ^Char     ^point value
     
     // 0 0 1A1 0 1 1A1 0 2 8H4     a
+
 
     
     do ScrabbleServer.Comm.startGame 

@@ -944,11 +944,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\Users\\jonas\\Desktop\\scrabble\\scrabble\\ScrabbleTemplate\\ScrabbleTemplate.fsproj",
+      "projectUniqueName": "c:\\Users\\jonas\\Desktop\\scrabble\\scrabble\\ScrabbleTemplate\\ScrabbleTemplate.fsproj",
       "projectName": "ScrabbleTemplate",
-      "projectPath": "C:\\Users\\jonas\\Desktop\\scrabble\\scrabble\\ScrabbleTemplate\\ScrabbleTemplate.fsproj",
+      "projectPath": "c:\\Users\\jonas\\Desktop\\scrabble\\scrabble\\ScrabbleTemplate\\ScrabbleTemplate.fsproj",
       "packagesPath": "C:\\Users\\jonas\\.nuget\\packages\\",
-      "outputPath": "C:\\Users\\jonas\\Desktop\\scrabble\\scrabble\\ScrabbleTemplate\\obj\\",
+      "outputPath": "c:\\Users\\jonas\\Desktop\\scrabble\\scrabble\\ScrabbleTemplate\\obj\\",
       "projectStyle": "PackageReference",
       "configFilePaths": [
         "C:\\Users\\jonas\\AppData\\Roaming\\NuGet\\NuGet.Config",
@@ -966,8 +966,8 @@
         "net7.0": {
           "targetAlias": "net7.0",
           "projectReferences": {
-            "C:\\Users\\jonas\\Desktop\\scrabble\\scrabble\\ScrabbleBot\\ScrabbleBot.fsproj": {
-              "projectPath": "C:\\Users\\jonas\\Desktop\\scrabble\\scrabble\\ScrabbleBot\\ScrabbleBot.fsproj"
+            "c:\\Users\\jonas\\Desktop\\scrabble\\scrabble\\ScrabbleBot\\ScrabbleBot.fsproj": {
+              "projectPath": "c:\\Users\\jonas\\Desktop\\scrabble\\scrabble\\ScrabbleBot\\ScrabbleBot.fsproj"
             }
           }
         }
