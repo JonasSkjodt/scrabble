@@ -8,5 +8,7 @@ module DictionarySimple
 
     let lookup (s: string) (DI(set)) = Set.contains(s) set
 
-    let step = "not implemented"
+    //let step (ch: char) (DI(set)) = 
+
+        
     

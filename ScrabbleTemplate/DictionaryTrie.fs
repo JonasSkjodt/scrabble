@@ -4,7 +4,7 @@ module DictionaryTrie
         | Leaf of char * string
         | Node of (char * string) * CTrie * CTrie * CTrie;;
     
-    let empty = Leaf (System.Char.MinValue, "")
+    let empty() = Leaf (System.Char.MinValue, "")
     
     let char2num char = (int char - int 'a') + 1 
 
@@ -16,7 +16,7 @@ module DictionaryTrie
     //     | Node ((cha, _), _ , _ ,_) when (cha < ch) -> true 
 
     // insert function
-    // example to use insert in the terminalw
+    // example to use insert in the terminal
     // let ac = empty |> insert "dogs" |> insert "dogge";;
     let insert word root =
         let rec insertRec x currentCtrie =
@@ -31,10 +31,10 @@ module DictionaryTrie
             // This will change an already existing leaf to a node and continue down the middle to the new leaf
             | Leaf (ch, str)   -> 
                 match ch with
-                | ch when ch = x.[0] -> Node((ch, str),  empty, insertRec (x.[1..]) empty, empty)
+                | ch when ch = x.[0] -> Node((ch, str),  empty(), insertRec (x.[1..]) (empty()), empty())
                 | ch when ch = System.Char.MinValue && String.length (x) = 1 -> Leaf (x.[0], word) //Node((ch, str),  empty, insertRec (x.[1..]) empty, empty)
                 
-                | _ -> insertRec (x) (Node((ch, str),  empty, empty, empty))
+                | _ -> insertRec (x) (Node((ch, str),  empty(), empty(), empty()))
 
                 // old with error
                 // | _ -> Node((x.[0], str),  empty, insertRec (x.[1..]) empty, empty)
@@ -46,7 +46,7 @@ module DictionaryTrie
             // This will continue down the left
             | Node ((ch, str), l, m, r) when char2num x.[0] < char2num ch   ->
                 match l with 
-                | l when l = empty && String.length(x) = 1 -> Node((ch, str), Leaf(x.[0], word), m, r)
+                | l when l = empty() && String.length(x) = 1 -> Node((ch, str), Leaf(x.[0], word), m, r)
                 // | l when l = empty && String.length(x) > 1 -> Node((ch, str), insertRec (x.[1..]) (Node((x.[0],""), empty, empty, empty)), m, r) // Maybe remove
                 | l when String.length(x) >= 1 -> Node((ch, str), insertRec (x) l, m, r)
                 
@@ -54,23 +54,23 @@ module DictionaryTrie
             // This will continue down the right
             | Node ((ch, str), l, m, r) when char2num x.[0] > char2num ch ->
                 match r with 
-                | r when r = empty && String.length(x) = 1 -> Node((ch, str), Leaf(x.[0], word), m, r)
+                | r when r = empty() && String.length(x) = 1 -> Node((ch, str), Leaf(x.[0], word), m, r)
                 //| r when r = empty && String.length(x) > 1 -> Node((ch, str), l, m, insertRec (x.[1..]) (Node((x.[0],""), empty, empty, empty))) //perhaps this should be Node((ch, str), l, m, insertRec (x) r) instead
                 | r when String.length(x) >= 1 -> Node((ch, str), l, m, insertRec (x) r)
 
             // if middle child node is empty insert
-            | Node ((ch, str), l,m,r) when m = empty -> Node((ch,str), l, insertRec x.[1..] (Leaf(x.[0],"")), r)
+            | Node ((ch, str), l,m,r) when m = empty() -> Node((ch,str), l, insertRec x.[1..] (Leaf(x.[0],"")), r)
 
             // This will continue down the middle
             | Node ((ch, str), l, m, r) when char2num x.[0] = char2num ch   ->
                 match m, str with
-                | m, _ when m = empty && String.length(x) = 1 -> Node((ch, str), l, Leaf(x.[0], word), r)
+                | m, _ when m = empty() && String.length(x) = 1 -> Node((ch, str), l, Leaf(x.[0], word), r)
                 //| m, _ when m = empty && String.length(x) > 1 -> Node((ch, str), l, insertRec (x.[1..]) (Node((x.[0],""), empty, empty, empty)), r)
                 | m, _ when String.length(x) >= 1 -> Node((ch, str), l, insertRec (x.[1..]) m, r)
                 | _, str when str = "" && String.length(x) = 0 -> Node((ch, word), l, m, r) 
             
             
-            | _ -> insertRec (x) empty
+            | _ -> insertRec (x) (empty())
             
         let checkRoot r =
             match r with
@@ -102,48 +102,53 @@ module DictionaryTrie
     // dictionary d takes one step down the trie and returns a tuple (b, d') where b is
     // true if traversing c completed a word and false otherwise, and where d' is
     // the next level of the trie.
-    let step char  root = 
+    // Ctrie |> step 'd' |> snd |> step 'o' |> snd |> step 'g'
+    let step char root = 
         match root with
-        | Leaf (ch, str) when str <> "" -> (false, empty)
+        | Leaf (ch, str) when str <> "" -> Some (false, empty())
 
         //go left
         | Node ((ch, str), l, m, r) when char2num char > char2num ch  -> 
             match l with
             //base case
-            | Node ((ch, str), l, m, r) when str = "" -> (false, Node ((ch, str), l, m, r))
+            | Node ((ch, str), l, m, r) when str = "" -> Some (false, Node ((ch, str), l, m, r))
             
-            | Leaf (ch, str) -> (true, Leaf(ch, str))
-            | Node ((ch, str), l, m, r) -> (true, Node ((ch, str), l, m, r))
+            | Leaf (ch, str) -> Some (true, Leaf(ch, str))
+            | Node ((ch, str), l, m, r) -> Some (true, Node ((ch, str), l, m, r))
         
         //go right
         | Node ((ch, str), l, m, r) when char2num char < char2num ch  -> 
             match r with
             //base case
-            | Node ((ch, str), l, m, r) when str = "" -> (false, Node ((ch, str), l, m, r))
+            | Node ((ch, str), l, m, r) when str = "" -> Some (false, Node ((ch, str), l, m, r))
             
-            | Leaf (ch, str) -> (true, Leaf(ch, str))
-            | Node ((ch, str), l, m, r) -> (true, Node ((ch, str), l, m, r))
+            | Leaf (ch, str) -> Some (true, Leaf(ch, str))
+            | Node ((ch, str), l, m, r) -> Some (true, Node ((ch, str), l, m, r))
 
         //go middle
         | Node ((ch, str), l, m, r) when char2num char = char2num ch  -> 
             match m with
             //base case
-            | Node ((ch, str), l, m, r) when str = "" -> (false, Node ((ch, str), l, m, r))
+            | Node ((ch, str), l, m, r) when str = "" -> Some (false, Node ((ch, str), l, m, r))
             
-            | Leaf (ch, str) -> (true, Leaf(ch, str))
-            | Node ((ch, str), l, m, r) -> (true, Node ((ch, str), l, m, r))
+            | Leaf (ch, str) -> Some (true, Leaf(ch, str))
+            | Node ((ch, str), l, m, r) -> Some (true, Node ((ch, str), l, m, r))
         
-        | _ -> (false, empty)
+        | _ -> Some (false, empty())
 
 
 
-    // // // for testing
-    let dc =  empty |> insert "dogs" |> insert "dogge" |> insert "come" |> insert "big" |> insert "zip" |> insert "yoyo" |> insert "dad"|> insert "boy"|> insert "year" |> insert "copper" |> insert "bulgur" |> insert "vortex" |> insert "cannopy" |> insert "terrordome" |> insert "jesper"|> insert "abe"|> insert "bee" |> insert "dyslexia" |> insert "jens"|> insert "me"|> insert "hear" |> insert "moose"
-    let dLookup = lookup "terrordome" dc
-    let dcLookup = lookup "moose" dc
+    // for testing
+    let dc =  empty() |> insert "dog" |> insert "dogge" |> insert "come" |> insert "big" |> insert "zip" |> insert "yoyo" |> insert "dad"|> insert "boy"|> insert "year" |> insert "copper" |> insert "bulgur" |> insert "vortex" |> insert "cannopy" |> insert "terrordome" |> insert "jesper"|> insert "abe"|> insert "bee" |> insert "dyslexia" |> insert "jens"|> insert "me"|> insert "hear" |> insert "moose";;
+     // let stepper =  dc |> step 'z'
 
-    
-
-    // let stepper =  dc |> step 'z'
-
-    // let stepper2 =  dc |> step 'd' |> snd |> step 'o' |> snd |> step 'g' 
+    let stepper2 =  
+        match dc |> step 'd' with
+        | Some (_, trie1) -> 
+            match trie1 |> step 'o' with
+            | Some (_, trie2) ->
+                match trie2 |> step 'g' with
+                | Some (true, _) -> true
+                | _ -> false
+            | _ -> false
+        | _ -> false

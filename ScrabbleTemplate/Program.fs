@@ -75,25 +75,25 @@ let main argv =
     let seed       = None
     let port       = 13001
 
-    let dictAPI =
-        // Uncomment if you have implemented a dictionary. last element None if you have not implemented a GADDAG
-        Some (DictionarySimple.empty, DictionarySimple.insert, DictionarySimple.lookup, DictionarySimple.step) //DictionarySimple.step(*, Some DictionarySimple.reverse*)) 
-        None
+    // let dictAPI =
+    //     // Uncomment if you have implemented a dictionary. last element None if you have not implemented a GADDAG
+    //     Some (DictionarySimple.empty, DictionarySimple.insert, DictionarySimple.lookup, DictionarySimple.step) //DictionarySimple.step(*, Some DictionarySimple.reverse*)) 
+    //     None
 
-    let playerDictAPI : ScrabbleUtil.Dictionary.dictAPI =
+    let playerDictAPI =
         // Uncomment if you have implemented a dictionary. last element None if you have not implemented a GADDAG
         //Some (DictionarySimple.empty, DictionarySimple.insert, DictionarySimple.lookup) //DictionarySimple.step, Some DictionarySimple.reverse) 
-        Some (DictionaryTrie.empty, DictionaryTrie.insert, DictionaryTrie.lookup, DictionaryTrie.step)
-        //None
+        Some (DictionaryTrie.empty, DictionaryTrie.insert, DictionaryTrie.step, None)
+        
     
-    let (playerDict, playerTime) = time (fun () -> ScrabbleUtil.Dictionary.mkDict words dictAPI)
+    let (playerDict, playerTime) = time (fun () -> ScrabbleUtil.Dictionary.mkDict words playerDictAPI)
     
     // Uncomment this line to call your client
     let players    = [("Scrabble botter", playerDict, ScrabbleClient.Scrabble.startGame)]  //ScrabbleClient is the name of the namespace in scrabble.fs and scrabble.fsi
     
 
-    let (dictionary, time: System.TimeSpan) =
-        time (fun () -> ScrabbleUtil.Dictionary.mkDict words dictAPI)
+    // let (dictionary, time: System.TimeSpan) =
+    //     time (fun () -> ScrabbleUtil.Dictionary.mkDict words dictAPI)
     
 
     // int at the end is amount of bots 

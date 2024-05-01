@@ -1,11 +1,11 @@
 {
   "version": 2,
-  "dgSpecHash": "37yIqJ28+tPm+yll7YAS6AJWA+HSyLbbThfUCNXFgvnv3t0MOvfTxnKplVWyUidfv0BLqUR2bGMLKATA/u/Qww==",
+  "dgSpecHash": "HOb84/EerY3RUk8J2NaB1n26A8R22NQPZ5hamgsbRMlTD8vVjCB7xPWR6ULIacattJwvRMf0vp3UeY87bfFaxA==",
   "success": true,
-  "projectFilePath": "c:\\Users\\Alexa\\UNI\\Semester_4\\Uni_Semester_4\\FuncSharp\\Project\\scrabble\\ScrabbleBot\\ScrabbleBot.fsproj",
+  "projectFilePath": "/Users/karpe/Documents/ITU/4_Semester/Functional_Programming_exercise/ScrabbleProject/scrabble/ScrabbleBot/ScrabbleBot.fsproj",
   "expectedPackageFiles": [
-    "C:\\Users\\Alexa\\.nuget\\packages\\fparsec\\1.1.1\\fparsec.1.1.1.nupkg.sha512",
-    "C:\\Users\\Alexa\\.nuget\\packages\\fsharp.core\\7.0.200\\fsharp.core.7.0.200.nupkg.sha512"
+    "/Users/karpe/.nuget/packages/fparsec/1.1.1/fparsec.1.1.1.nupkg.sha512",
+    "/Users/karpe/.nuget/packages/fsharp.core/7.0.200/fsharp.core.7.0.200.nupkg.sha512"
   ],
   "logs": []
 }
