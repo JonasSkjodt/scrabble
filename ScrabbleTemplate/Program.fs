@@ -42,7 +42,9 @@ let main argv =
     // let (playerDict1, playerTime1) = time (fun () -> ScrabbleUtil.Dictionary.mkDict words1 something)
     // let (playerDict, playerTime) = time (fun () ->  ScrabbleUtil.Dictionary.test words1 10 playerDict1)
     
-
+    
+    // let mc =  DictionaryTrie.empty |> DictionaryTrie.insert "dogs" |> DictionaryTrie.insert "dogge" |> DictionaryTrie.insert "come" |> DictionaryTrie.insert "big" |> DictionaryTrie.insert "zip" |> DictionaryTrie.insert "yoyo" |> DictionaryTrie.insert "dad"|> DictionaryTrie.insert "boy"|> DictionaryTrie.insert "year" |> DictionaryTrie.insert "copper" |> DictionaryTrie.insert "bulgur" |> DictionaryTrie.insert "vortex" |> DictionaryTrie.insert "cannopy" |> DictionaryTrie.insert "terrordome" |> DictionaryTrie.insert "jesper"|> DictionaryTrie.insert "abe"|> DictionaryTrie.insert "bee" |> DictionaryTrie.insert "dyslexia" |> DictionaryTrie.insert "jens"|> DictionaryTrie.insert "me"|> DictionaryTrie.insert "hear" |> DictionaryTrie.insert "moose"
+    // let mcLookup = DictionaryTrie.lookup "moose" mc
     
 
     
@@ -75,16 +77,16 @@ let main argv =
 
     let dictAPI =
         // Uncomment if you have implemented a dictionary. last element None if you have not implemented a GADDAG
-        //Some (DictionarySimple.empty, DictionarySimple.insert, DictionarySimple.lookup, DictionarySimple.step) //DictionarySimple.step(*, Some DictionarySimple.reverse*)) 
+        Some (DictionarySimple.empty, DictionarySimple.insert, DictionarySimple.lookup, DictionarySimple.step) //DictionarySimple.step(*, Some DictionarySimple.reverse*)) 
         None
 
-    let playerDictAPI =
+    let playerDictAPI : ScrabbleUtil.Dictionary.dictAPI =
         // Uncomment if you have implemented a dictionary. last element None if you have not implemented a GADDAG
         //Some (DictionarySimple.empty, DictionarySimple.insert, DictionarySimple.lookup) //DictionarySimple.step, Some DictionarySimple.reverse) 
         Some (DictionaryTrie.empty, DictionaryTrie.insert, DictionaryTrie.lookup, DictionaryTrie.step)
         //None
     
-    let (playerDict, playerTime) = time (fun () -> ScrabbleUtil.Dictionary.mkDict words playerDictAPI)
+    let (playerDict, playerTime) = time (fun () -> ScrabbleUtil.Dictionary.mkDict words dictAPI)
     
     // Uncomment this line to call your client
     let players    = [("Scrabble botter", playerDict, ScrabbleClient.Scrabble.startGame)]  //ScrabbleClient is the name of the namespace in scrabble.fs and scrabble.fsi

@@ -71,8 +71,13 @@ module DictionaryTrie
             
             
             | _ -> insertRec (x) empty
-        
-        insertRec (word.ToLower()) root
+            
+        let checkRoot r =
+            match r with
+            | Leaf (ch, str)  when ch = System.Char.MinValue -> Leaf ('m', str) 
+            | _ -> r
+        let root = checkRoot root
+        insertRec word root
     
     // Lookup function
     // continue from our example before, use lookup like so:
@@ -133,8 +138,11 @@ module DictionaryTrie
 
 
     // // // for testing
-    // let dc =  empty |> insert "dogs" |> insert "dogge" |> insert "come" |> insert "big" |> insert "zip" |> insert "yoyo" |> insert "dad"|> insert "boy"|> insert "year" |> insert "copper" |> insert "bulgur" |> insert "vortex" |> insert "cannopy" |> insert "terrordome" |> insert "jesper"|> insert "abe"|> insert "bee" |> insert "dyslexia" |> insert "jens"|> insert "me"|> insert "hear"
-    // let dcLookup = lookup "terrordome" dc
+    let dc =  empty |> insert "dogs" |> insert "dogge" |> insert "come" |> insert "big" |> insert "zip" |> insert "yoyo" |> insert "dad"|> insert "boy"|> insert "year" |> insert "copper" |> insert "bulgur" |> insert "vortex" |> insert "cannopy" |> insert "terrordome" |> insert "jesper"|> insert "abe"|> insert "bee" |> insert "dyslexia" |> insert "jens"|> insert "me"|> insert "hear" |> insert "moose"
+    let dLookup = lookup "terrordome" dc
+    let dcLookup = lookup "moose" dc
+
+    
 
     // let stepper =  dc |> step 'z'
 

@@ -1,28 +1,26 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\jonas\\Desktop\\scrabble\\scrabble\\ScrabbleTemplate\\ScrabbleTemplate.fsproj": {}
+    "c:\\Users\\Alexa\\UNI\\Semester_4\\Uni_Semester_4\\FuncSharp\\Project\\scrabble\\ScrabbleTemplate\\ScrabbleTemplate.fsproj": {}
   },
   "projects": {
-    "C:\\Users\\jonas\\Desktop\\scrabble\\scrabble\\ScrabbleBot\\ScrabbleBot.fsproj": {
+    "c:\\Users\\Alexa\\UNI\\Semester_4\\Uni_Semester_4\\FuncSharp\\Project\\scrabble\\ScrabbleBot\\ScrabbleBot.fsproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\jonas\\Desktop\\scrabble\\scrabble\\ScrabbleBot\\ScrabbleBot.fsproj",
+        "projectUniqueName": "c:\\Users\\Alexa\\UNI\\Semester_4\\Uni_Semester_4\\FuncSharp\\Project\\scrabble\\ScrabbleBot\\ScrabbleBot.fsproj",
         "projectName": "ScrabbleBot",
-        "projectPath": "C:\\Users\\jonas\\Desktop\\scrabble\\scrabble\\ScrabbleBot\\ScrabbleBot.fsproj",
-        "packagesPath": "C:\\Users\\jonas\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\jonas\\Desktop\\scrabble\\scrabble\\ScrabbleBot\\obj\\",
+        "projectPath": "c:\\Users\\Alexa\\UNI\\Semester_4\\Uni_Semester_4\\FuncSharp\\Project\\scrabble\\ScrabbleBot\\ScrabbleBot.fsproj",
+        "packagesPath": "C:\\Users\\Alexa\\.nuget\\packages\\",
+        "outputPath": "c:\\Users\\Alexa\\UNI\\Semester_4\\Uni_Semester_4\\FuncSharp\\Project\\scrabble\\ScrabbleBot\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
-          "C:\\Users\\jonas\\AppData\\Roaming\\NuGet\\NuGet.Config",
-          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
+          "C:\\Users\\Alexa\\AppData\\Roaming\\NuGet\\NuGet.Config"
         ],
         "originalTargetFrameworks": [
           "net7.0"
         ],
         "sources": {
-          "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
-          "C:\\Program Files\\dotnet\\sdk\\8.0.204\\FSharp\\library-packs": {},
+          "C:\\Program Files\\dotnet\\sdk\\8.0.104\\FSharp\\library-packs": {},
           "https://api.nuget.org/v3/index.json": {}
         },
         "frameworks": {
@@ -30,11 +28,6 @@
             "targetAlias": "net7.0",
             "projectReferences": {}
           }
-        },
-        "restoreAuditProperties": {
-          "enableAudit": "true",
-          "auditLevel": "low",
-          "auditMode": "direct"
         }
       },
       "frameworks": {
@@ -64,64 +57,43 @@
           ],
           "assetTargetFallback": true,
           "warn": true,
-          "downloadDependencies": [
-            {
-              "name": "Microsoft.AspNetCore.App.Ref",
-              "version": "[7.0.18, 7.0.18]"
-            },
-            {
-              "name": "Microsoft.NETCore.App.Ref",
-              "version": "[7.0.18, 7.0.18]"
-            },
-            {
-              "name": "Microsoft.WindowsDesktop.App.Ref",
-              "version": "[7.0.18, 7.0.18]"
-            }
-          ],
           "frameworkReferences": {
             "Microsoft.NETCore.App": {
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\8.0.204\\RuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\8.0.104\\RuntimeIdentifierGraph.json"
         }
       }
     },
-    "C:\\Users\\jonas\\Desktop\\scrabble\\scrabble\\ScrabbleTemplate\\ScrabbleTemplate.fsproj": {
+    "c:\\Users\\Alexa\\UNI\\Semester_4\\Uni_Semester_4\\FuncSharp\\Project\\scrabble\\ScrabbleTemplate\\ScrabbleTemplate.fsproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\jonas\\Desktop\\scrabble\\scrabble\\ScrabbleTemplate\\ScrabbleTemplate.fsproj",
+        "projectUniqueName": "c:\\Users\\Alexa\\UNI\\Semester_4\\Uni_Semester_4\\FuncSharp\\Project\\scrabble\\ScrabbleTemplate\\ScrabbleTemplate.fsproj",
         "projectName": "ScrabbleTemplate",
-        "projectPath": "C:\\Users\\jonas\\Desktop\\scrabble\\scrabble\\ScrabbleTemplate\\ScrabbleTemplate.fsproj",
-        "packagesPath": "C:\\Users\\jonas\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\jonas\\Desktop\\scrabble\\scrabble\\ScrabbleTemplate\\obj\\",
+        "projectPath": "c:\\Users\\Alexa\\UNI\\Semester_4\\Uni_Semester_4\\FuncSharp\\Project\\scrabble\\ScrabbleTemplate\\ScrabbleTemplate.fsproj",
+        "packagesPath": "C:\\Users\\Alexa\\.nuget\\packages\\",
+        "outputPath": "c:\\Users\\Alexa\\UNI\\Semester_4\\Uni_Semester_4\\FuncSharp\\Project\\scrabble\\ScrabbleTemplate\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
-          "C:\\Users\\jonas\\AppData\\Roaming\\NuGet\\NuGet.Config",
-          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
+          "C:\\Users\\Alexa\\AppData\\Roaming\\NuGet\\NuGet.Config"
         ],
         "originalTargetFrameworks": [
           "net7.0"
         ],
         "sources": {
-          "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
-          "C:\\Program Files\\dotnet\\sdk\\8.0.204\\FSharp\\library-packs": {},
+          "C:\\Program Files\\dotnet\\sdk\\8.0.104\\FSharp\\library-packs": {},
           "https://api.nuget.org/v3/index.json": {}
         },
         "frameworks": {
           "net7.0": {
             "targetAlias": "net7.0",
             "projectReferences": {
-              "C:\\Users\\jonas\\Desktop\\scrabble\\scrabble\\ScrabbleBot\\ScrabbleBot.fsproj": {
-                "projectPath": "C:\\Users\\jonas\\Desktop\\scrabble\\scrabble\\ScrabbleBot\\ScrabbleBot.fsproj"
+              "c:\\Users\\Alexa\\UNI\\Semester_4\\Uni_Semester_4\\FuncSharp\\Project\\scrabble\\ScrabbleBot\\ScrabbleBot.fsproj": {
+                "projectPath": "c:\\Users\\Alexa\\UNI\\Semester_4\\Uni_Semester_4\\FuncSharp\\Project\\scrabble\\ScrabbleBot\\ScrabbleBot.fsproj"
               }
             }
           }
-        },
-        "restoreAuditProperties": {
-          "enableAudit": "true",
-          "auditLevel": "low",
-          "auditMode": "direct"
         }
       },
       "frameworks": {
@@ -156,30 +128,12 @@
           ],
           "assetTargetFallback": true,
           "warn": true,
-          "downloadDependencies": [
-            {
-              "name": "Microsoft.AspNetCore.App.Ref",
-              "version": "[7.0.18, 7.0.18]"
-            },
-            {
-              "name": "Microsoft.NETCore.App.Host.win-x64",
-              "version": "[7.0.18, 7.0.18]"
-            },
-            {
-              "name": "Microsoft.NETCore.App.Ref",
-              "version": "[7.0.18, 7.0.18]"
-            },
-            {
-              "name": "Microsoft.WindowsDesktop.App.Ref",
-              "version": "[7.0.18, 7.0.18]"
-            }
-          ],
           "frameworkReferences": {
             "Microsoft.NETCore.App": {
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\8.0.204\\RuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\8.0.104\\RuntimeIdentifierGraph.json"
         }
       }
     }
