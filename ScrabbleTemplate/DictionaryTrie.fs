@@ -103,55 +103,59 @@ module DictionaryTrie
     // true if traversing c completed a word and false otherwise, and where d' is
     // the next level of the trie.
     // Ctrie |> step 'd' |> snd |> step 'o' |> snd |> step 'g'
-    let step char root = 
-        match root with
-        | Leaf (ch, str) when str <> "" -> Some (false, Leaf(ch, str))
+    let step char root =
+        let rec step_rec char node = 
+            match node with
+            | Leaf (ch, str) when str <> "" -> Some (true, Leaf(ch, str))
 
-        //go right
-        | Node ((ch, str), l, m, r) when char2num char > char2num ch  -> 
-            match r with
-            //base case
-            | Node ((ch, str), l, m, r) when str = "" -> Some (false, Node ((ch, str), l, m, r))
-            | Node ((ch, str), l, m, r) when str <> "" -> Some (true, Node ((ch, str), l, m, r))
-            
-            | Leaf (ch, str) when str <> "" -> Some (true, Leaf(ch, str))
-            | Leaf (ch, str) when str = "" -> Some (false, Leaf(ch, str))
-        
-        //go left
-        | Node ((ch, str), l, m, r) when char2num char < char2num ch  -> 
-            match l with
-            //base case
-            | Node ((ch, str), l, m, r) when str = "" -> Some (false, Node ((ch, str), l, m, r))
-            | Node ((ch, str), l, m, r) when str <> "" -> Some (true, Node ((ch, str), l, m, r))
-            
-            | Leaf (ch, str) when str <> "" -> Some (true, Leaf(ch, str))
-            | Leaf (ch, str) when str = "" -> Some (false, Leaf(ch, str))
+            //go right
+            | Node ((ch, str), l, m, r) when char2num char > char2num ch  -> 
+                match r with
+                //base case
+                | Node ((ch, str), l, m, r) when str = "" -> step_rec char ( Node ((ch, str), l, m, r)) //rec it
 
-        //go middle
-        | Node ((ch, str), l, m, r) when char2num char = char2num ch  -> 
-            match m with
-            //base case
-            | Node ((ch, str), l, m, r) when str = "" -> Some (false, Node ((ch, str), l, m, r))
-            | Node ((ch, str), l, m, r) when str <> "" -> Some (true, Node ((ch, str), l, m, r))
+                | Node ((ch, str), l, m, r) when str <> "" -> Some (true, Node ((ch, str), l, m, r))
+                
+                | Leaf (ch, str) when str <> "" -> Some (true, Leaf(ch, str))
+                | Leaf (ch, str) when str = "" -> Some (false, Leaf(ch, str))
             
-            | Leaf (ch, str) when str <> "" -> Some (true, Leaf(ch, str))
-            | Leaf (ch, str) when str = "" -> Some (false, Leaf(ch, str))
-        
-        | _ -> Some (false, empty())
+            //go left
+            | Node ((ch, str), l, m, r) when char2num char < char2num ch  -> 
+                match l with
+                //base case
+                | Node ((ch, str), l, m, r) when str = "" -> step_rec char ( Node ((ch, str), l, m, r))
+                | Node ((ch, str), l, m, r) when str <> "" -> Some (true, Node ((ch, str), l, m, r))
+                
+                | Leaf (ch, str) when str <> "" -> Some (true, Leaf(ch, str))
+                | Leaf (ch, str) when str = "" -> Some (false, Leaf(ch, str))
+
+            //go middle
+            | Node ((ch, str), l, m, r) when char2num char = char2num ch  -> 
+                match m with
+                //base case
+                | Node ((ch, str), l, m, r) when str = "" -> Some (false, Node ((ch, str), l, m, r))
+                | Node ((ch, str), l, m, r) when str <> "" -> Some (true, Node ((ch, str), l, m, r))
+                
+                | Leaf (ch, str) when str <> "" -> Some (true, Leaf(ch, str))
+                | Leaf (ch, str) when str = "" -> Some (false, Leaf(ch, str))
+            
+            | _ -> Some (false, empty())
+
+        step_rec char root
 
 
 
     // for testing
-    let dc =  empty() |> insert "dog" |> insert "dogge" |> insert "come" |> insert "big" |> insert "zip" |> insert "yoyo" |> insert "dad"|> insert "boy"|> insert "year" |> insert "copper" |> insert "bulgur" |> insert "vortex" |> insert "cannopy" |> insert "terrordome" |> insert "jesper"|> insert "abe"|> insert "bee" |> insert "dyslexia" |> insert "jens"|> insert "me"|> insert "hear" |> insert "moose";;
-     // let stepper =  dc |> step 'z'
+    //let dc =  empty() |> insert "dog" //|> insert "dogge" |> insert "come" |> insert "big" |> insert "zip" |> insert "yoyo" |> insert "dad"|> insert "boy"|> insert "year" |> insert "copper" |> insert "bulgur" |> insert "vortex" |> insert "cannopy" |> insert "terrordome" |> insert "jesper"|> insert "abe"|> insert "bee" |> insert "dyslexia" |> insert "jens"|> insert "me"|> insert "hear" |> insert "moose"
+    //let stepper =  dc |> step 'd'
 
-    let stepper2 =  
-        match dc |> step 'd' with
-        | Some (_, trie1) -> 
-            match trie1 |> step 'o' with
-            | Some (_, trie2) ->
-                match trie2 |> step 'g' with
-                | Some (true, _) -> true
-                | _ -> false
-            | _ -> false
-        | _ -> false
+    // let stepper2 =  
+    //     match dc |> step 'd' with
+    //     | Some (_, trie1) -> 
+    //         match trie1 |> step 'o' with
+    //         | Some (_, trie2) ->
+    //             match trie2 |> step 'g' with
+    //             | Some (true, _) -> true
+    //             | _ -> false
+    //         | _ -> false
+    //     | _ -> false
