@@ -105,34 +105,37 @@ module DictionaryTrie
     // Ctrie |> step 'd' |> snd |> step 'o' |> snd |> step 'g'
     let step char root = 
         match root with
-        | Leaf (ch, str) when str <> "" -> Some (false, empty())
+        | Leaf (ch, str) when str <> "" -> Some (false, Leaf(ch, str))
 
-        //go left
-        | Node ((ch, str), l, m, r) when char2num char > char2num ch  -> 
-            match l with
-            //base case
-            | Node ((ch, str), l, m, r) when str = "" -> Some (false, Node ((ch, str), l, m, r))
-            
-            | Leaf (ch, str) -> Some (true, Leaf(ch, str))
-            | Node ((ch, str), l, m, r) -> Some (true, Node ((ch, str), l, m, r))
-        
         //go right
-        | Node ((ch, str), l, m, r) when char2num char < char2num ch  -> 
+        | Node ((ch, str), l, m, r) when char2num char > char2num ch  -> 
             match r with
             //base case
             | Node ((ch, str), l, m, r) when str = "" -> Some (false, Node ((ch, str), l, m, r))
+            | Node ((ch, str), l, m, r) when str <> "" -> Some (true, Node ((ch, str), l, m, r))
             
-            | Leaf (ch, str) -> Some (true, Leaf(ch, str))
-            | Node ((ch, str), l, m, r) -> Some (true, Node ((ch, str), l, m, r))
+            | Leaf (ch, str) when str <> "" -> Some (true, Leaf(ch, str))
+            | Leaf (ch, str) when str = "" -> Some (false, Leaf(ch, str))
+        
+        //go left
+        | Node ((ch, str), l, m, r) when char2num char < char2num ch  -> 
+            match l with
+            //base case
+            | Node ((ch, str), l, m, r) when str = "" -> Some (false, Node ((ch, str), l, m, r))
+            | Node ((ch, str), l, m, r) when str <> "" -> Some (true, Node ((ch, str), l, m, r))
+            
+            | Leaf (ch, str) when str <> "" -> Some (true, Leaf(ch, str))
+            | Leaf (ch, str) when str = "" -> Some (false, Leaf(ch, str))
 
         //go middle
         | Node ((ch, str), l, m, r) when char2num char = char2num ch  -> 
             match m with
             //base case
             | Node ((ch, str), l, m, r) when str = "" -> Some (false, Node ((ch, str), l, m, r))
+            | Node ((ch, str), l, m, r) when str <> "" -> Some (true, Node ((ch, str), l, m, r))
             
-            | Leaf (ch, str) -> Some (true, Leaf(ch, str))
-            | Node ((ch, str), l, m, r) -> Some (true, Node ((ch, str), l, m, r))
+            | Leaf (ch, str) when str <> "" -> Some (true, Leaf(ch, str))
+            | Leaf (ch, str) when str = "" -> Some (false, Leaf(ch, str))
         
         | _ -> Some (false, empty())
 
