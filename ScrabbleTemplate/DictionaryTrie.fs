@@ -74,7 +74,7 @@ module DictionaryTrie
             
         let checkRoot r =
             match r with
-            | Leaf (ch, str)  when ch = System.Char.MinValue -> Leaf ('m', str) 
+            | Leaf (ch, str)  when ch = System.Char.MinValue -> Leaf ('M', str) 
             | _ -> r
         let root = checkRoot root
         insertRec word root
@@ -134,7 +134,8 @@ module DictionaryTrie
                 match node with 
                 //base case
                 | Node ((ch, str), l, m, r) when str = "" -> Some (false, m)
-                | Node ((ch, str), l, m, r)  when str <> "" -> Some (true, m)
+                //node
+                | Node ((ch, str), l, m, r)  when str <> "" -> Some (true, ( Node ((ch, str), l, m, r)))
 
 
                 // | Node ((ch, str), l, m, r) when str = "" -> Some (false, Node ((ch, str), l, m, r))
@@ -150,20 +151,20 @@ module DictionaryTrie
 
 
     // for testing
-    let dc =  empty() |> insert "dogs" |> insert "dogge" |> insert "come" |> insert "big" |> insert "zip" |> insert "yoyo" |> insert "dad"|> insert "boy"|> insert "year" |> insert "copper" |> insert "bulgur" |> insert "vortex" |> insert "cannopy" |> insert "terrordome" |> insert "jesper"|> insert "abe"|> insert "bee" |> insert "dyslexia" |> insert "jens"|> insert "me"|> insert "hear" |> insert "moose"
+    //let dc =  empty() |> insert "AAH" |> insert "dogge" |> insert "come" |> insert "big" |> insert "zip" |> insert "yoyo" |> insert "dad"|> insert "boy"|> insert "year" |> insert "copper" |> insert "bulgur" |> insert "vortex" |> insert "cannopy" |> insert "terrordome" |> insert "jesper"|> insert "abe"|> insert "bee" |> insert "dyslexia" |> insert "jens"|> insert "me"|> insert "hear" |> insert "moose"
     //let stepper =  dc |> step 'd'
 
-    // jesper?? hello
-    let stepper2 =  
-        match dc |> step 'm' with
-        | Some (_, trie1) -> 
-            match trie1 |> step 'o' with
-            | Some (_, trie2) ->
-                match trie2 |> step 'o' with
-                | Some (t, _) -> t
-                  | _ -> false
-              | _ -> false
-          | _ -> false
+    // // jesper?? hello
+    // let stepper2 =  
+    //     match dc |> step 'A' with
+    //     | Some (_, trie1) -> 
+    //         match trie1 |> step 'A' with
+    //         | Some (_, trie2) ->
+    //             match trie2 |> step 'h' with
+    //             | Some (t, _) -> t
+    //               | _ -> false
+    //           | _ -> false
+    //       | _ -> false
 
     // let stepper3 =
     //     match dc |> step 'j' with

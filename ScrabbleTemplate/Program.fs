@@ -22,16 +22,35 @@ let spawnMultiples name dict bot =
 let main argv =
 
 
-    // let dc =  empty() |> insert "dog" |> insert "dogge" |> insert "come" |> insert "big" |> insert "zip" |> insert "yoyo" |> insert "dad"|> insert "boy"|> insert "year" |> insert "copper" |> insert "bulgur" |> insert "vortex" |> insert "cannopy" |> insert "terrordome" |> insert "jesper"|> insert "abe"|> insert "bee" |> insert "dyslexia" |> insert "jens"|> insert "me"|> insert "hear" |> insert "moose"
-    // //let stepper =  dc |> step 'd'
+    //let dc =  empty() |> insert "AA" |> insert "AAH" |> insert "AAHED"  |> insert "AAHS" |> insert "AAHS" |> insert "AAL" |> insert "DOGGE" |> insert "AAHING" |> insert "BIG" |> insert "ZIP" |> insert "YOYO" |> insert "DAD"|> insert "BOY"|> insert "YEAR" |> insert "COPPER" |> insert "BULGUR" |> insert "VORTEX" |> insert "CANNOPY" |> insert "TERRORDOME" |> insert "JESPER"|> insert "ABE"|> insert "BEE" |> insert "DYSLEXIA" |> insert "JENS"|> insert "ME"|> insert "HEAR" |> insert "MOOSE"
+
+    
 
     // let stepper2 =  
-    //     match dc |> step 'z' with
+    //     match dc |> ScrabbleUtil.Dictionary.step 'A' with
     //     | Some (_, trie1) -> 
-    //         match trie1 |> step 'i' with
+    //         match trie1 |> ScrabbleUtil.Dictionary.step 'A' with
+    //         | Some (t, trie) -> (t, trie)
+
+    // let stepper3 =
+    //     match dc |> step 'j' with
+    //     | Some (_, trie1) ->
+    //         match trie1 |> step 'e' with
     //         | Some (_, trie2) ->
-    //             match trie2 |> step 't' with
-    //             | Some (t, trie: CTrie) -> (t, trie)
+    //             match trie2 |> step 's' with
+    //             | Some (_, trie3) ->
+    //                 match trie3 |> step 'p' with
+    //                 | Some (_, trie4) ->
+    //                     match trie4 |> step 'e' with
+    //                     | Some (_, trie5) ->
+    //                         match trie5 |> step 'r' with
+    //                         | Some (t, _) -> t
+    //                         | _ -> false
+    //                     | _ -> false
+    //                 | _ -> false
+    //             | _ -> false
+    //         | _ -> false
+    //     | _ -> false
 
     // let ch = 'd'
     // let chTin ch = (int ch - int 'a') + 1
@@ -80,7 +99,7 @@ let main argv =
 //    let board      = ScrabbleUtil.HoleBoard.holeBoard ()
 //    let board      = ScrabbleUtil.InfiniteHoleBoard.infiniteHoleBoard ()
 
-    let words     = readLines "./Dictionaries/English.txt"
+    let words     = readLines "../../../Dictionaries/English.txt"
 
     let handSize   = 7u
     let timeout    = None
@@ -101,6 +120,36 @@ let main argv =
     
     let (playerDict, playerTime) = time (fun () -> ScrabbleUtil.Dictionary.mkDict words playerDictAPI)
     
+    // let dv = ScrabbleUtil.Dictionary.step 'd' (playerDict false) 
+    let xdjfkjd =
+        match ScrabbleUtil.Dictionary.step 'A' (playerDict false) with
+            | Some (_, trie1) ->
+                match trie1 |> ScrabbleUtil.Dictionary.step 'A' with
+                | Some (t, trie2) -> (t, trie2) 
+                
+
+                
+            
+    // let stepper3 =
+    //     match dc |> step 'j' with
+    //     | Some (_, trie1) ->
+    //         match trie1 |> step 'e' with
+    //         | Some (_, trie2) ->
+    //             match trie2 |> step 's' with
+    //             | Some (_, trie3) ->
+    //                 match trie3 |> step 'p' with
+    //                 | Some (_, trie4) ->
+    //                     match trie4 |> step 'e' with
+    //                     | Some (_, trie5) ->
+    //                         match trie5 |> step 'r' with
+    //                         | Some (t, _) -> t
+    //                         | _ -> false
+    //                     | _ -> false
+    //                 | _ -> false
+    //             | _ -> false
+    //         | _ -> false
+    //     | _ -> false
+    
     
     ScrabbleUtil.DebugPrint.debugPrint ("Dictionary test sucessful\n")
     let incorrectWords = ScrabbleUtil.Dictionary.test words 10 (playerDict false) // change the boolean to true if using a GADDAG
@@ -108,7 +157,6 @@ let main argv =
     | [] -> ScrabbleUtil.DebugPrint.debugPrint ("Dictionary test sucessful!\n")
     | _ -> ScrabbleUtil.DebugPrint.debugPrint ("Dictionary test failed for at least the following words: \n")
     List.iter (fun str -> ScrabbleUtil.DebugPrint.debugPrint (sprintf "%s\n" str)) incorrectWords
-
 
 
     // Uncomment this line to call your client
