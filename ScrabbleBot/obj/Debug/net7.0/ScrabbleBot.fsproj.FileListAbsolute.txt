@@ -79,3 +79,17 @@ C:\Users\jonas\Desktop\scrabble\scrabble\ScrabbleBot\obj\Debug\net7.0\ScrabbleBo
 C:\Users\jonas\Desktop\scrabble\scrabble\ScrabbleBot\obj\Debug\net7.0\refint\ScrabbleBot.dll
 C:\Users\jonas\Desktop\scrabble\scrabble\ScrabbleBot\obj\Debug\net7.0\ScrabbleBot.pdb
 C:\Users\jonas\Desktop\scrabble\scrabble\ScrabbleBot\obj\Debug\net7.0\ref\ScrabbleBot.dll
+c:\Users\Alexa\UNI\Semester_4\Uni_Semester_4\FuncSharp\Project\scrabble\ScrabbleBot\obj\Debug\net7.0\ScrabbleBot.dll
+c:\Users\Alexa\UNI\Semester_4\Uni_Semester_4\FuncSharp\Project\scrabble\ScrabbleBot\obj\Debug\net7.0\refint\ScrabbleBot.dll
+c:\Users\Alexa\UNI\Semester_4\Uni_Semester_4\FuncSharp\Project\scrabble\ScrabbleBot\obj\Debug\net7.0\ScrabbleBot.pdb
+C:\Users\Alexa\UNI\Semester_4\Uni_Semester_4\FuncSharp\Project\scrabble\ScrabbleBot\bin\Debug\net7.0\ScrabbleBot.deps.json
+C:\Users\Alexa\UNI\Semester_4\Uni_Semester_4\FuncSharp\Project\scrabble\ScrabbleBot\bin\Debug\net7.0\ScrabbleBot.dll
+C:\Users\Alexa\UNI\Semester_4\Uni_Semester_4\FuncSharp\Project\scrabble\ScrabbleBot\bin\Debug\net7.0\ScrabbleBot.pdb
+C:\Users\Alexa\UNI\Semester_4\Uni_Semester_4\FuncSharp\Project\scrabble\ScrabbleBot\bin\Debug\net7.0\ScrabbleUtil.dll
+C:\Users\Alexa\UNI\Semester_4\Uni_Semester_4\FuncSharp\Project\scrabble\ScrabbleBot\obj\Debug\net7.0\ScrabbleBot.fsproj.AssemblyReference.cache
+C:\Users\Alexa\UNI\Semester_4\Uni_Semester_4\FuncSharp\Project\scrabble\ScrabbleBot\obj\Debug\net7.0\ScrabbleBot.AssemblyInfoInputs.cache
+C:\Users\Alexa\UNI\Semester_4\Uni_Semester_4\FuncSharp\Project\scrabble\ScrabbleBot\obj\Debug\net7.0\ScrabbleBot.AssemblyInfo.fs
+C:\Users\Alexa\UNI\Semester_4\Uni_Semester_4\FuncSharp\Project\scrabble\ScrabbleBot\obj\Debug\net7.0\ScrabbleBot.fsproj.CoreCompileInputs.cache
+C:\Users\Alexa\UNI\Semester_4\Uni_Semester_4\FuncSharp\Project\scrabble\ScrabbleBot\obj\Debug\net7.0\ScrabbleBot.sourcelink.json
+C:\Users\Alexa\UNI\Semester_4\Uni_Semester_4\FuncSharp\Project\scrabble\ScrabbleBot\obj\Debug\net7.0\ScrabbleBot.fsproj.CopyComplete
+C:\Users\Alexa\UNI\Semester_4\Uni_Semester_4\FuncSharp\Project\scrabble\ScrabbleBot\obj\Debug\net7.0\ref\ScrabbleBot.dll

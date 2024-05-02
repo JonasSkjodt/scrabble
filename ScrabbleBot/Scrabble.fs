@@ -5,6 +5,7 @@ open ScrabbleUtil.ServerCommunication
 
 open System.IO
 
+
 open ScrabbleUtil.DebugPrint
 
 // The RegEx module is only used to parse human input. It is not used for the final product.
@@ -46,6 +47,7 @@ module State =
         dict          : ScrabbleUtil.Dictionary.Dict
         playerNumber  : uint32
         hand          : MultiSet.MultiSet<uint32>
+        
     }
 
     let mkState b d pn h = {board = b; dict = d;  playerNumber = pn; hand = h }
@@ -90,7 +92,7 @@ module Scrabble =
                     match newPieces with
                     | newTile :: tail -> addNewTiles tail (MultiSet.addSingle (fst newTile) hand)
                     | [] -> hand
-
+                
                 let newHand = (removeTiles ms st.hand)
                 let newHand' = addNewTiles newPieces newHand
                 
@@ -101,20 +103,36 @@ module Scrabble =
                 
                 let st' = { st with hand = newHand'} 
 
-                printfn " " |> ignore
-                
+                // printfn " " |> ignore
+                Thread.Sleep (1 * 1000)
+
                 aux st'
 
                 // Successful play by you. Update your state (remove old tiles, add the new ones, etc.)
-                
+
+              // pid = playerid
+              // ms = letters on the board
+              // points = points from a play
             | RCM (CMPlayed (pid, ms, points)) ->
                 (* Successful play by other player. Update your state *)
                 // Code to update your board
-                let st' = st // This state needs to be updated
+                
+                
+
+                // update st with new playernumber and new points
+                let st' = st
+                
+                // let st' = { st with hand = newHand'}
+
+
+                Thread.Sleep (2 * 1000)
+                printfn "test TEST testxxx"
                 aux st'
             | RCM (CMPlayFailed (pid, ms)) ->
                 (* Failed play. Update your state *)
                 let st' = st // This state needs to be updated
+
+                Thread.Sleep (3 * 1000)
                 aux st'
             | RCM (CMGameOver _) -> ()
             | RCM a -> failwith (sprintf "not implmented: %A" a)
