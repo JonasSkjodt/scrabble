@@ -42,20 +42,64 @@ module State =
     // but it could, potentially, keep track of other useful
     // information, such as number of players, player turn, etc.
 
+
     type state = {
-        board         : Parser.board
-        dict          : ScrabbleUtil.Dictionary.Dict
-        playerNumber  : uint32
-        hand          : MultiSet.MultiSet<uint32>
-        
+        board           : Parser.board
+        dict            : ScrabbleUtil.Dictionary.Dict
+        playerNumber    : uint32
+        hand            : MultiSet.MultiSet<uint32>   
+        playerTurn      : uint32
+        numberOfPlayers : uint32
+        letterPlacement : Map<coord, uint32 * (char * int)>
     }
 
-    let mkState b d pn h = {board = b; dict = d;  playerNumber = pn; hand = h }
+    let mkState b d pn h pT nOP lP= {board = b; dict = d;  playerNumber = pn; hand = h; playerTurn = pT; numberOfPlayers = nOP; letterPlacement = lP}
 
-    let board st         = st.board
-    let dict st          = st.dict
-    let playerNumber st  = st.playerNumber
-    let hand st          = st.hand
+    let board st            = st.board
+    let dict st             = st.dict
+    let playerNumber st     = st.playerNumber
+    let hand st             = st.hand
+    let playerTurn st       = st.playerTurn
+    let numberOfPlayers st  = st.numberOfPlayers
+    let letterPlacement st  = st.letterPlacement
+    
+
+    let rec removeTiles (move : list<coord * (uint32 * (char * int))>) hand =
+                    match move with
+                    | (_, (tileID, _)) :: tail when MultiSet.contains tileID hand ->
+                        removeTiles tail (MultiSet.removeSingle tileID hand)
+                    | [] -> hand
+                    | _ -> failwith "Tile played could not be found in player hand"
+
+    let rec addNewTiles newPieces hand =
+                    match newPieces with
+                    | newTile :: tail -> addNewTiles tail (MultiSet.addSingle (fst newTile) hand)
+                    | [] -> hand
+
+    let changeTurn pId numP= 
+        match pId with
+        | p when p = numP -> 1u
+        | p -> p + 1u
+        
+    let private (|FoundValue|_|) key map = Map.tryFind key map
+
+    let updateBoard tiles = 
+        let updatePlacement tile coord st =
+            match st.letterPlacement with
+            | FoundValue coord _ ->  failwith "There is already a tile at the coord"  //map when Map.containsKey coord map -> failwith "There is already a tile at the coord"
+            | _ -> {st with letterPlacement = Map.add coord tile st.letterPlacement} 
+
+        Seq.foldBack (fun (coord, tile) acc -> updatePlacement tile coord acc) tiles 
+
+    // let updateBoard tiles st = 
+    //     let updatePlacement (coord, tile) map =
+    //         match Map.tryFind coord map with
+    //         | Some _ -> failwith "There is already a tile at the coord"
+    //         | None -> Map.add coord tile map 
+
+    //     tiles
+    //     |> Seq.fold (fun acc (coord, tile) -> updatePlacement (coord, tile) acc) st.letterPlacement
+    //     |> fun updatedMap ->  updatedMap
 
 module Scrabble =
     open System.Threading
@@ -63,6 +107,7 @@ module Scrabble =
     let playGame cstream pieces (st : State.state) =
 
         let rec aux (st : State.state) =
+            // if State.playerNumber st = State.playerTurn st then
             Print.printHand pieces (State.hand st)
             //printfn "Updated hand: %A" (st.hand)
 
@@ -80,32 +125,27 @@ module Scrabble =
             match msg with
             | RCM (CMPlaySuccess(ms, points, newPieces)) ->
                 (* Successful play by you. Update your state (remove old tiles, add the new ones, change turn, etc) *)
+                // The message CMPlaySuccess is sent to the player who made the move
                 
-                let rec removeTiles (move : list<coord * (uint32 * (char * int))>) hand =
-                    match move with
-                    | (_, (tileID, _)) :: tail when MultiSet.contains tileID hand ->
-                        removeTiles tail (MultiSet.removeSingle tileID hand)
-                    | [] -> hand
-                    | _ -> failwith "Tile played could not be found in player hand"
+                //let sta = State.updateBoard ms
+                
+                let newHand = (State.removeTiles ms st.hand)
+                let newHand' = State.addNewTiles newPieces newHand
+                
+                // let newBoard = State.updateBoard ms st
 
-                let rec addNewTiles newPieces hand =
-                    match newPieces with
-                    | newTile :: tail -> addNewTiles tail (MultiSet.addSingle (fst newTile) hand)
-                    | [] -> hand
-                
-                let newHand = (removeTiles ms st.hand)
-                let newHand' = addNewTiles newPieces newHand
-                
+                let newTurn = State.changeTurn st.playerNumber st.numberOfPlayers
+
                 // We tried to update the state in a functional way, but it didn't work. Aux doesn't print 
-                // the new hand, so we have to do an empty print to slow the code down enough to actually update the 
+                // the new hand, so we have to do a thread.sleep to slow the code down enough to actually update the 
                 // state. 
                 //let st' = State.mkState (State.board st) (State.dict st) (State.playerNumber st) newHand'
                 
-                let st' = { st with hand = newHand'} 
-
+                // let st' = { sta with hand = newHand' ; playerTurn = newTurn ; letterPlacement = sta.letterPlacement }
+                let st' = { st with hand = newHand' ; playerTurn = newTurn}
                 // printfn " " |> ignore
-                Thread.Sleep (1 * 1000)
-
+                // Thread.Sleep (2 * 1000)
+                    
                 aux st'
 
                 // Successful play by you. Update your state (remove old tiles, add the new ones, etc.)
@@ -113,26 +153,37 @@ module Scrabble =
               // pid = playerid
               // ms = letters on the board
               // points = points from a play
+
             | RCM (CMPlayed (pid, ms, points)) ->
                 (* Successful play by other player. Update your state *)
                 // Code to update your board
                 
-                
+                // let sta = State.updateBoard (Seq.ofList ms) st
+            
+                // let newBoard = State.updateBoard ms st
 
+                let newTurn = State.changeTurn st.playerNumber st.numberOfPlayers
+
+                // We tried to update the state in a functional way, but it didn't work. Aux doesn't print 
+                // the new hand, so we have to do a thread.sleep to slow the code down enough to actually update the 
+                // state. 
+                //let st' = State.mkState (State.board st) (State.dict st) (State.playerNumber st) newHand'
+                
+                // let st' = { st with playerTurn = newTurn; }
+                
                 // update st with new playernumber and new points
-                let st' = st
-                
-                // let st' = { st with hand = newHand'}
-
-
-                Thread.Sleep (2 * 1000)
-                printfn "test TEST testxxx"
+                let newTurn = State.changeTurn st.playerNumber st.numberOfPlayers
+                let st' = { st with playerTurn = newTurn } 
+     
                 aux st'
+            
             | RCM (CMPlayFailed (pid, ms)) ->
-                (* Failed play. Update your state *)
-                let st' = st // This state needs to be updated
+                (* Failed play. Update your state *) // this is seen from the other player
 
-                Thread.Sleep (3 * 1000)
+                let newTurn = State.changeTurn st.playerNumber st.numberOfPlayers
+                let st' = { st with playerTurn = newTurn } // This state needs to be updated
+
+                // Thread.Sleep (2 * 1000)
                 aux st'
             | RCM (CMGameOver _) -> ()
             | RCM a -> failwith (sprintf "not implmented: %A" a)
@@ -165,5 +216,100 @@ module Scrabble =
                   
         let handSet = List.fold (fun acc (x, k) -> MultiSet.add x k acc) MultiSet.empty hand
 
-        fun () -> playGame cstream tiles (State.mkState board dict playerNumber handSet)
+        fun () -> playGame cstream tiles (State.mkState board dict playerNumber handSet playerTurn numPlayers  Map.empty)
         
+// point values
+//A : 1
+//B : 
+//C :
+//D : 2
+//E : 1
+//F : 4
+//K : 5 
+//L : 1
+//M : 3
+//N : 1
+//O : 1
+//P : 3
+//R : 1
+//S : 1
+//T : 1
+//U : 1
+//V : 4
+//X : 
+//Y : 4
+//W : 4
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+(*
+| RCM (CMPlaySuccess(ms, points, newPieces)) ->
+                (* Successful play by you. Update your state (remove old tiles, add the new ones, change turn, etc) *)
+                // The message CMPlaySuccess is sent to the player who made the move
+                
+                let sta = State.updateBoard (Seq.ofList ms) st
+                
+                let newHand = (State.removeTiles ms sta.hand)
+                let newHand' = State.addNewTiles newPieces newHand
+                
+                // let newBoard = State.updateBoard ms st
+
+                let newTurn = State.changeTurn sta.playerNumber sta.numberOfPlayers
+
+                // We tried to update the state in a functional way, but it didn't work. Aux doesn't print 
+                // the new hand, so we have to do a thread.sleep to slow the code down enough to actually update the 
+                // state. 
+                //let st' = State.mkState (State.board st) (State.dict st) (State.playerNumber st) newHand'
+                
+                let st' = { sta with hand = newHand' ; playerTurn = newTurn ; letterPlacement = sta.letterPlacement }
+                // printfn " " |> ignore
+                // Thread.Sleep (2 * 1000)
+                    
+                aux st'
+
+                // Successful play by you. Update your state (remove old tiles, add the new ones, etc.)
+
+              // pid = playerid
+              // ms = letters on the board
+              // points = points from a play
+
+            | RCM (CMPlayed (pid, ms, points)) ->
+                (* Successful play by other player. Update your state *)
+                // Code to update your board
+                
+                let sta = State.updateBoard (Seq.ofList ms) st
+            
+                // let newBoard = State.updateBoard ms st
+
+                let newTurn = State.changeTurn sta.playerNumber sta.numberOfPlayers
+
+                // We tried to update the state in a functional way, but it didn't work. Aux doesn't print 
+                // the new hand, so we have to do a thread.sleep to slow the code down enough to actually update the 
+                // state. 
+                //let st' = State.mkState (State.board st) (State.dict st) (State.playerNumber st) newHand'
+                
+                let st' = { sta with playerTurn = newTurn; }
+                
+                // update st with new playernumber and new points
+                //let newTurn = State.changeTurn st.playerNumber st.numberOfPlayers
+                //let st' = { st with playerTurn = newTurn } 
+     
+                aux st'
+                *)
