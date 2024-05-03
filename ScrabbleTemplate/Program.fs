@@ -27,8 +27,8 @@ let main argv =
     //System.Console.ForegroundColor <- System.ConsoleColor.Black
     System.Console.Clear()
 
-    let board        = ScrabbleUtil.StandardBoard.standardBoard ()
-//    let board      = ScrabbleUtil.InfiniteBoard.infiniteBoard ()
+    //let board        = ScrabbleUtil.StandardBoard.standardBoard ()
+    let board      = ScrabbleUtil.InfiniteBoard.infiniteBoard ()
 
 //    let board      = ScrabbleUtil.RandomBoard.randomBoard ()
 //    let board      = ScrabbleUtil.RandomBoard.randomBoardSeed (Some 42)
@@ -71,7 +71,7 @@ let main argv =
 
 
     // Uncomment this line to call your client
-    let players    = [("BOT", playerDict, Oxyphenbutazone.Scrabble.startGame); ("Player 1", playerDict, ScrabbleClient.Scrabble.startGame)]  //ScrabbleClient is the name of the namespace in scrabble.fs and scrabble.fsi
+    // let players    = [("BOT", playerDict, Oxyphenbutazone.Scrabble.startGame); ("Player 1", playerDict, ScrabbleClient.Scrabble.startGame)]  //ScrabbleClient is the name of the namespace in scrabble.fs and scrabble.fsi
     
     // let players    = [("Player 1", playerDict, ScrabbleClient.Scrabble.startGame); ("Player 2", playerDict, ScrabbleClient.Scrabble.startGame)]  //ScrabbleClient is the name of the namespace in scrabble.fs and scrabble.fsi
 
@@ -80,7 +80,7 @@ let main argv =
     
 
     // int at the end is amount of bots 
-    //let players = spawnMultiples "OxyphenButazone" dictionary Oxyphenbutazone.Scrabble.startGame 2
+    let players = spawnMultiples "OxyphenButazone" playerDict Oxyphenbutazone.Scrabble.startGame 2
 
     // 0 0 19S1 0 1 1A1 0 2 22V4 0 3 5E1    save
 
