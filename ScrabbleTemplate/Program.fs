@@ -80,22 +80,11 @@ let main argv =
     //let players    = [("BOT", dictionary, Oxyphenbutazone.Scrabble.startGame); ("Player 1", dictionary, ScrabbleClient.Scrabble.startGame)]  //ScrabbleClient is the name of the namespace in scrabble.fs and scrabble.fsi
     
     // Two players
-    // let players    = [("Player 1", dictionary, ScrabbleClient.Scrabble.startGame); ("Player 2", dictionary, ScrabbleClient.Scrabble.startGame)]  //ScrabbleClient is the name of the namespace in scrabble.fs and scrabble.fsi
+    let players    = [("Player 1", dictionary, ScrabbleClient.Scrabble.startGame); ("Player 2", dictionary, ScrabbleClient.Scrabble.startGame)]  //ScrabbleClient is the name of the namespace in scrabble.fs and scrabble.fsi
 
     // Two bots
-    let players = spawnMultiples "OxyphenButazone" dictionary Oxyphenbutazone.Scrabble.startGame 2
+    //let players = spawnMultiples "OxyphenButazone" dictionary Oxyphenbutazone.Scrabble.startGame 2
     
-
-    // int at the end is amount of bots 
-
-    // 0 0 19S1 0 1 1A1 0 2 22V4 0 3 5E1    save
-
-    // 0 0 19S1 <----- placening 'S' on the board
-    // 0            0            19-----------S---------1
-    // ^placementX  ^placementY  ^tileID      ^Char     ^point value
-    
-    // 0 0 1A1 0 1 1A1 0 2 8H4     a
-
 
     
     do ScrabbleServer.Comm.startGame 
