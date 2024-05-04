@@ -1,4 +1,11 @@
 ﻿// Learn more about F# at http://fsharp.org
+// Multi-player: yes
+// Dictionary(Trie): yes
+// playing on all boards: no
+// parallelism: no
+// Respect the timeout flag: no
+
+
 
 open DictionaryTrie
 
