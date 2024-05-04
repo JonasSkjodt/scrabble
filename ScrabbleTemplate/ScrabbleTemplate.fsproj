@@ -8,7 +8,6 @@
   <ItemGroup>
 
     <Content Include="Dictionaries\English.txt" />
-    <Compile Include="DictionarySimple.fs" />
     <Compile Include="DictionaryTrie.fs" />
     <Compile Include="Program.fs" />
   </ItemGroup>

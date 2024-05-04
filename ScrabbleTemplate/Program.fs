@@ -23,8 +23,8 @@ let main argv =
     
     ScrabbleUtil.DebugPrint.toggleDebugPrint false // Change to false to supress debug output
 
-    //System.Console.BackgroundColor <- System.ConsoleColor.White
-    //System.Console.ForegroundColor <- System.ConsoleColor.Black
+    System.Console.BackgroundColor <- System.ConsoleColor.White
+    System.Console.ForegroundColor <- System.ConsoleColor.Black
     System.Console.Clear()
 
     //let board        = ScrabbleUtil.StandardBoard.standardBoard ()
@@ -38,8 +38,9 @@ let main argv =
 //    let board      = ScrabbleUtil.HoleBoard.holeBoard ()
 //    let board      = ScrabbleUtil.InfiniteHoleBoard.infiniteHoleBoard ()
 
-    // let words     = readLines "../../../Dictionaries/English.txt"
-    let words     = readLines "./Dictionaries/English.txt"
+    let words     = 
+        try readLines "../../../Dictionaries/English.txt" 
+        with _ -> readLines "./Dictionaries/English.txt"
 
 
     let handSize   = 7u
@@ -48,20 +49,23 @@ let main argv =
     let seed       = None
     let port       = 13001
 
-    // let dictAPI =
+    // let dll_dictAPI =
     //     // Uncomment if you have implemented a dictionary. last element None if you have not implemented a GADDAG
     //     Some (DictionarySimple.empty, DictionarySimple.insert, DictionarySimple.lookup, DictionarySimple.step) //DictionarySimple.step(*, Some DictionarySimple.reverse*)) 
     //     None
 
-    let playerDictAPI =
+    let dictAPI =
         // Uncomment if you have implemented a dictionary. last element None if you have not implemented a GADDAG
         //Some (DictionarySimple.empty, DictionarySimple.insert, DictionarySimple.lookup) //DictionarySimple.step, Some DictionarySimple.reverse) 
         Some (DictionaryTrie.empty, DictionaryTrie.insert, DictionaryTrie.step, None)
         
+    // this dicitonary is built on a Ternary Search Trie 
+    let (dictionary, playerTime) = time (fun () -> ScrabbleUtil.Dictionary.mkDict words dictAPI)
     
-    let (playerDict, playerTime) = time (fun () -> ScrabbleUtil.Dictionary.mkDict words playerDictAPI)
+    // let (dll_dictionary, time: System.TimeSpan) =
+    //     time (fun () -> ScrabbleUtil.Dictionary.mkDict words dictAPI)
     
-    
+    // Dictionary test code to check if the trie stores and retrieves words correctly:
     // ScrabbleUtil.DebugPrint.debugPrint ("Dictionary test sucessful\n")
     // let incorrectWords = ScrabbleUtil.Dictionary.test words 10 (playerDict false) // change the boolean to true if using a GADDAG
     // match incorrectWords with
@@ -70,17 +74,19 @@ let main argv =
     // List.iter (fun str -> ScrabbleUtil.DebugPrint.debugPrint (sprintf "%s\n" str)) incorrectWords
 
 
-    // Uncomment this line to call your client
-    // let players    = [("BOT", playerDict, Oxyphenbutazone.Scrabble.startGame); ("Player 1", playerDict, ScrabbleClient.Scrabble.startGame)]  //ScrabbleClient is the name of the namespace in scrabble.fs and scrabble.fsi
-    
-    // let players    = [("Player 1", playerDict, ScrabbleClient.Scrabble.startGame); ("Player 2", playerDict, ScrabbleClient.Scrabble.startGame)]  //ScrabbleClient is the name of the namespace in scrabble.fs and scrabble.fsi
+    // Uncomment one of these lines for the number of players you want to play against
 
-    // let (dictionary, time: System.TimeSpan) =
-    //     time (fun () -> ScrabbleUtil.Dictionary.mkDict words dictAPI)
+    // One player and one bot
+    //let players    = [("BOT", dictionary, Oxyphenbutazone.Scrabble.startGame); ("Player 1", dictionary, ScrabbleClient.Scrabble.startGame)]  //ScrabbleClient is the name of the namespace in scrabble.fs and scrabble.fsi
+    
+    // Two players
+    // let players    = [("Player 1", dictionary, ScrabbleClient.Scrabble.startGame); ("Player 2", dictionary, ScrabbleClient.Scrabble.startGame)]  //ScrabbleClient is the name of the namespace in scrabble.fs and scrabble.fsi
+
+    // Two bots
+    let players = spawnMultiples "OxyphenButazone" dictionary Oxyphenbutazone.Scrabble.startGame 2
     
 
     // int at the end is amount of bots 
-    let players = spawnMultiples "OxyphenButazone" playerDict Oxyphenbutazone.Scrabble.startGame 2
 
     // 0 0 19S1 0 1 1A1 0 2 22V4 0 3 5E1    save
 
@@ -93,7 +99,7 @@ let main argv =
 
     
     do ScrabbleServer.Comm.startGame 
-          board playerDict handSize timeout tiles seed port players
+          board dictionary handSize timeout tiles seed port players
     
     ScrabbleUtil.DebugPrint.forcePrint ("Server has terminated. Press Enter to exit program.\n")
     System.Console.ReadLine () |> ignore 

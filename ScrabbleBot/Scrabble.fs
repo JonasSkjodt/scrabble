@@ -79,7 +79,7 @@ module State =
     let changeTurn pId numP= 
         match pId with
         | p when p = numP -> 1u
-        | p -> p + 1u
+        | _ -> pId + 1u
         
     let private (|FoundValue|_|) key map = Map.tryFind key map
 
@@ -107,83 +107,89 @@ module Scrabble =
     let playGame cstream pieces (st : State.state) =
 
         let rec aux (st : State.state) =
-            // if State.playerNumber st = State.playerTurn st then
-            Print.printHand pieces (State.hand st)
+            if State.playerNumber st = State.playerTurn st then
+                Thread.Sleep (1 * 500)
+                forcePrint ("Player " + st.playerTurn.ToString() + " turn\n")
+                Print.printHand pieces (State.hand st)
             //printfn "Updated hand: %A" (st.hand)
 
             // remove the force print when you move on from manual input (or when you have learnt the format)
-            forcePrint "Input move (format '(<x-coordinate> <y-coordinate> <piece id><character><point-value> )*', note the absence of space between the last inputs)\n\n"
-            let input =  System.Console.ReadLine()
-            let move = RegEx.parseMove input
+            //forcePrint "Input move (format '(<x-coordinate> <y-coordinate> <piece id><character><point-value> )*', note the absence of space between the last inputs)\n\n"
+            // create empty move
+            
+            let move = ""
 
-            debugPrint (sprintf "Player %d -> Server:\n%A\n" (State.playerNumber st) move) // keep the debug lines. They are useful.
-            send cstream (SMPlay move)
+            if st.playerTurn = st.playerNumber then
+                
+                let input = System.Console.ReadLine()
+                
+                let bool inp  = 
+                    match inp with
+                    | "" -> false
+                    | inp  -> true
 
+                let boolReal = bool input
+
+                let move = 
+                    match boolReal with
+                    | true -> RegEx.parseMove input
+                    | false -> []
+                    // let move = RegEx.parseMove input
+
+                let play = ""
+
+                let serverMsg move = 
+                    match move with
+                    | [] -> SMPass
+                    | _ -> SMPlay move
+
+                debugPrint (sprintf "Player %d -> Server:\n%A\n" (State.playerNumber st) move) // keep the debug lines. They are useful.
+                send cstream (serverMsg move)
+                
+            
             let msg = recv cstream
             debugPrint (sprintf "Player %d <- Server:\n%A\n" (State.playerNumber st) move) // keep the debug lines. They are useful.
 
+
+            // pid = playerid
+            // ms = letters on the board
+            // points = points from a play
             match msg with
             | RCM (CMPlaySuccess(ms, points, newPieces)) ->
                 (* Successful play by you. Update your state (remove old tiles, add the new ones, change turn, etc) *)
                 // The message CMPlaySuccess is sent to the player who made the move
                 
-                //let sta = State.updateBoard ms
-                
                 let newHand = (State.removeTiles ms st.hand)
                 let newHand' = State.addNewTiles newPieces newHand
-                
-                // let newBoard = State.updateBoard ms st
 
                 let newTurn = State.changeTurn st.playerNumber st.numberOfPlayers
-
-                // We tried to update the state in a functional way, but it didn't work. Aux doesn't print 
-                // the new hand, so we have to do a thread.sleep to slow the code down enough to actually update the 
-                // state. 
-                //let st' = State.mkState (State.board st) (State.dict st) (State.playerNumber st) newHand'
-                
-                // let st' = { sta with hand = newHand' ; playerTurn = newTurn ; letterPlacement = sta.letterPlacement }
                 let st' = { st with hand = newHand' ; playerTurn = newTurn}
-                // printfn " " |> ignore
-                // Thread.Sleep (2 * 1000)
                     
                 aux st'
 
-                // Successful play by you. Update your state (remove old tiles, add the new ones, etc.)
-
-              // pid = playerid
-              // ms = letters on the board
-              // points = points from a play
-
+            // Successful play by you. Update your state (remove old tiles, add the new ones, etc.)
             | RCM (CMPlayed (pid, ms, points)) ->
                 (* Successful play by other player. Update your state *)
-                // Code to update your board
-                
-                // let sta = State.updateBoard (Seq.ofList ms) st
-            
-                // let newBoard = State.updateBoard ms st
-
-                let newTurn = State.changeTurn st.playerNumber st.numberOfPlayers
-
-                // We tried to update the state in a functional way, but it didn't work. Aux doesn't print 
-                // the new hand, so we have to do a thread.sleep to slow the code down enough to actually update the 
-                // state. 
-                //let st' = State.mkState (State.board st) (State.dict st) (State.playerNumber st) newHand'
-                
-                // let st' = { st with playerTurn = newTurn; }
                 
                 // update st with new playernumber and new points
-                let newTurn = State.changeTurn st.playerNumber st.numberOfPlayers
-                let st' = { st with playerTurn = newTurn } 
-     
+                let newTurn = State.changeTurn pid st.numberOfPlayers
+                let st' = {st with playerTurn = newTurn}
+                
                 aux st'
-            
+
+            // Pass 
+            | RCM (CMPassed (pid )) -> 
+                  (* Passed play. Update your state *)
+
+                let newTurn = State.changeTurn pid st.numberOfPlayers
+                let st' = { st with playerTurn = newTurn }
+                aux st'
             | RCM (CMPlayFailed (pid, ms)) ->
                 (* Failed play. Update your state *) // this is seen from the other player
 
-                let newTurn = State.changeTurn st.playerNumber st.numberOfPlayers
+                let newTurn = State.changeTurn pid st.numberOfPlayers
                 let st' = { st with playerTurn = newTurn } // This state needs to be updated
 
-                // Thread.Sleep (2 * 1000)
                 aux st'
             | RCM (CMGameOver _) -> ()
             | RCM a -> failwith (sprintf "not implmented: %A" a)

@@ -60,13 +60,7 @@ module DictionaryTrie
         let root = checkRoot root
         insertRec word root
     
-
-    // val step : char -> Dict -> (bool * Dict) option
-    // that given a character c and a
-    // dictionary d takes one step down the trie and returns a tuple (b, d') where b is
-    // true if traversing c completed a word and false otherwise, and where d' is
-    // the next level of the trie.
-    // Ctrie |> step 'd' |> snd |> step 'o' |> snd |> step 'g'
+    
     let step char root =
         let rec step_rec char node = 
             match node with
@@ -91,39 +85,3 @@ module DictionaryTrie
             | _ -> Some (false, empty())
 
         step_rec char root
-
-    // for testing
-    //let dc =  empty() |> insert "AAH" |> insert "dogge" |> insert "come" |> insert "big" |> insert "zip" |> insert "yoyo" |> insert "dad"|> insert "boy"|> insert "year" |> insert "copper" |> insert "bulgur" |> insert "vortex" |> insert "cannopy" |> insert "terrordome" |> insert "jesper"|> insert "abe"|> insert "bee" |> insert "dyslexia" |> insert "jens"|> insert "me"|> insert "hear" |> insert "moose"
-    //let stepper =  dc |> step 'd'
-
-    // // jesper?? hello
-    // let stepper2 =  
-    //     match dc |> step 'A' with
-    //     | Some (_, trie1) -> 
-    //         match trie1 |> step 'A' with
-    //         | Some (_, trie2) ->
-    //             match trie2 |> step 'h' with
-    //             | Some (t, _) -> t
-    //               | _ -> false
-    //           | _ -> false
-    //       | _ -> false
-
-    // let stepper3 =
-    //     match dc |> step 'j' with
-    //     | Some (_, trie1) ->
-    //         match trie1 |> step 'e' with
-    //         | Some (_, trie2) ->
-    //             match trie2 |> step 's' with
-    //             | Some (_, trie3) ->
-    //                 match trie3 |> step 'p' with
-    //                 | Some (_, trie4) ->
-    //                     match trie4 |> step 'e' with
-    //                     | Some (_, trie5) ->
-    //                         match trie5 |> step 'r' with
-    //                         | Some (t, _) -> t
-    //                         | _ -> false
-    //                     | _ -> false
-    //                 | _ -> false
-    //             | _ -> false
-    //         | _ -> false
-    //     | _ -> false
