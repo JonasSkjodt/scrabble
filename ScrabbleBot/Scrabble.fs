@@ -109,7 +109,6 @@ module Scrabble =
         let rec aux (st : State.state) =
             if State.playerNumber st = State.playerTurn st then
                 Thread.Sleep (1 * 500)
-                forcePrint ("Player " + st.playerTurn.ToString() + " turn\n")
                 Print.printHand pieces (State.hand st)
             //printfn "Updated hand: %A" (st.hand)
 
@@ -224,98 +223,3 @@ module Scrabble =
 
         fun () -> playGame cstream tiles (State.mkState board dict playerNumber handSet playerTurn numPlayers  Map.empty)
         
-// point values
-//A : 1
-//B : 
-//C :
-//D : 2
-//E : 1
-//F : 4
-//K : 5 
-//L : 1
-//M : 3
-//N : 1
-//O : 1
-//P : 3
-//R : 1
-//S : 1
-//T : 1
-//U : 1
-//V : 4
-//X : 
-//Y : 4
-//W : 4
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-(*
-| RCM (CMPlaySuccess(ms, points, newPieces)) ->
-                (* Successful play by you. Update your state (remove old tiles, add the new ones, change turn, etc) *)
-                // The message CMPlaySuccess is sent to the player who made the move
-                
-                let sta = State.updateBoard (Seq.ofList ms) st
-                
-                let newHand = (State.removeTiles ms sta.hand)
-                let newHand' = State.addNewTiles newPieces newHand
-                
-                // let newBoard = State.updateBoard ms st
-
-                let newTurn = State.changeTurn sta.playerNumber sta.numberOfPlayers
-
-                // We tried to update the state in a functional way, but it didn't work. Aux doesn't print 
-                // the new hand, so we have to do a thread.sleep to slow the code down enough to actually update the 
-                // state. 
-                //let st' = State.mkState (State.board st) (State.dict st) (State.playerNumber st) newHand'
-                
-                let st' = { sta with hand = newHand' ; playerTurn = newTurn ; letterPlacement = sta.letterPlacement }
-                // printfn " " |> ignore
-                // Thread.Sleep (2 * 1000)
-                    
-                aux st'
-
-                // Successful play by you. Update your state (remove old tiles, add the new ones, etc.)
-
-              // pid = playerid
-              // ms = letters on the board
-              // points = points from a play
-
-            | RCM (CMPlayed (pid, ms, points)) ->
-                (* Successful play by other player. Update your state *)
-                // Code to update your board
-                
-                let sta = State.updateBoard (Seq.ofList ms) st
-            
-                // let newBoard = State.updateBoard ms st
-
-                let newTurn = State.changeTurn sta.playerNumber sta.numberOfPlayers
-
-                // We tried to update the state in a functional way, but it didn't work. Aux doesn't print 
-                // the new hand, so we have to do a thread.sleep to slow the code down enough to actually update the 
-                // state. 
-                //let st' = State.mkState (State.board st) (State.dict st) (State.playerNumber st) newHand'
-                
-                let st' = { sta with playerTurn = newTurn; }
-                
-                // update st with new playernumber and new points
-                //let newTurn = State.changeTurn st.playerNumber st.numberOfPlayers
-                //let st' = { st with playerTurn = newTurn } 
-     
-                aux st'
-                *)
