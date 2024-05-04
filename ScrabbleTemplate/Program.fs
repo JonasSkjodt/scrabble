@@ -49,11 +49,6 @@ let main argv =
     let seed       = None
     let port       = 13001
 
-    // let dll_dictAPI =
-    //     // Uncomment if you have implemented a dictionary. last element None if you have not implemented a GADDAG
-    //     Some (DictionarySimple.empty, DictionarySimple.insert, DictionarySimple.lookup, DictionarySimple.step) //DictionarySimple.step(*, Some DictionarySimple.reverse*)) 
-    //     None
-
     let dictAPI =
         // Uncomment if you have implemented a dictionary. last element None if you have not implemented a GADDAG
         //Some (DictionarySimple.empty, DictionarySimple.insert, DictionarySimple.lookup) //DictionarySimple.step, Some DictionarySimple.reverse) 
@@ -61,17 +56,6 @@ let main argv =
         
     // this dicitonary is built on a Ternary Search Trie 
     let (dictionary, playerTime) = time (fun () -> ScrabbleUtil.Dictionary.mkDict words dictAPI)
-    
-    // let (dll_dictionary, time: System.TimeSpan) =
-    //     time (fun () -> ScrabbleUtil.Dictionary.mkDict words dictAPI)
-    
-    // Dictionary test code to check if the trie stores and retrieves words correctly:
-    // ScrabbleUtil.DebugPrint.debugPrint ("Dictionary test sucessful\n")
-    // let incorrectWords = ScrabbleUtil.Dictionary.test words 10 (playerDict false) // change the boolean to true if using a GADDAG
-    // match incorrectWords with
-    // | [] -> ScrabbleUtil.DebugPrint.debugPrint ("Dictionary test sucessful!\n")
-    // | _ -> ScrabbleUtil.DebugPrint.debugPrint ("Dictionary test failed for at least the following words: \n")
-    // List.iter (fun str -> ScrabbleUtil.DebugPrint.debugPrint (sprintf "%s\n" str)) incorrectWords
 
 
     // Uncomment one of these lines for the number of players you want to play against

@@ -1,4 +1,10 @@
 module DictionaryTrie
+// This trie is a Ternary Search Tree (TST)
+// It is a tree where each node has three children, left, middle, and right
+// left side is for characters that are less than the current character
+// right side is for characters that are greater than the current character
+// middle is a bit funky please just google it if you are curious
+// We insert M as the root node to make the tree more balanced (m is the middle of the alphabet)
     
     type CTrie =
         | Leaf of char * string
