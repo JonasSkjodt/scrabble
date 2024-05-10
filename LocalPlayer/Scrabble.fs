@@ -1,4 +1,4 @@
-﻿namespace ScrabbleClient
+﻿namespace LocalPlayer
 
 open ScrabbleUtil
 open ScrabbleUtil.ServerCommunication
@@ -101,26 +101,6 @@ module State =
     //     |> Seq.fold (fun acc (coord, tile) -> updatePlacement (coord, tile) acc) st.letterPlacement
     //     |> fun updatedMap ->  updatedMap
 
-
-
-
-module MudBot =
-    open System.Threading
-
-    //check if valid word
-    let isValidWord = "not implemented"
-
-    //find first word
-    let gen_move = "not implemented"
-
-
-
-
-
-
-
-
-
 module Scrabble =
     open System.Threading
 
@@ -136,12 +116,12 @@ module Scrabble =
             //forcePrint "Input move (format '(<x-coordinate> <y-coordinate> <piece id><character><point-value> )*', note the absence of space between the last inputs)\n\n"
             // create empty move
             
-            let move = "" //insert bot moves
+            let move = ""
 
             if st.playerTurn = st.playerNumber then
                 
                 //change the console readline to find the necessary things for the bot
-                //for instance, check the first letter, can the bot make a word from it? do it recursively
+                //for instance, check the first letter, can the bot make a word from it
                 //etc
                 
                 let input = System.Console.ReadLine()
@@ -150,7 +130,7 @@ module Scrabble =
                     match inp with
                     | "" -> false
                     | inp  -> true
-                
+
                 let boolReal = bool input
 
                 let move = 
