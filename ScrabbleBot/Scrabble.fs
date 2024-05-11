@@ -174,7 +174,8 @@ module Scrabble =
                 // old input reading
                 // let input = System.Console.ReadLine()
                 
-                
+                // Helper func to convert chars to alphanumeric values
+                let char2num (char : char) = uint32((int char - int 'a') + 1)
 
                 // Check if board is empty and call this function with a unfinished word
                 let move = 
@@ -184,7 +185,25 @@ module Scrabble =
 
                         let result = MudBot.permHand startingHand [""]
                         
-                        MudBot.check result st.dict
+                        let moveString = MudBot.check result st.dict
+
+                        let move =  List.map (fun x -> char2num x) (Seq.toList moveString)
+                                
+
+                        // Create a move going downwards
+                        let rec createMove move acc  = 
+                            match move with
+                            | [] -> []
+                            | x::xs -> 
+                                let (c, p) = Map.find x pieces
+                                let tileID = x
+                                let coord = (0, acc)
+                                let letter = (c, p)
+                                let newMove = (coord, (tileID, letter))
+                                newMove :: createMove xs (acc+1)
+
+                        createMove move 0
+ 
                         
                     else
                     // Generate a move based on already existing tiles on the board
@@ -194,7 +213,7 @@ module Scrabble =
                         let letterPlacement = Map.toSeq st.letterPlacement |> List.ofSeq
                         
                         // Generate permutations of the hand for each letterPlacement
-                        let rec perm letterList : string = 
+                        let rec perm (letterList : List<(coord * (uint32 * (char * int)))>) : string = 
                             match letterList with
                             | [] -> ""
                             | (coord, (tileID, (c, p))) :: tail -> 
@@ -206,18 +225,16 @@ module Scrabble =
                                     perm tail
 
                         let checkedValue = perm letterPlacement
-                        
                         if checkedValue <> "" then
                             checkedValue
                         else 
                             ""
                     
+                // Generate the move 
+                
 
 
 
-
-
-                let input = MudBot.createMove st.letterPlacement st.hand st.dict
                 
                 let bool inp  = 
                     match inp with
