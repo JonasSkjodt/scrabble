@@ -96,13 +96,17 @@ module State =
     //         match Map.tryFind coord map with
     //         | Some _ -> failwith "There is already a tile at the coord"
     //         | None -> Map.add coord tile map 
-
+    //     updatePlacement tiles st.letterPlacement
     //     tiles
     //     |> Seq.fold (fun acc (coord, tile) -> updatePlacement (coord, tile) acc) st.letterPlacement
     //     |> fun updatedMap ->  updatedMap
 
 module Scrabble =
     open System.Threading
+
+    // List of starting letter frequence from Wikipedia. Will help the bot with finding words easier.
+    // https://en.wikipedia.org/wiki/Letter_frequency#Relative_frequencies_of_the_first_letters_of_a_word_in_English_language
+    let startLetters = ['S' ; 'C' ; 'P' ; 'D' ; 'R' ; 'B' ; 'A' ; 'M' ; 'T' ; 'F' ; 'I' ; 'E' ; 'H' ; 'G' ; 'L' ; 'U' ; 'W' ; 'O' ; 'N' ; 'V' ; 'J' ; 'K' ; 'Q' ; 'Y' ; 'Z' ; 'X' ]
 
     let playGame cstream pieces (st : State.state) =
 
@@ -157,22 +161,32 @@ module Scrabble =
             | RCM (CMPlaySuccess(ms, points, newPieces)) ->
                 (* Successful play by you. Update your state (remove old tiles, add the new ones, change turn, etc) *)
                 // The message CMPlaySuccess is sent to the player who made the move
-                
+
+                // place letters on the board
+                let boardWithLetters = State.updateBoard ms st
+
+                debugPrint (sprintf "THIS MESSAGE IS A TEST: %A\n" boardWithLetters.letterPlacement)
+
+                // create a new hand with old tiles removed and new tiles added
                 let newHand = (State.removeTiles ms st.hand)
                 let newHand' = State.addNewTiles newPieces newHand
 
+                // update st with the new playernumber via changeTurn
                 let newTurn = State.changeTurn st.playerNumber st.numberOfPlayers
-                let st' = { st with hand = newHand' ; playerTurn = newTurn}
+                let st' = { st with hand = newHand' ; playerTurn = newTurn ; letterPlacement = boardWithLetters.letterPlacement}
                     
                 aux st'
 
             // Successful play by you. Update your state (remove old tiles, add the new ones, etc.)
             | RCM (CMPlayed (pid, ms, points)) ->
                 (* Successful play by other player. Update your state *)
-                
+
+                // place letters on the board
+                let boardWithLetters = State.updateBoard ms st
+
                 // update st with new playernumber and new points
                 let newTurn = State.changeTurn pid st.numberOfPlayers
-                let st' = {st with playerTurn = newTurn}
+                let st' = {st with playerTurn = newTurn ; letterPlacement = boardWithLetters.letterPlacement}
                 
                 aux st'
 
