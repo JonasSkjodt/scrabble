@@ -72,7 +72,7 @@ let main argv =
     
     // Two players
     let players    = [("Player 1", dictionary, ScrabbleClient.Scrabble.startGame); ("Player 2", dictionary, ScrabbleClient.Scrabble.startGame)]  //ScrabbleClient is the name of the namespace in scrabble.fs and scrabble.fsi
-
+    //let playersLocal    = [("Player 1", dictionary, LocalPlayer.Scrabble.startGame); ("Player 2", dictionary, LocalPlayer.Scrabble.startGame)]
     // Two bots
     //let players = spawnMultiples "OxyphenButazone" dictionary Oxyphenbutazone.Scrabble.startGame 2
     

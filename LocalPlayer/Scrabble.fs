@@ -1,7 +1,8 @@
-﻿namespace ScrabbleClient
+﻿namespace LocalPlayer
 
 open ScrabbleUtil
 open ScrabbleUtil.ServerCommunication
+
 open System.IO
 
 
@@ -95,61 +96,13 @@ module State =
     //         match Map.tryFind coord map with
     //         | Some _ -> failwith "There is already a tile at the coord"
     //         | None -> Map.add coord tile map 
-    //     updatePlacement tiles st.letterPlacement
+
     //     tiles
     //     |> Seq.fold (fun acc (coord, tile) -> updatePlacement (coord, tile) acc) st.letterPlacement
     //     |> fun updatedMap ->  updatedMap
 
-
-
-
-module MudBot =
-    open System.Threading
-
-    let handToList (hand : MultiSet.MultiSet<uint32>) = hand |> Map.toSeq |> List.ofSeq   
-    
-    // Allows for permutations even through async
-    let rec createMove (letters : List<char>) dict =
-        match letters with
-        | [] -> false
-        | x::xs -> 
-            let isValidMove = 
-                match ScrabbleUtil.Dictionary.step x dict with
-                | Some (valid, _) -> valid
-                | None -> false
-            isValidMove || createMove xs dict
-
-    // let rec generatePermutations (input : List<char>) = 
-    //     match input with
-    //     | [] -> [[]]
-    //     | _ ->
-    //         input 
-    //         |> List.collect (fun x -> 
-    //             let remaining = List.filter (fun y -> y <> x) input
-    //             generatePermutations remaining 
-    //             |> List.map (fun sublist -> x :: sublist))
-
-    let rec permHand hand acc =
-                        match hand with
-                        | [] -> List.rev acc
-                        | h::t -> 
-                            let newAcc = List.map (fun x -> h + x) acc @ acc
-                            permHand t newAcc
-
-    let rec check (perm:List<string>) dict =
-        match perm with
-        | [] -> ""
-        | x::xs -> if createMove (Seq.toList x) dict then x else check (xs) dict
-
-
-
-
 module Scrabble =
     open System.Threading
-
-    // List of starting letter frequence from Wikipedia. Will help the bot with finding words easier.
-    // https://en.wikipedia.org/wiki/Letter_frequency#Relative_frequencies_of_the_first_letters_of_a_word_in_English_language
-    let startLetters = ['S' ; 'C' ; 'P' ; 'D' ; 'R' ; 'B' ; 'A' ; 'M' ; 'T' ; 'F' ; 'I' ; 'E' ; 'H' ; 'G' ; 'L' ; 'U' ; 'W' ; 'O' ; 'N' ; 'V' ; 'J' ; 'K' ; 'Q' ; 'Y' ; 'Z' ; 'X' ]
 
     let playGame cstream pieces (st : State.state) =
 
@@ -163,66 +116,21 @@ module Scrabble =
             //forcePrint "Input move (format '(<x-coordinate> <y-coordinate> <piece id><character><point-value> )*', note the absence of space between the last inputs)\n\n"
             // create empty move
             
-            let move = "" //insert bot moves
+            let move = ""
 
             if st.playerTurn = st.playerNumber then
                 
                 //change the console readline to find the necessary things for the bot
-                //for instance, check the first letter, can the bot make a word from it? do it recursively
+                //for instance, check the first letter, can the bot make a word from it
                 //etc
                 
-                // old input reading
-                // let input = System.Console.ReadLine()
-                
-                
-
-                // Check if board is empty and call this function with a unfinished word
-                let move = 
-                    if Map.isEmpty st.letterPlacement then  // if the board is empty
-                            // Create permutations of the hand
-                        let startingHand = MudBot.handToList st.hand
-
-                        let result = MudBot.permHand startingHand [""]
-                        
-                        MudBot.check result st.dict
-                        
-                    else
-                    // Generate a move based on already existing tiles on the board
-                        let startingHand = MudBot.handToList st.hand 
-
-                        // Convert letterPlacement to a list of coords and tiles
-                        let letterPlacement = Map.toSeq st.letterPlacement |> List.ofSeq
-                        
-                        // Generate permutations of the hand for each letterPlacement
-                        let rec perm letterList : string = 
-                            match letterList with
-                            | [] -> ""
-                            | (coord, (tileID, (c, p))) :: tail -> 
-                                let result = MudBot.permHand startingHand [c]
-                                let check = MudBot.check result st.dict
-                                if check <> "" then 
-                                    check
-                                else 
-                                    perm tail
-
-                        let checkedValue = perm letterPlacement
-                        
-                        if checkedValue <> "" then
-                            checkedValue
-                        else 
-                            ""
-                    
-
-
-
-
-
-                let input = MudBot.createMove st.letterPlacement st.hand st.dict
+                let input = System.Console.ReadLine()
                 
                 let bool inp  = 
                     match inp with
                     | "" -> false
                     | inp  -> true
+
                 let boolReal = bool input
 
                 let move = 
@@ -253,32 +161,22 @@ module Scrabble =
             | RCM (CMPlaySuccess(ms, points, newPieces)) ->
                 (* Successful play by you. Update your state (remove old tiles, add the new ones, change turn, etc) *)
                 // The message CMPlaySuccess is sent to the player who made the move
-
-                // place letters on the board
-                let boardWithLetters = State.updateBoard ms st
-
-                debugPrint (sprintf "THIS MESSAGE IS A TEST: %A\n" boardWithLetters.letterPlacement)
-
-                // create a new hand with old tiles removed and new tiles added
+                
                 let newHand = (State.removeTiles ms st.hand)
                 let newHand' = State.addNewTiles newPieces newHand
 
-                // update st with the new playernumber via changeTurn
                 let newTurn = State.changeTurn st.playerNumber st.numberOfPlayers
-                let st' = { st with hand = newHand' ; playerTurn = newTurn ; letterPlacement = boardWithLetters.letterPlacement}
+                let st' = { st with hand = newHand' ; playerTurn = newTurn}
                     
                 aux st'
 
             // Successful play by you. Update your state (remove old tiles, add the new ones, etc.)
             | RCM (CMPlayed (pid, ms, points)) ->
                 (* Successful play by other player. Update your state *)
-
-                // place letters on the board
-                let boardWithLetters = State.updateBoard ms st
-
+                
                 // update st with new playernumber and new points
                 let newTurn = State.changeTurn pid st.numberOfPlayers
-                let st' = {st with playerTurn = newTurn ; letterPlacement = boardWithLetters.letterPlacement}
+                let st' = {st with playerTurn = newTurn}
                 
                 aux st'
 
