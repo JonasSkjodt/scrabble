@@ -2,7 +2,6 @@
 
 open ScrabbleUtil
 open ScrabbleUtil.ServerCommunication
-
 open System.IO
 
 
@@ -107,16 +106,28 @@ module State =
 module MudBot =
     open System.Threading
 
-    //check if valid word
-    let isValidWord = "not implemented"
+    let handToList (hand : MultiSet.MultiSet<uint32>) = hand |> Map.toSeq |> List.ofSeq   
+    
+    // Allows for permutations even through async
+    let rec createMove (letters : List<char>) dict =
+        match letters with
+        | [] -> false
+        | x::xs -> 
+            let isValidMove = 
+                match ScrabbleUtil.Dictionary.step x dict with
+                | Some (valid, _) -> valid
+                | None -> false
+            isValidMove || createMove xs dict
 
-    //find first word
-    let gen_move = "not implemented"
-
-
-
-
-
+    let rec generatePermutations (input : List<char>) = 
+        match input with
+        | [] -> [[]]
+        | _ ->
+            input 
+            |> List.collect (fun x -> 
+                let remaining = List.filter (fun y -> y <> x) input
+                generatePermutations remaining 
+                |> List.map (fun sublist -> x :: sublist))
 
 
 
@@ -144,13 +155,93 @@ module Scrabble =
                 //for instance, check the first letter, can the bot make a word from it? do it recursively
                 //etc
                 
-                let input = System.Console.ReadLine()
+                // old input reading
+                // let input = System.Console.ReadLine()
+                
+                
+
+                // Check if board is empty and call this function with a unfinished word
+                if Map.isEmpty st.letterPlacement then  // if the board is empty
+                    // Create permutations of the hand
+                    let startingHand = MudBot.handToList st.hand
+                    let inc = 0
+                    
+                    let rec permHand hand acc =
+                        match hand with
+                        | [] -> List.rev acc
+                        | h::t -> 
+                            let newAcc = List.map (fun x -> h + x) acc @ acc
+                            permHand t newAcc
+
+                    let result = permHand startingHand [""]
+
+                    let rec check (perm:List<char>) =
+                        match perm with
+                        | [] -> false
+                        | x::xs -> MudBot.createMove x st.dict || check (xs)
+                    
+                    check result
+
+                    
+                    
+                    // if check perm then 
+                    //     let move = perm
+                    // else 
+                    //     let move = ""
+                    
+                    // hand = ["A", "G", "C", "K", "A", "S", "F"]
+                    // perm hand ["A"]  
+                    // "AG"
+                    // "AC"
+                    // "AK"
+                    // "AA"
+                    // "AS"
+                    // "AF"
+                    // "AGC"
+                    // "AGK"
+                    // "AGA"
+                    // "AGS"
+                    // "AGF"
+                    // "ACG"
+                    // "ACK"
+                    // "ACA"
+                    // "ACS"
+
+
+                    // // let rec perm (hand : List<char>) (word : List<char> ) = 
+                    // //     match hand with
+                    // //     | [] -> []
+                    // //     | _ -> 
+                    // //         let nextLetter = List.head hand
+                    // //         let word = word :: nextLetter
+                    // //         let hand = List.tail hand
+                    // //         let check = MudBot.createMove word st.dict
+                    // //         if check then 
+                    // //             word
+                    // //         else 
+                    // //             perm hand word
+                        
+                    //IAMBROKEN
+
+
+                    // hand = ["A", "G", "C", "K", "A", "S", "F"]
+                    // perm hand ["A"]  
+
+
+
+                        
+                    
+                    //let handpermutations = MudBot.generatePermutations startingHand
+
+                    //let input = MudBot.createMove (MudBot.handToList st.hand) st.dict
+                else
+
+                let input = MudBot.createMove st.letterPlacement st.hand st.dict
                 
                 let bool inp  = 
                     match inp with
                     | "" -> false
                     | inp  -> true
-                
                 let boolReal = bool input
 
                 let move = 

@@ -65,6 +65,7 @@ module internal MultiSet
     
     // yellow
     let ofList (_ : 'a list) : MultiSet<'a> = empty
+
     let toList (_ : MultiSet<'a>) : 'a list = []
 
     let map (_ : 'a -> 'b) (_ : MultiSet<'a>) : MultiSet<'b> = empty
