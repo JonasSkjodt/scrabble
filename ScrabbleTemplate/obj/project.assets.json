@@ -243,6 +243,20 @@
           }
         }
       },
+      "LocalPlayer/1.0.0": {
+        "type": "project",
+        "framework": ".NETCoreApp,Version=v7.0",
+        "dependencies": {
+          "FParsec": "1.1.1",
+          "FSharp.Core": "7.0.200"
+        },
+        "compile": {
+          "bin/placeholder/LocalPlayer.dll": {}
+        },
+        "runtime": {
+          "bin/placeholder/LocalPlayer.dll": {}
+        }
+      },
       "ScrabbleBot/1.0.0": {
         "type": "project",
         "framework": ".NETCoreApp,Version=v7.0",
@@ -924,6 +938,11 @@
         "system.threading.tasks.nuspec"
       ]
     },
+    "LocalPlayer/1.0.0": {
+      "type": "project",
+      "path": "../LocalPlayer/LocalPlayer.fsproj",
+      "msbuildProject": "../LocalPlayer/LocalPlayer.fsproj"
+    },
     "ScrabbleBot/1.0.0": {
       "type": "project",
       "path": "../ScrabbleBot/ScrabbleBot.fsproj",
@@ -935,40 +954,51 @@
       "FSharp.Core >= 7.0.200",
       "FSharp.Quotations.Evaluator >= 2.1.0",
       "FsPickler >= 5.3.2",
+      "LocalPlayer >= 1.0.0",
       "ScrabbleBot >= 1.0.0"
     ]
   },
   "packageFolders": {
-    "/Users/karpe/.nuget/packages/": {}
+    "C:\\Users\\Alexander\\.nuget\\packages\\": {}
   },
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "/Users/karpe/Documents/ITU/4_Semester/Functional_Programming_exercise/ScrabbleProject/scrabble/ScrabbleTemplate/ScrabbleTemplate.fsproj",
+      "projectUniqueName": "d:\\Code\\UNI\\Semester_4\\Uni_Semester_4\\FuncSharp\\scrabble\\ScrabbleTemplate\\ScrabbleTemplate.fsproj",
       "projectName": "ScrabbleTemplate",
-      "projectPath": "/Users/karpe/Documents/ITU/4_Semester/Functional_Programming_exercise/ScrabbleProject/scrabble/ScrabbleTemplate/ScrabbleTemplate.fsproj",
-      "packagesPath": "/Users/karpe/.nuget/packages/",
-      "outputPath": "/Users/karpe/Documents/ITU/4_Semester/Functional_Programming_exercise/ScrabbleProject/scrabble/ScrabbleTemplate/obj/",
+      "projectPath": "d:\\Code\\UNI\\Semester_4\\Uni_Semester_4\\FuncSharp\\scrabble\\ScrabbleTemplate\\ScrabbleTemplate.fsproj",
+      "packagesPath": "C:\\Users\\Alexander\\.nuget\\packages\\",
+      "outputPath": "d:\\Code\\UNI\\Semester_4\\Uni_Semester_4\\FuncSharp\\scrabble\\ScrabbleTemplate\\obj\\",
       "projectStyle": "PackageReference",
       "configFilePaths": [
-        "/Users/karpe/.nuget/NuGet/NuGet.Config"
+        "C:\\Users\\Alexander\\AppData\\Roaming\\NuGet\\NuGet.Config",
+        "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
       ],
       "originalTargetFrameworks": [
         "net7.0"
       ],
       "sources": {
-        "/usr/local/share/dotnet/sdk/7.0.407/FSharp/library-packs": {},
+        "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
+        "C:\\Program Files\\dotnet\\sdk\\8.0.204\\FSharp\\library-packs": {},
         "https://api.nuget.org/v3/index.json": {}
       },
       "frameworks": {
         "net7.0": {
           "targetAlias": "net7.0",
           "projectReferences": {
-            "/Users/karpe/Documents/ITU/4_Semester/Functional_Programming_exercise/ScrabbleProject/scrabble/ScrabbleBot/ScrabbleBot.fsproj": {
-              "projectPath": "/Users/karpe/Documents/ITU/4_Semester/Functional_Programming_exercise/ScrabbleProject/scrabble/ScrabbleBot/ScrabbleBot.fsproj"
+            "d:\\Code\\UNI\\Semester_4\\Uni_Semester_4\\FuncSharp\\scrabble\\LocalPlayer\\LocalPlayer.fsproj": {
+              "projectPath": "d:\\Code\\UNI\\Semester_4\\Uni_Semester_4\\FuncSharp\\scrabble\\LocalPlayer\\LocalPlayer.fsproj"
+            },
+            "d:\\Code\\UNI\\Semester_4\\Uni_Semester_4\\FuncSharp\\scrabble\\ScrabbleBot\\ScrabbleBot.fsproj": {
+              "projectPath": "d:\\Code\\UNI\\Semester_4\\Uni_Semester_4\\FuncSharp\\scrabble\\ScrabbleBot\\ScrabbleBot.fsproj"
             }
           }
         }
+      },
+      "restoreAuditProperties": {
+        "enableAudit": "true",
+        "auditLevel": "low",
+        "auditMode": "direct"
       }
     },
     "frameworks": {
@@ -1003,12 +1033,30 @@
         ],
         "assetTargetFallback": true,
         "warn": true,
+        "downloadDependencies": [
+          {
+            "name": "Microsoft.AspNetCore.App.Ref",
+            "version": "[7.0.18, 7.0.18]"
+          },
+          {
+            "name": "Microsoft.NETCore.App.Host.win-x64",
+            "version": "[7.0.18, 7.0.18]"
+          },
+          {
+            "name": "Microsoft.NETCore.App.Ref",
+            "version": "[7.0.18, 7.0.18]"
+          },
+          {
+            "name": "Microsoft.WindowsDesktop.App.Ref",
+            "version": "[7.0.18, 7.0.18]"
+          }
+        ],
         "frameworkReferences": {
           "Microsoft.NETCore.App": {
             "privateAssets": "all"
           }
         },
-        "runtimeIdentifierGraphPath": "/usr/local/share/dotnet/sdk/7.0.407/RuntimeIdentifierGraph.json"
+        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\8.0.204\\RuntimeIdentifierGraph.json"
       }
     }
   }
