@@ -213,20 +213,57 @@ module Scrabble =
                         let letterPlacement = Map.toSeq st.letterPlacement |> List.ofSeq
                         
                         // Generate permutations of the hand for each letterPlacement
-                        let rec perm (letterList : List<(coord * (uint32 * (char * int)))>) : string = 
+                        let rec perm (letterList : List<(coord * (uint32 * (char * int)))>) : string * coord = 
                             match letterList with
-                            | [] -> ""
+                            | [] -> "", (0, 0)
                             | (coord, (tileID, (c, p))) :: tail -> 
                                 let result = MudBot.permHand startingHand [c]
                                 let check = MudBot.check result st.dict
                                 if check <> "" then 
-                                    check
+                                    (check, coord)
                                 else 
                                     perm tail
 
-                        let checkedValue = perm letterPlacement
-                        if checkedValue <> "" then
-                            checkedValue
+                        let checkedValue = (perm letterPlacement)
+                        let indexOfPlacedLetter = fst checkedValue |> Seq.toList |> List.findIndex
+
+                        if fst checkedValue <> "" then
+                            let move = List.map (fun x -> char2num x) (Seq.toList (fst checkedValue))
+
+                            // Decide if the move should be placed horizontally or vertically
+                            //TODO: FINISH THIS THE MATCH CASE IS SLIGHTLY WRONG BUT THE IDEA IS THERE
+                            let vertOrHor checkedValue = 
+                                match checkedValue with
+                                | (a,b) when !(Map.containsKey (a, b-indexOfPlacedLetter)) && !(Map.containsKey (a, b+indexOfPlacedLetter-1)) -> "vertical"
+
+                                // Create a move going downwards
+                                let rec createMove move acc  = 
+                                    match move with
+                                    | [] -> []
+                                    | x::xs -> 
+                                        let (c, p) = Map.find x pieces
+                                        let tileID = x
+                                        let coord = (acc, 0)
+                                        let letter = (c, p)
+                                        let newMove = (coord, (tileID, letter))
+                                        newMove :: createMove xs (acc+1)
+
+                                createMove move 0
+                            else 
+                                // Create a move going right
+
+                            let rec createMove move acc  = 
+                                match move with
+                                | [] -> []
+                                | x::xs -> 
+                                    let (c, p) = Map.find x pieces
+                                    let tileID = x
+                                    let coord = (0, acc)
+                                    let letter = (c, p)
+                                    let newMove = (coord, (tileID, letter))
+                                    newMove :: createMove xs (acc+1)
+
+                            createMove move 0
                         else 
                             ""
                     
