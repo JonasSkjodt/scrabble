@@ -187,6 +187,12 @@ module Scrabble =
                         
                         let moveString = MudBot.check result st.dict
 
+                        // If moveString == "" then the bot should pass
+                        if moveString = "" then
+                            [(0,0),0,(System.Char.MinValue, 0)]
+                        else
+
+
                         let move =  List.map (fun x -> char2num x) (Seq.toList moveString)
                                 
 
@@ -204,8 +210,17 @@ module Scrabble =
 
                         createMove move 0
  
+                    
                         
                     else
+                    // FOR FINDING WORDS ON THE BOARD WHEN THE BOARD IS NOT EMPTY: 
+                    // Keep a list of all perm (Based on the current tile that you grabbed from the board)
+                    // Find the first word in the list and keep a int count of the index where the is
+                    // If the word does not fit the board, find the next word in the list
+                    // If you try all permutations for a tile on the board and none of them fit, then move to the next tile (generate new perm list)
+                    
+                    
+                    
                     // Generate a move based on already existing tiles on the board
                         let startingHand = MudBot.handToList st.hand 
 
@@ -224,6 +239,8 @@ module Scrabble =
                                 else 
                                     perm tail
 
+                        
+
                         let checkedValue = (perm letterPlacement)
                         let indexOfPlacedLetter = fst checkedValue |> Seq.toList |> List.findIndex
 
@@ -232,9 +249,24 @@ module Scrabble =
 
                             // Decide if the move should be placed horizontally or vertically
                             //TODO: FINISH THIS THE MATCH CASE IS SLIGHTLY WRONG BUT THE IDEA IS THERE
+                            
                             let vertOrHor checkedValue = 
                                 match checkedValue with
-                                | (a,b) when !(Map.containsKey (a, b-indexOfPlacedLetter)) && !(Map.containsKey (a, b+indexOfPlacedLetter-1)) -> "vertical"
+                                | (a, b) when (Map.containsKey (a,b-1) st.letterPlacement) && (Map.containsKey (a,b+1) st.letterPlacement) &&  (Map.containsKey (a-1,b) st.letterPlacement) && (Map.containsKey (a+1,b) st.letterPlacement) -> ("",0)
+                                | (a,b) when not (Map.containsKey (a, b-1) st.letterPlacement) && not (Map.containsKey (a, b+1) st.letterPlacement) -> ("ver",a - indexOfPlacedLetter )
+                                | (a,b) when not (Map.containsKey (a-1, b) st.letterPlacement) && not (Map.containsKey (a+1, b) st.letterPlacement) -> ("hor", b - indexOfPlacedLetter)
+                            
+                            
+                            let rec checkMoveOnBoard dir pivot_coord move start_coord =
+                                match dir, move with
+                                | _, [] -> Success "Valid move"
+                                | "ver", _ -> if not Map.containsKey (start_coord, snd pivot_coord) st.letterPlacement then checkMoveOnBoard dir pivot_coord move (start_coord + 1) else Failure "Invalid move"
+                                | "hor", _ -> if not Map.containsKey (fst pivot_coord, start_coord) st.letterPlacement then checkMoveOnBoard dir pivot_coord move (start_coord + 1) else Failure "Invalid move"
+
+                                //   ABC(2,0)
+                                //   B
+                                //  ACT(0,2)
+
 
                                 // Create a move going downwards
                                 let rec createMove move acc  = 
