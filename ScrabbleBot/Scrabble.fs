@@ -106,7 +106,7 @@ module State =
 module MudBot =
     open System.Threading
 
-    let handToList (hand : MultiSet.MultiSet<uint32>) = hand |> Map.toSeq |> List.ofSeq   
+    let handToList (hand : MultiSet.MultiSet<uint32>) = hand |> MultiSet.toList // Map.toSeq |> List.ofSeq   
     
     // Allows for permutations even through async
     let rec createMove (letters : List<char>) dict =
@@ -129,7 +129,7 @@ module MudBot =
     //             generatePermutations remaining 
     //             |> List.map (fun sublist -> x :: sublist))
 
-    let rec permHand hand acc =
+    let rec permHand (hand : List<string>) (acc : List<string>) =
                         match hand with
                         | [] -> List.rev acc
                         | h::t -> 
@@ -181,7 +181,13 @@ module Scrabble =
                 let move = 
                     if Map.isEmpty st.letterPlacement then  // if the board is empty
                             // Create permutations of the hand
-                        let startingHand = MudBot.handToList st.hand
+
+                        // Convert alphanumeric hand to a list of strings
+                        
+                        let alphaNumericToStrings (hand : List<uint32>) = List.map (fun x -> string (char x) ) hand
+
+                        let startingHand = alphaNumericToStrings (MudBot.handToList st.hand)
+                        
 
                         let result = MudBot.permHand startingHand [""]
                         
@@ -189,7 +195,7 @@ module Scrabble =
 
                         // If moveString == "" then the bot should pass
                         if moveString = "" then
-                            [(0,0),0,(System.Char.MinValue, 0)]
+                            [(0,0),(0u,(System.Char.MinValue, 0))]
                         else
 
 
@@ -197,7 +203,7 @@ module Scrabble =
                                 
 
                         // Create a move going downwards
-                        let rec createMove move acc  = 
+                        let rec createMove move acc : list<(int * int) * (uint32 * (char * int))>  = 
                             match move with
                             | [] -> []
                             | x::xs -> 
@@ -205,12 +211,10 @@ module Scrabble =
                                 let tileID = x
                                 let coord = (0, acc)
                                 let letter = (c, p)
-                                let newMove = (coord, (tileID, letter))
+                                let newMove = (coord, (tileID, (letter)))
                                 newMove :: createMove xs (acc+1)
 
-                        createMove move 0
- 
-                    
+                        createMove move 0                
                         
                     else
                     // FOR FINDING WORDS ON THE BOARD WHEN THE BOARD IS NOT EMPTY: 
@@ -226,13 +230,17 @@ module Scrabble =
 
                         // Convert letterPlacement to a list of coords and tiles
                         let letterPlacement = Map.toSeq st.letterPlacement |> List.ofSeq
+
+                        // Convert starting hand to a list of strings
+                        let startingHand = List.map (fun x -> string (char x) ) startingHand
+
                         
                         // Generate permutations of the hand for each letterPlacement
                         let rec perm (letterList : List<(coord * (uint32 * (char * int)))>) : string * coord = 
                             match letterList with
                             | [] -> "", (0, 0)
                             | (coord, (tileID, (c, p))) :: tail -> 
-                                let result = MudBot.permHand startingHand [c]
+                                let result = MudBot.permHand startingHand [string c]
                                 let check = MudBot.check result st.dict
                                 if check <> "" then 
                                     (check, coord)
@@ -242,7 +250,7 @@ module Scrabble =
                         
 
                         let checkedValue = (perm letterPlacement)
-                        let indexOfPlacedLetter = fst checkedValue |> Seq.toList |> List.findIndex
+                        let indexOfPlacedLetter = fst checkedValue |> Seq.toList |> List.findIndex (fun e -> e = fst (snd (Map.find (snd checkedValue) st.letterPlacement)))
 
                         if fst checkedValue <> "" then
                             let move = List.map (fun x -> char2num x) (Seq.toList (fst checkedValue))
@@ -257,11 +265,11 @@ module Scrabble =
                                 | (a,b) when not (Map.containsKey (a-1, b) st.letterPlacement) && not (Map.containsKey (a+1, b) st.letterPlacement) -> ("hor", b - indexOfPlacedLetter)
                             
                             
-                            let rec checkMoveOnBoard dir pivot_coord move start_coord =
-                                match dir, move with
-                                | _, [] -> Success "Valid move"
-                                | "ver", _ -> if not Map.containsKey (start_coord, snd pivot_coord) st.letterPlacement then checkMoveOnBoard dir pivot_coord move (start_coord + 1) else Failure "Invalid move"
-                                | "hor", _ -> if not Map.containsKey (fst pivot_coord, start_coord) st.letterPlacement then checkMoveOnBoard dir pivot_coord move (start_coord + 1) else Failure "Invalid move"
+                            // let rec checkMoveOnBoard dir pivot_coord move start_coord =
+                            //     match dir, move with
+                            //     | _, [] -> Success "Valid move"
+                            //     | "ver", _ -> if not Map.containsKey (start_coord, snd pivot_coord) st.letterPlacement then checkMoveOnBoard dir pivot_coord move (start_coord + 1) else Failure "Invalid move"
+                            //     | "hor", _ -> if not Map.containsKey (fst pivot_coord, start_coord) st.letterPlacement then checkMoveOnBoard dir pivot_coord move (start_coord + 1) else Failure "Invalid move"
 
                                 //   ABC(2,0)
                                 //   B
@@ -269,63 +277,72 @@ module Scrabble =
 
 
                                 // Create a move going downwards
-                                let rec createMove move acc  = 
-                                    match move with
-                                    | [] -> []
-                                    | x::xs -> 
-                                        let (c, p) = Map.find x pieces
-                                        let tileID = x
-                                        let coord = (acc, 0)
-                                        let letter = (c, p)
-                                        let newMove = (coord, (tileID, letter))
-                                        newMove :: createMove xs (acc+1)
-
-                                createMove move 0
-                            else 
-                                // Create a move going right
-
-                            let rec createMove move acc  = 
-                                match move with
-                                | [] -> []
-                                | x::xs -> 
+                                // list<(int * int) * (uint32 * (char * int))> 
+                            let rec createMove move acc dir coord : list<(int * int ) * (uint32 * (char * int))>  = 
+                                match move, dir with
+                                | [], _ -> []
+                                | x::xs, "ver" -> 
                                     let (c, p) = Map.find x pieces
                                     let tileID = x
-                                    let coord = (0, acc)
-                                    let letter = (c, p)
-                                    let newMove = (coord, (tileID, letter))
-                                    newMove :: createMove xs (acc+1)
+                                    let coord = (fst coord, acc)
+                                    if Map.containsKey coord st.letterPlacement then [(0,0),(0u,(System.Char.MinValue, 0))]
+                                    else
+                                        let letter = ((c : char), p)
+                                        let newMove = (coord, (tileID, (letter)))
+                                        newMove :: createMove xs (acc+1) dir coord
+                                    
+                                | x::xs, "hor" ->
+                                    let (c, p) = Map.find x pieces
+                                    let tileID = x
+                                    let coord = (acc, snd coord)
+                                    if Map.containsKey coord st.letterPlacement then [(0,0),(0u,(System.Char.MinValue, 0))] 
+                                    else
+                                        let letter = ((c : char), p)
+                                        let newMove = (coord, (tileID, (letter)))
+                                        newMove :: createMove xs (acc+1) dir coord
 
-                            createMove move 0
+                            createMove move 0 (fst checkedValue) (snd checkedValue)
+
+                            
+                        // else 
+                        // // Create a move going right
+
+                        //     let rec createMove move acc  = 
+                        //         match move with
+                        //         | [] -> []
+                        //         | x::xs -> 
+                        //             let (c, p) = Map.find x pieces
+                        //             let tileID = x
+                        //             let coord = (0, acc)
+                        //             let letter = (c, p)
+                        //             let newMove = (coord, (tileID, letter))
+                        //             newMove :: createMove xs (acc+1)
+
+                            // createMove move 0
                         else 
-                            ""
+                            [(0,0),(0u,(System.Char.MinValue, 0))]
                     
                 // Generate the move 
                 
 
 
 
-                
+        
                 let bool inp  = 
                     match inp with
-                    | "" -> false
+                    | [(0,0), (0u,(System.Char.MinValue, 0))] -> false
                     | inp  -> true
-                let boolReal = bool input
 
-                let move = 
-                    match boolReal with
-                    | true -> RegEx.parseMove input
-                    | false -> []
-                    // let move = RegEx.parseMove input
-
-                let play = ""
+                let boolReal = bool move
                 
                 let serverMsg move = 
                     match move with
-                    | [] -> SMPass
+                    | [(0,0),(0u,(System.Char.MinValue, 0))] -> SMPass
                     | _ -> SMPlay move
 
                 debugPrint (sprintf "Player %d -> Server:\n%A\n" (State.playerNumber st) move) // keep the debug lines. They are useful.
                 send cstream (serverMsg move)
+            
                 
             
             let msg = recv cstream

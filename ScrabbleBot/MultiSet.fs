@@ -66,7 +66,10 @@ module internal MultiSet
     // yellow
     let ofList (_ : 'a list) : MultiSet<'a> = empty
 
-    let toList (_ : MultiSet<'a>) : 'a list = []
+    //let toList (_ : MultiSet<'a>) : 'a list = []
+    //TODO look at this, watch it! (it needs to be refactored)
+
+    let toList s = foldBack (fun elem num acc -> List.init (int32 num) (fun _ -> elem) @ acc) s []
 
     let map (_ : 'a -> 'b) (_ : MultiSet<'a>) : MultiSet<'b> = empty
 
