@@ -1,14 +1,14 @@
 {
   "version": 2,
-  "dgSpecHash": "ame9F5UU/RfqEo2NU6BsP7GL1fbnvwv2legDQpzznQt3F/K8QXhO2SbNcu19jDpnkPZ1bKjQKkDhH82C+fogHA==",
+  "dgSpecHash": "XOLfbHpecMBkVYYPMoXcUoVgXdLxsEGWzcC90gH8BIm9N7rku68+fid/9AUbR2DwCdVUUeie27yiFYAAxe86ZQ==",
   "success": true,
-  "projectFilePath": "d:\\Code\\UNI\\Semester_4\\Uni_Semester_4\\FuncSharp\\scrabble\\ScrabbleBot\\ScrabbleBot.fsproj",
+  "projectFilePath": "C:\\Users\\jonas\\Desktop\\scrabble\\scrabble\\ScrabbleBot\\ScrabbleBot.fsproj",
   "expectedPackageFiles": [
-    "C:\\Users\\Alexander\\.nuget\\packages\\fparsec\\1.1.1\\fparsec.1.1.1.nupkg.sha512",
-    "C:\\Users\\Alexander\\.nuget\\packages\\fsharp.core\\7.0.200\\fsharp.core.7.0.200.nupkg.sha512",
-    "C:\\Users\\Alexander\\.nuget\\packages\\microsoft.netcore.app.ref\\7.0.18\\microsoft.netcore.app.ref.7.0.18.nupkg.sha512",
-    "C:\\Users\\Alexander\\.nuget\\packages\\microsoft.windowsdesktop.app.ref\\7.0.18\\microsoft.windowsdesktop.app.ref.7.0.18.nupkg.sha512",
-    "C:\\Users\\Alexander\\.nuget\\packages\\microsoft.aspnetcore.app.ref\\7.0.18\\microsoft.aspnetcore.app.ref.7.0.18.nupkg.sha512"
+    "C:\\Users\\jonas\\.nuget\\packages\\fparsec\\1.1.1\\fparsec.1.1.1.nupkg.sha512",
+    "C:\\Users\\jonas\\.nuget\\packages\\fsharp.core\\7.0.200\\fsharp.core.7.0.200.nupkg.sha512",
+    "C:\\Users\\jonas\\.nuget\\packages\\microsoft.netcore.app.ref\\7.0.18\\microsoft.netcore.app.ref.7.0.18.nupkg.sha512",
+    "C:\\Users\\jonas\\.nuget\\packages\\microsoft.windowsdesktop.app.ref\\7.0.18\\microsoft.windowsdesktop.app.ref.7.0.18.nupkg.sha512",
+    "C:\\Users\\jonas\\.nuget\\packages\\microsoft.aspnetcore.app.ref\\7.0.18\\microsoft.aspnetcore.app.ref.7.0.18.nupkg.sha512"
   ],
   "logs": []
 }

@@ -129,6 +129,7 @@ module MudBot =
     //             generatePermutations remaining 
     //             |> List.map (fun sublist -> x :: sublist))
 
+    // TODO: Change perm func to instead generate permutations in increasing order of length so first time is 2, then 3, then 4, etc
     let rec permHand (hand : List<string>) (acc : List<string>) =
                         match hand with
                         | [] -> List.rev acc
@@ -151,7 +152,7 @@ module Scrabble =
     // https://en.wikipedia.org/wiki/Letter_frequency#Relative_frequencies_of_the_first_letters_of_a_word_in_English_language
     let startLetters = ['S' ; 'C' ; 'P' ; 'D' ; 'R' ; 'B' ; 'A' ; 'M' ; 'T' ; 'F' ; 'I' ; 'E' ; 'H' ; 'G' ; 'L' ; 'U' ; 'W' ; 'O' ; 'N' ; 'V' ; 'J' ; 'K' ; 'Q' ; 'Y' ; 'Z' ; 'X' ]
 
-    // The pieces map is 
+    // The pieces map is probably the single worst data type I have ever seen and used in my life. I would like to personally thank the person who made it :)
 
     let playGame cstream (pieces : Map<uint32,tile>) (st : State.state) =
 
@@ -167,6 +168,8 @@ module Scrabble =
             
             let move = "" //insert bot moves
 
+
+            // TODO: Implement the while loop to keep creating new perms if the first one does not work (due to the board having pieces where it wants to play)
             if st.playerTurn = st.playerNumber then
                 
                 //change the console readline to find the necessary things for the bot
@@ -179,14 +182,18 @@ module Scrabble =
                 // Helper func to convert chars to alphanumeric values
                 let char2num (char : char) = uint32((int char - int 'a') + 1)
 
+                debugPrint "lol"
+
                 // Check if board is empty and call this function with a unfinished word
                 let move = 
                     if Map.isEmpty st.letterPlacement then  // if the board is empty
                             // Create permutations of the hand
 
                         // Convert alphanumeric hand to a list of strings
+                        //System.Char.ConvertToUtf32
+                        //https://stackoverflow.com/questions/5735698/how-to-convert-a-char-to-unicode-value-in-f
                         
-                        let alphaNumericToStrings (hand : List<uint32>) = List.map (fun x -> string (char x) ) hand
+                        let alphaNumericToStrings (hand : List<uint32>) = List.map (fun x -> string (fst ((Set.toList (Map.find x pieces)).Head))) hand
 
                         let startingHand = alphaNumericToStrings (MudBot.handToList st.hand)
                         
@@ -218,6 +225,7 @@ module Scrabble =
                         createMove move 0                
                         
                     else
+                    // TODO:
                     // FOR FINDING WORDS ON THE BOARD WHEN THE BOARD IS NOT EMPTY: 
                     // Keep a list of all perm (Based on the current tile that you grabbed from the board)
                     // Find the first word in the list and keep a int count of the index where the is

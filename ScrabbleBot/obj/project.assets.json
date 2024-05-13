@@ -154,19 +154,19 @@
     ]
   },
   "packageFolders": {
-    "C:\\Users\\Alexander\\.nuget\\packages\\": {}
+    "C:\\Users\\jonas\\.nuget\\packages\\": {}
   },
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "d:\\Code\\UNI\\Semester_4\\Uni_Semester_4\\FuncSharp\\scrabble\\ScrabbleBot\\ScrabbleBot.fsproj",
+      "projectUniqueName": "C:\\Users\\jonas\\Desktop\\scrabble\\scrabble\\ScrabbleBot\\ScrabbleBot.fsproj",
       "projectName": "ScrabbleBot",
-      "projectPath": "d:\\Code\\UNI\\Semester_4\\Uni_Semester_4\\FuncSharp\\scrabble\\ScrabbleBot\\ScrabbleBot.fsproj",
-      "packagesPath": "C:\\Users\\Alexander\\.nuget\\packages\\",
-      "outputPath": "d:\\Code\\UNI\\Semester_4\\Uni_Semester_4\\FuncSharp\\scrabble\\ScrabbleBot\\obj\\",
+      "projectPath": "C:\\Users\\jonas\\Desktop\\scrabble\\scrabble\\ScrabbleBot\\ScrabbleBot.fsproj",
+      "packagesPath": "C:\\Users\\jonas\\.nuget\\packages\\",
+      "outputPath": "C:\\Users\\jonas\\Desktop\\scrabble\\scrabble\\ScrabbleBot\\obj\\",
       "projectStyle": "PackageReference",
       "configFilePaths": [
-        "C:\\Users\\Alexander\\AppData\\Roaming\\NuGet\\NuGet.Config",
+        "C:\\Users\\jonas\\AppData\\Roaming\\NuGet\\NuGet.Config",
         "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
       ],
       "originalTargetFrameworks": [

@@ -1,20 +1,20 @@
 {
   "format": 1,
   "restore": {
-    "d:\\Code\\UNI\\Semester_4\\Uni_Semester_4\\FuncSharp\\scrabble\\ScrabbleTemplate\\ScrabbleTemplate.fsproj": {}
+    "C:\\Users\\jonas\\Desktop\\scrabble\\scrabble\\ScrabbleTemplate\\ScrabbleTemplate.fsproj": {}
   },
   "projects": {
-    "d:\\Code\\UNI\\Semester_4\\Uni_Semester_4\\FuncSharp\\scrabble\\LocalPlayer\\LocalPlayer.fsproj": {
+    "C:\\Users\\jonas\\Desktop\\scrabble\\scrabble\\LocalPlayer\\LocalPlayer.fsproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "d:\\Code\\UNI\\Semester_4\\Uni_Semester_4\\FuncSharp\\scrabble\\LocalPlayer\\LocalPlayer.fsproj",
+        "projectUniqueName": "C:\\Users\\jonas\\Desktop\\scrabble\\scrabble\\LocalPlayer\\LocalPlayer.fsproj",
         "projectName": "LocalPlayer",
-        "projectPath": "d:\\Code\\UNI\\Semester_4\\Uni_Semester_4\\FuncSharp\\scrabble\\LocalPlayer\\LocalPlayer.fsproj",
-        "packagesPath": "C:\\Users\\Alexander\\.nuget\\packages\\",
-        "outputPath": "d:\\Code\\UNI\\Semester_4\\Uni_Semester_4\\FuncSharp\\scrabble\\LocalPlayer\\obj\\",
+        "projectPath": "C:\\Users\\jonas\\Desktop\\scrabble\\scrabble\\LocalPlayer\\LocalPlayer.fsproj",
+        "packagesPath": "C:\\Users\\jonas\\.nuget\\packages\\",
+        "outputPath": "C:\\Users\\jonas\\Desktop\\scrabble\\scrabble\\LocalPlayer\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
-          "C:\\Users\\Alexander\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Users\\jonas\\AppData\\Roaming\\NuGet\\NuGet.Config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
         ],
         "originalTargetFrameworks": [
@@ -87,17 +87,17 @@
         }
       }
     },
-    "d:\\Code\\UNI\\Semester_4\\Uni_Semester_4\\FuncSharp\\scrabble\\ScrabbleBot\\ScrabbleBot.fsproj": {
+    "C:\\Users\\jonas\\Desktop\\scrabble\\scrabble\\ScrabbleBot\\ScrabbleBot.fsproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "d:\\Code\\UNI\\Semester_4\\Uni_Semester_4\\FuncSharp\\scrabble\\ScrabbleBot\\ScrabbleBot.fsproj",
+        "projectUniqueName": "C:\\Users\\jonas\\Desktop\\scrabble\\scrabble\\ScrabbleBot\\ScrabbleBot.fsproj",
         "projectName": "ScrabbleBot",
-        "projectPath": "d:\\Code\\UNI\\Semester_4\\Uni_Semester_4\\FuncSharp\\scrabble\\ScrabbleBot\\ScrabbleBot.fsproj",
-        "packagesPath": "C:\\Users\\Alexander\\.nuget\\packages\\",
-        "outputPath": "d:\\Code\\UNI\\Semester_4\\Uni_Semester_4\\FuncSharp\\scrabble\\ScrabbleBot\\obj\\",
+        "projectPath": "C:\\Users\\jonas\\Desktop\\scrabble\\scrabble\\ScrabbleBot\\ScrabbleBot.fsproj",
+        "packagesPath": "C:\\Users\\jonas\\.nuget\\packages\\",
+        "outputPath": "C:\\Users\\jonas\\Desktop\\scrabble\\scrabble\\ScrabbleBot\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
-          "C:\\Users\\Alexander\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Users\\jonas\\AppData\\Roaming\\NuGet\\NuGet.Config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
         ],
         "originalTargetFrameworks": [
@@ -170,17 +170,17 @@
         }
       }
     },
-    "d:\\Code\\UNI\\Semester_4\\Uni_Semester_4\\FuncSharp\\scrabble\\ScrabbleTemplate\\ScrabbleTemplate.fsproj": {
+    "C:\\Users\\jonas\\Desktop\\scrabble\\scrabble\\ScrabbleTemplate\\ScrabbleTemplate.fsproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "d:\\Code\\UNI\\Semester_4\\Uni_Semester_4\\FuncSharp\\scrabble\\ScrabbleTemplate\\ScrabbleTemplate.fsproj",
+        "projectUniqueName": "C:\\Users\\jonas\\Desktop\\scrabble\\scrabble\\ScrabbleTemplate\\ScrabbleTemplate.fsproj",
         "projectName": "ScrabbleTemplate",
-        "projectPath": "d:\\Code\\UNI\\Semester_4\\Uni_Semester_4\\FuncSharp\\scrabble\\ScrabbleTemplate\\ScrabbleTemplate.fsproj",
-        "packagesPath": "C:\\Users\\Alexander\\.nuget\\packages\\",
-        "outputPath": "d:\\Code\\UNI\\Semester_4\\Uni_Semester_4\\FuncSharp\\scrabble\\ScrabbleTemplate\\obj\\",
+        "projectPath": "C:\\Users\\jonas\\Desktop\\scrabble\\scrabble\\ScrabbleTemplate\\ScrabbleTemplate.fsproj",
+        "packagesPath": "C:\\Users\\jonas\\.nuget\\packages\\",
+        "outputPath": "C:\\Users\\jonas\\Desktop\\scrabble\\scrabble\\ScrabbleTemplate\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
-          "C:\\Users\\Alexander\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Users\\jonas\\AppData\\Roaming\\NuGet\\NuGet.Config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
         ],
         "originalTargetFrameworks": [
@@ -195,11 +195,11 @@
           "net7.0": {
             "targetAlias": "net7.0",
             "projectReferences": {
-              "d:\\Code\\UNI\\Semester_4\\Uni_Semester_4\\FuncSharp\\scrabble\\LocalPlayer\\LocalPlayer.fsproj": {
-                "projectPath": "d:\\Code\\UNI\\Semester_4\\Uni_Semester_4\\FuncSharp\\scrabble\\LocalPlayer\\LocalPlayer.fsproj"
+              "C:\\Users\\jonas\\Desktop\\scrabble\\scrabble\\LocalPlayer\\LocalPlayer.fsproj": {
+                "projectPath": "C:\\Users\\jonas\\Desktop\\scrabble\\scrabble\\LocalPlayer\\LocalPlayer.fsproj"
               },
-              "d:\\Code\\UNI\\Semester_4\\Uni_Semester_4\\FuncSharp\\scrabble\\ScrabbleBot\\ScrabbleBot.fsproj": {
-                "projectPath": "d:\\Code\\UNI\\Semester_4\\Uni_Semester_4\\FuncSharp\\scrabble\\ScrabbleBot\\ScrabbleBot.fsproj"
+              "C:\\Users\\jonas\\Desktop\\scrabble\\scrabble\\ScrabbleBot\\ScrabbleBot.fsproj": {
+                "projectPath": "C:\\Users\\jonas\\Desktop\\scrabble\\scrabble\\ScrabbleBot\\ScrabbleBot.fsproj"
               }
             }
           }
