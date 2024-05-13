@@ -8,7 +8,7 @@ open System.IO
 open ScrabbleUtil.DebugPrint
 
 // The RegEx module is only used to parse human input. It is not used for the final product.
-
+//type tile = Set of char * int
 module RegEx =
     open System.Text.RegularExpressions
 
@@ -151,7 +151,9 @@ module Scrabble =
     // https://en.wikipedia.org/wiki/Letter_frequency#Relative_frequencies_of_the_first_letters_of_a_word_in_English_language
     let startLetters = ['S' ; 'C' ; 'P' ; 'D' ; 'R' ; 'B' ; 'A' ; 'M' ; 'T' ; 'F' ; 'I' ; 'E' ; 'H' ; 'G' ; 'L' ; 'U' ; 'W' ; 'O' ; 'N' ; 'V' ; 'J' ; 'K' ; 'Q' ; 'Y' ; 'Z' ; 'X' ]
 
-    let playGame cstream pieces (st : State.state) =
+    // The pieces map is 
+
+    let playGame cstream (pieces : Map<uint32,tile>) (st : State.state) =
 
         let rec aux (st : State.state) =
             if State.playerNumber st = State.playerTurn st then
@@ -207,10 +209,9 @@ module Scrabble =
                             match move with
                             | [] -> []
                             | x::xs -> 
-                                let (c, p) = Map.find x pieces
+                                let letter = (Set.toList (Map.find x pieces)).Head
                                 let tileID = x
                                 let coord = (0, acc)
-                                let letter = (c, p)
                                 let newMove = (coord, (tileID, (letter)))
                                 newMove :: createMove xs (acc+1)
 
@@ -282,22 +283,20 @@ module Scrabble =
                                 match move, dir with
                                 | [], _ -> []
                                 | x::xs, "ver" -> 
-                                    let (c, p) = Map.find x pieces
+                                    let letter = (Set.toList (Map.find x pieces)).Head
                                     let tileID = x
                                     let coord = (fst coord, acc)
                                     if Map.containsKey coord st.letterPlacement then [(0,0),(0u,(System.Char.MinValue, 0))]
                                     else
-                                        let letter = ((c : char), p)
                                         let newMove = (coord, (tileID, (letter)))
                                         newMove :: createMove xs (acc+1) dir coord
                                     
                                 | x::xs, "hor" ->
-                                    let (c, p) = Map.find x pieces
+                                    let letter = (Set.toList (Map.find x pieces)).Head
                                     let tileID = x
                                     let coord = (acc, snd coord)
                                     if Map.containsKey coord st.letterPlacement then [(0,0),(0u,(System.Char.MinValue, 0))] 
                                     else
-                                        let letter = ((c : char), p)
                                         let newMove = (coord, (tileID, (letter)))
                                         newMove :: createMove xs (acc+1) dir coord
 
@@ -406,6 +405,12 @@ module Scrabble =
 
         aux st
 
+    //tile
+    //   type tile = Set
+    //   property Count:  int
+    //   property MinimumElement:  char * int
+    //   property IsEmpty:  bool
+    //   property MaximumElement:  char * int
     let startGame 
             (boardP : boardProg) 
             (dictf : bool -> Dictionary.Dict) 
