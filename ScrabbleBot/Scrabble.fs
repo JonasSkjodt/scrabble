@@ -287,6 +287,8 @@ module Scrabble =
 
                                 // Create a move going downwards
                                 // list<(int * int) * (uint32 * (char * int))> 
+
+                            // TODO: implement failure states for this function that then returns to the permutation part
                             let rec createMove move acc dir coord : list<(int * int ) * (uint32 * (char * int))>  = 
                                 match move, dir with
                                 | [], _ -> []
