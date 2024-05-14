@@ -213,6 +213,7 @@ module Scrabble =
                         let alphaNumericToStrings (hand : List<uint32>) = List.map (fun x -> string (fst ((Set.toList (Map.find x pieces)).Head))) hand
 
                         //let startingHand = alphaNumericToStrings (MudBot.handToList st.hand)
+                        //TODO: REMOVE THIS LATER
                         let startingHand = ["A"; "A" ; "E" ; "E" ; "E" ; "E" ; "E"]
 
                         let result = MudBot.permutations startingHand 
@@ -253,7 +254,8 @@ module Scrabble =
                     
                     
                     // Generate a move based on already existing tiles on the board
-                        let startingHand = MudBot.handToList st.hand 
+                        //let startingHand = MudBot.handToList st.hand 
+                        let startingHand = ["A"; "A" ; "E" ; "E" ; "E" ; "E" ; "E"]
 
                         // Convert letterPlacement to a list of coords and tiles
                         let letterPlacement = Map.toSeq st.letterPlacement |> List.ofSeq
@@ -315,6 +317,9 @@ module Scrabble =
                                     let tileID = x
                                     let coord = (fst coord, acc)
                                     if Map.containsKey coord st.letterPlacement then [(0,0),(0u,(System.Char.MinValue, 0))]
+                                    if Map.containsKey (fst coord-1, acc) st.letterPlacement && Map.containsKey (fst coord+1, acc) st.letterPlacement then Recursive left+right
+                                    if Map.containsKey (fst coord-1, acc) st.letterPlacement then Recursive left
+                                    if Map.containsKey (fst coord+1, acc) st.letterPlacement then Recursive right
                                     else
                                         let newMove = (coord, (tileID, (letter)))
                                         newMove :: createMove xs (acc+1) dir coord
