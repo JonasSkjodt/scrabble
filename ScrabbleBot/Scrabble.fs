@@ -309,6 +309,35 @@ module Scrabble =
                                 // list<(int * int) * (uint32 * (char * int))> 
 
                             // TODO: implement failure states for this function that then returns to the permutation part
+                            let rec recursiveCheckerHor coord dir node =
+                                match coord, dir with
+                                | (a, b), "right" ->
+                                    if Map.containsKey (a+1,b) st.letterPlacement then 
+                                        match ScrabbleUtil.Dictionary.step (fst (snd (Map.find (a,b) st.letterPlacement))) node with
+                                        | Some (_, node) -> recursiveCheckerHor (a+1,b) "right" node
+                                        | None -> false
+                                    else 
+                                        match ScrabbleUtil.Dictionary.step (fst (snd (Map.find (a,b) st.letterPlacement))) node with
+                                        | Some (bool, _) -> true
+                                        | None -> false
+                                | (a, b), "left" -> if Map.containsKey (a-1, b) st.letterPlacement then recursiveCheckerHor (a-1,b) "left" node else recursiveCheckerHor (a,b) "right" node
+
+
+                            let rec recursiveCheckerVer coord dir node =
+                                match coord, dir with
+                                    | (a, b), "right" ->
+                                        if Map.containsKey (a+1,b) st.letterPlacement then 
+                                            match ScrabbleUtil.Dictionary.step (fst (snd (Map.find (a,b) st.letterPlacement))) node with
+                                            | Some (_, node) -> recursiveCheckerHor (a+1,b) "right" node
+                                            | None -> false
+                                        else 
+                                            match ScrabbleUtil.Dictionary.step (fst (snd (Map.find (a,b) st.letterPlacement))) node with
+                                            | Some (bool, _) -> true
+                                            | None -> false
+                                    | (a, b), "left" -> if Map.containsKey (a-1, b) st.letterPlacement then recursiveCheckerHor (a-1,b) "left" node else recursiveCheckerHor (a,b) "right" node
+
+
+                            // create move for vertical and horizontal
                             let rec createMove move acc dir coord : list<(int * int ) * (uint32 * (char * int))>  = 
                                 match move, dir with
                                 | [], _ -> []
@@ -316,50 +345,40 @@ module Scrabble =
                                     let letter = (Set.toList (Map.find x pieces)).Head
                                     let tileID = x
                                     let coord = (fst coord, acc)
+                                    
                                     if Map.containsKey coord st.letterPlacement then [(0,0),(0u,(System.Char.MinValue, 0))]
-                                    if Map.containsKey (fst coord-1, acc) st.letterPlacement && Map.containsKey (fst coord+1, acc) st.letterPlacement then Recursive left+right
-                                    if Map.containsKey (fst coord-1, acc) st.letterPlacement then Recursive left
-                                    if Map.containsKey (fst coord+1, acc) st.letterPlacement then Recursive right
                                     else
                                         let newMove = (coord, (tileID, (letter)))
-                                        newMove :: createMove xs (acc+1) dir coord
-                                    
+                                        match (if Map.containsKey (fst coord-1, acc) st.letterPlacement && Map.containsKey (fst coord+1, acc) st.letterPlacement then recursiveCheckerHor coord "left" st.dict else true) with
+                                        | true -> 
+                                            newMove :: createMove xs (acc+1) dir coord
+                                        | false -> 
+                                            match (if Map.containsKey (fst coord-1, acc) st.letterPlacement then recursiveCheckerHor coord "left" st.dict else true) with
+                                                    | true -> 
+                                                        newMove :: createMove xs (acc+1) dir coord
+                                                    | false -> match (if Map.containsKey (fst coord+1, acc) st.letterPlacement then recursiveCheckerHor coord "right" st.dict else true) with
+                                                                | true ->
+                                                                newMove :: createMove xs (acc+1) dir coord
+                                                                | false -> [(0,0),(0u,(System.Char.MinValue, 0))]
+
                                 | x::xs, "hor" ->
                                     let letter = (Set.toList (Map.find x pieces)).Head
                                     let tileID = x
                                     let coord = (acc, snd coord)
-                                    if Map.containsKey coord st.letterPlacement then [(0,0),(0u,(System.Char.MinValue, 0))] 
-                                    else
+                                    if Map.containsKey coord st.letterPlacement then [(0,0),(0u,(System.Char.MinValue, 0))]  
+                                     else
                                         let newMove = (coord, (tileID, (letter)))
-                                        newMove :: createMove xs (acc+1) dir coord
-
+                                        match (if Map.containsKey (acc, snd coord) st.letterPlacement then recursiveCheckerVer coord "up" st.dict else true) with
+                                                    | true -> 
+                                                        newMove :: createMove xs (acc+1) dir coord
+                                                    | false -> [(0,0),(0u,(System.Char.MinValue, 0))]
+                                
                             createMove move 0 (fst checkedValue) (snd checkedValue)
 
-                            
-                        // else 
-                        // // Create a move going right
-
-                        //     let rec createMove move acc  = 
-                        //         match move with
-                        //         | [] -> []
-                        //         | x::xs -> 
-                        //             let (c, p) = Map.find x pieces
-                        //             let tileID = x
-                        //             let coord = (0, acc)
-                        //             let letter = (c, p)
-                        //             let newMove = (coord, (tileID, letter))
-                        //             newMove :: createMove xs (acc+1)
-
-                            // createMove move 0
                         else 
                             [(0,0),(0u,(System.Char.MinValue, 0))]
                     
-                // Generate the move 
                 
-
-
-
-        
                 let bool inp  = 
                     match inp with
                     | [(0,0), (0u,(System.Char.MinValue, 0))] -> false
