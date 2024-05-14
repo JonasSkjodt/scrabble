@@ -115,7 +115,8 @@ module MudBot =
         | x::xs -> 
             let isValidMove = 
                 match ScrabbleUtil.Dictionary.step x dict with
-                | Some (valid, _) -> valid
+                | Some (valid, _) when valid = true -> valid
+                | Some (_, node) -> createMove xs node
                 | None -> false
             isValidMove || createMove xs dict
 
@@ -130,20 +131,36 @@ module MudBot =
     //             |> List.map (fun sublist -> x :: sublist))
 
     // TODO: Change perm func to instead generate permutations in increasing order of length so first time is 2, then 3, then 4, etc
-    let rec permHand (hand : List<string>) (acc : List<string>) =
-                        match hand with
-                        | [] -> List.rev acc
-                        | h::t -> 
-                            let newAcc = List.map (fun x -> h + x) acc @ acc
-                            permHand t newAcc
+    // let rec permHand (hand : List<string>) (acc : List<string>) =
+    //                     match hand with
+    //                     | [] -> List.rev acc
+    //                     | h::t -> 
+    //                         let newAcc = List.map (fun x -> h + x) acc @ acc
+    //                         permHand t newAcc
+  
+    let rec permutations (strings: string list) : string list =
+        let rec insertAtAllPositions e l =
+            match l with
+            | [] -> [[e]]
+            | h::t -> (e::l) :: (insertAtAllPositions e t |> List.map (fun x -> h::x))
+
+        let rec aux acc xs =
+            match xs with
+            | [] -> acc
+            | h::t ->
+                let withH = acc |> List.collect (insertAtAllPositions h)
+                aux (withH @ acc) t
+                
+        let allPerms = aux [[]] strings
+        allPerms |> List.tail |> List.map (String.concat "") |> List.sort
+
 
     let rec check (perm:List<string>) dict =
         match perm with
         | [] -> ""
         | x::xs -> if createMove (Seq.toList x) dict then x else check (xs) dict
 
-
-
+    
 
 module Scrabble =
     open System.Threading
@@ -180,7 +197,7 @@ module Scrabble =
                 // let input = System.Console.ReadLine()
                 
                 // Helper func to convert chars to alphanumeric values
-                let char2num (char : char) = uint32((int char - int 'a') + 1)
+                let char2num (char : char) = uint32((int char - int 'A') + 1)
 
                 debugPrint "lol"
 
@@ -195,10 +212,10 @@ module Scrabble =
                         
                         let alphaNumericToStrings (hand : List<uint32>) = List.map (fun x -> string (fst ((Set.toList (Map.find x pieces)).Head))) hand
 
-                        let startingHand = alphaNumericToStrings (MudBot.handToList st.hand)
-                        
+                        //let startingHand = alphaNumericToStrings (MudBot.handToList st.hand)
+                        let startingHand = ["A"; "A" ; "E" ; "E" ; "E" ; "E" ; "E"]
 
-                        let result = MudBot.permHand startingHand [""]
+                        let result = MudBot.permutations startingHand 
                         
                         let moveString = MudBot.check result st.dict
 
@@ -207,6 +224,7 @@ module Scrabble =
                             [(0,0),(0u,(System.Char.MinValue, 0))]
                         else
 
+                        //let moveChar = List.map (fun x -> char (x)) (Seq.toList moveString)
 
                         let move =  List.map (fun x -> char2num x) (Seq.toList moveString)
                                 
@@ -249,13 +267,13 @@ module Scrabble =
                             match letterList with
                             | [] -> "", (0, 0)
                             | (coord, (tileID, (c, p))) :: tail -> 
-                                let result = MudBot.permHand startingHand [string c]
+                                let c = string c 
+                                let result = MudBot.permutations (startingHand @ [c])
                                 let check = MudBot.check result st.dict
                                 if check <> "" then 
                                     (check, coord)
                                 else 
                                     perm tail
-
                         
 
                         let checkedValue = (perm letterPlacement)
