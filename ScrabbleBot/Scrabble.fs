@@ -113,12 +113,12 @@ module MudBot =
         match letters with
         | [] -> false
         | x::xs -> 
-            let isValidMove = 
+            //let isValidMove = 
                 match ScrabbleUtil.Dictionary.step x dict with
                 | Some (valid, _) when valid = true -> valid
                 | Some (_, node) -> createMove xs node
                 | None -> false
-            isValidMove || createMove xs dict
+            //isValidMove || createMove xs dict
 
     // let rec generatePermutations (input : List<char>) = 
     //     match input with
@@ -187,6 +187,7 @@ module Scrabble =
 
 
             // TODO: Implement the while loop to keep creating new perms if the first one does not work (due to the board having pieces where it wants to play)
+            // OR ASYNC
             if st.playerTurn = st.playerNumber then
                 
                 //change the console readline to find the necessary things for the bot
@@ -212,9 +213,9 @@ module Scrabble =
                         
                         let alphaNumericToStrings (hand : List<uint32>) = List.map (fun x -> string (fst ((Set.toList (Map.find x pieces)).Head))) hand
 
-                        //let startingHand = alphaNumericToStrings (MudBot.handToList st.hand)
+                        let startingHand = alphaNumericToStrings (MudBot.handToList st.hand)
                         //TODO: REMOVE THIS LATER
-                        let startingHand = ["A"; "A" ; "E" ; "E" ; "E" ; "E" ; "E"]
+                        //let startingHand = ["D"; "D" ; "E" ; "E" ; "E" ; "E" ; "E"]
 
                         let result = MudBot.permutations startingHand 
                         
@@ -252,10 +253,11 @@ module Scrabble =
                     // If you try all permutations for a tile on the board and none of them fit, then move to the next tile (generate new perm list)
                     
                     
-                    
+                        let alphaNumericToStrings (hand : List<uint32>) = List.map (fun x -> string (fst ((Set.toList (Map.find x pieces)).Head))) hand
                     // Generate a move based on already existing tiles on the board
-                        //let startingHand = MudBot.handToList st.hand 
-                        let startingHand = ["A"; "A" ; "E" ; "E" ; "E" ; "E" ; "E"]
+                        let startingHand = alphaNumericToStrings (MudBot.handToList st.hand)
+                        //TODO: REMOVE AT THE END
+                        //let startingHand = ["A"; "A" ; "E" ; "E" ; "E" ; "E" ; "E"]
 
                         // Convert letterPlacement to a list of coords and tiles
                         let letterPlacement = Map.toSeq st.letterPlacement |> List.ofSeq
@@ -277,7 +279,7 @@ module Scrabble =
                                 else 
                                     perm tail
                         
-
+                        // TODO: do async or while loop
                         let checkedValue = (perm letterPlacement)
                         let indexOfPlacedLetter = fst checkedValue |> Seq.toList |> List.findIndex (fun e -> e = fst (snd (Map.find (snd checkedValue) st.letterPlacement)))
 
@@ -285,8 +287,6 @@ module Scrabble =
                             let move = List.map (fun x -> char2num x) (Seq.toList (fst checkedValue))
 
                             // Decide if the move should be placed horizontally or vertically
-                            //TODO: FINISH THIS THE MATCH CASE IS SLIGHTLY WRONG BUT THE IDEA IS THERE
-                            
                             let vertOrHor checkedValue = 
                                 match checkedValue with
                                 | (a, b) when (Map.containsKey (a,b-1) st.letterPlacement) && (Map.containsKey (a,b+1) st.letterPlacement) &&  (Map.containsKey (a-1,b) st.letterPlacement) && (Map.containsKey (a+1,b) st.letterPlacement) -> ("",0)
@@ -338,9 +338,14 @@ module Scrabble =
 
 
                             // create move for vertical and horizontal
-                            let rec createMove move acc dir coord : list<(int * int ) * (uint32 * (char * int))>  = 
+                            let rec createMove move acc dir coord pivotCoord : list<(int * int ) * (uint32 * (char * int))>  = 
                                 match move, dir with
                                 | [], _ -> []
+                                | x::xs, _ when x = (match Map.tryFind pivotCoord st.letterPlacement with 
+                                                            | Some (tileID, _) -> tileID 
+                                                            | None -> 0u)
+                                                            -> createMove xs (acc+1) dir coord pivotCoord
+                                
                                 | x::xs, "ver" -> 
                                     let letter = (Set.toList (Map.find x pieces)).Head
                                     let tileID = x
@@ -351,29 +356,34 @@ module Scrabble =
                                         let newMove = (coord, (tileID, (letter)))
                                         match (if Map.containsKey (fst coord-1, acc) st.letterPlacement && Map.containsKey (fst coord+1, acc) st.letterPlacement then recursiveCheckerHor coord "left" st.dict else true) with
                                         | true -> 
-                                            newMove :: createMove xs (acc+1) dir coord
+                                            newMove :: createMove xs (acc+1) dir coord pivotCoord
                                         | false -> 
                                             match (if Map.containsKey (fst coord-1, acc) st.letterPlacement then recursiveCheckerHor coord "left" st.dict else true) with
                                                     | true -> 
-                                                        newMove :: createMove xs (acc+1) dir coord
+                                                        newMove :: createMove xs (acc+1) dir coord pivotCoord
                                                     | false -> match (if Map.containsKey (fst coord+1, acc) st.letterPlacement then recursiveCheckerHor coord "right" st.dict else true) with
                                                                 | true ->
-                                                                newMove :: createMove xs (acc+1) dir coord
+                                                                newMove :: createMove xs (acc+1) dir coord pivotCoord
                                                                 | false -> [(0,0),(0u,(System.Char.MinValue, 0))]
+                                            
 
                                 | x::xs, "hor" ->
                                     let letter = (Set.toList (Map.find x pieces)).Head
                                     let tileID = x
                                     let coord = (acc, snd coord)
                                     if Map.containsKey coord st.letterPlacement then [(0,0),(0u,(System.Char.MinValue, 0))]  
-                                     else
+                                    else
                                         let newMove = (coord, (tileID, (letter)))
                                         match (if Map.containsKey (acc, snd coord) st.letterPlacement then recursiveCheckerVer coord "up" st.dict else true) with
                                                     | true -> 
-                                                        newMove :: createMove xs (acc+1) dir coord
+                                                        newMove :: createMove xs (acc+1) dir coord pivotCoord
                                                     | false -> [(0,0),(0u,(System.Char.MinValue, 0))]
-                                
-                            createMove move 0 (fst checkedValue) (snd checkedValue)
+                            if (fst (vertOrHor (snd checkedValue))) = "ver" then
+                                createMove move ((snd (snd checkedValue))-1) "ver" (fst (snd checkedValue),snd (vertOrHor (snd checkedValue)))  (snd checkedValue)
+                            elif (fst (vertOrHor (snd checkedValue))) = "hor" then
+                                createMove move ((fst (snd checkedValue))-1) "hor" (snd (vertOrHor (snd checkedValue)), snd (snd checkedValue)) (snd checkedValue)
+                            else
+                                [(0,0),(0u,(System.Char.MinValue, 0))]
 
                         else 
                             [(0,0),(0u,(System.Char.MinValue, 0))]
