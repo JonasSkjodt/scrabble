@@ -62,7 +62,7 @@ module State =
         square_fun    : coord -> bool
     }
 
-    let mkState d pn h pT nOP players lP square_fun= {(*board = b;*) dict = d;  playerNumber = pn; hand = h; playerTurn = pT; numberOfPlayers = nOP; players = players; letterPlacement = lP; square_fun = square_fun}
+    let mkState d pn h pT nOP players lP square_fun= {dict = d;  playerNumber = pn; hand = h; playerTurn = pT; numberOfPlayers = nOP; players = players; letterPlacement = lP; square_fun = square_fun}
 
     //let board st            = st.board
     let dict st             = st.dict
@@ -80,11 +80,12 @@ module State =
                     | [] -> hand
                     | _ -> failwith "Tile played could not be found in player hand"
 
-    let rec addNewTiles newPieces hand =
+    let rec addNewTiles (newPieces : (uint32 * uint32) list ) hand =
                     match newPieces with
-                    | newTile :: tail -> addNewTiles tail (MultiSet.addSingle (fst newTile) hand)
                     | [] -> hand
-
+                    //| newTile :: tail -> addNewTiles tail (MultiSet.addSingle (fst newTile) hand)
+                    | newTile :: tail -> addNewTiles tail (MultiSet.add (fst newTile) (snd newTile) hand)
+    
     let changeTurn pId numP= 
         match pId with
         | p when p = numP -> 1u
@@ -211,10 +212,8 @@ module MudBot =
 
 
 module Scrabble =
-    open System.Threading
-    open MultiSet
-    open ScrabbleLib
 
+    open System.Threading
 
     let rec updateBoard (ms : (coord*(uint32*(char*int)))list) (board : Map<coord, uint32>) = 
         match ms with
@@ -248,7 +247,6 @@ module Scrabble =
             // create empty move
             
             let move = "" //insert bot moves
-            //val mkState: d         : Dict -> pn        : uint32 -> h         : MultiSet<uint32> -> pT        : uint32 -> nOP       : uint32 -> players   : Map<uint32,bool> -> lP        : Map<coord,uint32> ->square_fun: (coord -> bool)
             
             if (not (st.players.Item st.playerTurn)) then aux (State.mkState st.dict st.playerNumber st.hand (((st.playerTurn)%st.numberOfPlayers)+1u) st.numberOfPlayers st.players  st.letterPlacement st.square_fun)
             else 
@@ -264,12 +262,9 @@ module Scrabble =
 
                     debugPrint (sprintf "Player %d -> Server:\n%A\n" (State.playerNumber st) move) // keep the debug lines. They are useful.
                     send cstream (serverMsg move)
-                
-                    
-                
+                                
                 let msg = recv cstream
                 debugPrint (sprintf "Player %d <- Server:\n%A\n" (State.playerNumber st) move) // keep the debug lines. They are useful.
-
 
                 // pid = playerid
                 // ms = letters on the board
@@ -283,8 +278,6 @@ module Scrabble =
                     let ms_seq = List.map (fun (coord, (tileID, _))  -> (coord, tileID)) ms |> List.collect (fun (coord, tileID) -> [(coord, tileID); (coord, tileID)]) |> List.toSeq
                     let boardWithLetters = updateBoard ms st.letterPlacement
 
-
-                    //debugPrint (sprintf "THIS MESSAGE IS A TEST: %A\n" boardWithLetters.letterPlacement)
 
                     // create a new hand with old tiles removed and new tiles added
                     let newHand = (State.removeTiles ms st.hand)
@@ -328,15 +321,8 @@ module Scrabble =
                 | RCM a -> failwith (sprintf "not implmented: %A" a)
                 | RGPE err -> printfn "Gameplay Error:\n%A" err; aux st
 
-
         aux st
 
-    //tile
-    //   type tile = Set
-    //   property Count:  int
-    //   property MinimumElement:  char * int
-    //   property IsEmpty:  bool
-    //   property MaximumElement:  char * int
     let startGame 
             (boardP : boardProg) 
             (dictf : bool -> Dictionary.Dict) 
@@ -355,26 +341,10 @@ module Scrabble =
                       hand =  %A
                       timeout = %A\n\n" numPlayers playerNumber playerTurn hand timeout)
 
-        //let dict = dictf true // Uncomment if using a gaddag for your dictionary
-        let dict = dictf false // Uncomment if using a trie for your dictionary
-        // let board = Parser.mkBoard boardP
-
-        // let board = Parser.mkBoard boardP
+        let dict = dictf true // Uncomment if using a gaddag for your dictionary
+        //let dict = dictf false // Uncomment if using a trie for your dictionary
         
         let handSet = List.fold (fun acc (x, k) -> MultiSet.add x k acc) MultiSet.empty hand
-
-        //theirs
-        //https://github.com/zqueamish/scrabble-bot/blob/main/ScrabbleBot/Scrabble.fs
-        // let dict = dictf true // Uncomment if using a gaddag for your dictionary
-        // //let dict = dictf false // Uncomment if using a trie for your dictionary
-        // let board = simpleBoardLangParser.parseSimpleBoardProg boardP
-        // let rec mkPlayers (n : uint32) =
-        //     match n with
-        //     | 0u -> Map.empty
-        //     | n -> (mkPlayers (n-1u)).Add (n, true)
-
-        // let handSet = List.fold (fun acc (x, k) -> MultiSet.add x k acc) MultiSet.empty hand
-        // fun () -> playGame cstream tiles (State.mkState Map.empty dict playerNumber handSet playerTurn (mkPlayers numPlayers) numPlayers board)
 
         let board = ScrabbleLib.simpleBoardLangParser.parseSimpleBoardProg boardP
         let rec mkPlayers (n : uint32) =
