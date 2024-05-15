@@ -209,7 +209,23 @@ module MudBot =
                              else genStart st pieces (0, 0)
         List.fold (fun (best_move : (coord*(uint32*(char*int32))) list) (move : 'b list) -> if move_value move > move_value best_move then move else best_move) [] playable_moves
 
-
+    // let move pieces (st: State.state) : (coord*(uint32*(char*int))) list =
+    //     let playable_moves =
+    //         if st.letterPlacement.ContainsKey (coord(0, 0)) then
+    //             // try to convert anchors to array for parallel processing
+    //             let anchors = Map.toArray st.letterPlacement
+    //             // Generate all possible moves in parallel
+    //             // https://stackoverflow.com/questions/30246799/f-how-to-do-list-map-in-parallel
+    //             let moves = anchors |> Array.Parallel.map (fun (anchor, _) -> genStart st pieces anchor)
+    //             // take the generated moves array and make it into a single list
+    //             Array.fold (fun acc move -> move @ acc) [] moves
+    //         else
+    //             // If the (0, 0) coordinate is not in the letterPlacement, start from there
+    //             genStart st pieces (0, 0)
+        
+    //     // Select the move with the highest value
+    //     List.fold (fun (best_move: (coord*(uint32*(char*int))) list) move ->
+    //         if move_value move > move_value best_move then move else best_move) [] playable_moves
 
 module Scrabble =
 
