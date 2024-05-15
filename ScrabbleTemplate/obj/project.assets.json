@@ -986,8 +986,8 @@
         "net7.0": {
           "targetAlias": "net7.0",
           "projectReferences": {
-            "c:\\Users\\jonas\\Desktop\\scrabble\\scrabble\\LocalPlayer\\LocalPlayer.fsproj": {
-              "projectPath": "c:\\Users\\jonas\\Desktop\\scrabble\\scrabble\\LocalPlayer\\LocalPlayer.fsproj"
+            "C:\\Users\\jonas\\Desktop\\scrabble\\scrabble\\LocalPlayer\\LocalPlayer.fsproj": {
+              "projectPath": "C:\\Users\\jonas\\Desktop\\scrabble\\scrabble\\LocalPlayer\\LocalPlayer.fsproj"
             },
             "C:\\Users\\jonas\\Desktop\\scrabble\\scrabble\\ScrabbleBot\\ScrabbleBot.fsproj": {
               "projectPath": "C:\\Users\\jonas\\Desktop\\scrabble\\scrabble\\ScrabbleBot\\ScrabbleBot.fsproj"

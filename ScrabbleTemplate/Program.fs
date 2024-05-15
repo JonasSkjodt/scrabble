@@ -8,6 +8,7 @@
 
 
 open DictionaryTrie
+open DictionaryGaddag
 
 let time f =
     let start = System.DateTime.Now
@@ -59,7 +60,8 @@ let main argv =
     let dictAPI =
         // Uncomment if you have implemented a dictionary. last element None if you have not implemented a GADDAG
         //Some (DictionarySimple.empty, DictionarySimple.insert, DictionarySimple.lookup) //DictionarySimple.step, Some DictionarySimple.reverse) 
-        Some (DictionaryTrie.empty, DictionaryTrie.insert, DictionaryTrie.step, None)
+        // (DictionaryTrie.empty, DictionaryTrie.insert, DictionaryTrie.step, None)
+        Some (DictionaryGaddag.empty, DictionaryGaddag.insert, DictionaryGaddag.step, Some DictionaryGaddag.reverse)
         
     // this dicitonary is built on a Ternary Search Trie 
     let (dictionary, playerTime) = time (fun () -> ScrabbleUtil.Dictionary.mkDict words dictAPI)

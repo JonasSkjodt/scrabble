@@ -79,3 +79,4 @@ C:\Users\jonas\Desktop\scrabble\scrabble\ScrabbleBot\obj\Debug\net7.0\ScrabbleBo
 C:\Users\jonas\Desktop\scrabble\scrabble\ScrabbleBot\obj\Debug\net7.0\refint\ScrabbleBot.dll
 C:\Users\jonas\Desktop\scrabble\scrabble\ScrabbleBot\obj\Debug\net7.0\ScrabbleBot.pdb
 C:\Users\jonas\Desktop\scrabble\scrabble\ScrabbleBot\obj\Debug\net7.0\ref\ScrabbleBot.dll
+C:\Users\jonas\Desktop\scrabble\scrabble\ScrabbleBot\bin\Debug\net7.0\ScrabbleLib.dll

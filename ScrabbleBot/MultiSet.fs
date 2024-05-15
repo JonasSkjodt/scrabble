@@ -51,7 +51,7 @@ module internal MultiSet
                 R (m.Add(a, newCount))
             else
                 R (m.Remove a)
-    
+
     let removeSingle (a : 'a) (s : MultiSet<'a>) : MultiSet<'a> = 
         match s with
         | R(m) -> remove a 1u s
@@ -64,12 +64,16 @@ module internal MultiSet
         | R (m) -> Map.foldBack f m x
     
     // yellow
-    let ofList (_ : 'a list) : MultiSet<'a> = empty
-
+    let rec ofList (lst : 'a list) : MultiSet<'a> = 
+            match lst with
+            | [] -> empty
+            | x :: xs -> addSingle x (ofList xs)
     //let toList (_ : MultiSet<'a>) : 'a list = []
     //TODO look at this, watch it! (it needs to be refactored)
 
-    let toList s = foldBack (fun elem num acc -> List.init (int32 num) (fun _ -> elem) @ acc) s []
+    let toList (ms : MultiSet<'a>) : 'a list =
+        foldBack (fun item count acc -> List.replicate (int count) item @ acc) ms []
+    //let toList s = foldBack (fun elem num acc -> List.init (int32 num) (fun _ -> elem) @ acc) s []
 
     let map (_ : 'a -> 'b) (_ : MultiSet<'a>) : MultiSet<'b> = empty
 

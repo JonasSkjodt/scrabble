@@ -1,7 +1,14 @@
-﻿namespace ScrabbleClient
+﻿//ASYNC GONE; TIMEOUT GONE; 
+//think about life
+//think about the future
+//think about the past
+//think about the present
+
+namespace ScrabbleClient
 
 open ScrabbleUtil
 open ScrabbleUtil.ServerCommunication
+
 open System.IO
 
 
@@ -43,18 +50,21 @@ module State =
 
 
     type state = {
-        board           : Parser.board
+        //board           : Parser.board
         dict            : ScrabbleUtil.Dictionary.Dict
         playerNumber    : uint32
         hand            : MultiSet.MultiSet<uint32>   
         playerTurn      : uint32
         numberOfPlayers : uint32
-        letterPlacement : Map<coord, uint32 * (char * int)>
+        players       : Map<uint32, bool>
+        //letterPlacement : Map<coord, uint32 * (char * int)>
+        letterPlacement : Map<coord, uint32>
+        square_fun    : coord -> bool
     }
 
-    let mkState b d pn h pT nOP lP= {board = b; dict = d;  playerNumber = pn; hand = h; playerTurn = pT; numberOfPlayers = nOP; letterPlacement = lP}
+    let mkState d pn h pT nOP players lP square_fun= {(*board = b;*) dict = d;  playerNumber = pn; hand = h; playerTurn = pT; numberOfPlayers = nOP; players = players; letterPlacement = lP; square_fun = square_fun}
 
-    let board st            = st.board
+    //let board st            = st.board
     let dict st             = st.dict
     let playerNumber st     = st.playerNumber
     let hand st             = st.hand
@@ -82,88 +92,144 @@ module State =
         
     let private (|FoundValue|_|) key map = Map.tryFind key map
 
-    let updateBoard tiles = 
-        let updatePlacement tile coord st =
-            match st.letterPlacement with
-            | FoundValue coord _ ->  failwith "There is already a tile at the coord"  //map when Map.containsKey coord map -> failwith "There is already a tile at the coord"
-            | _ -> {st with letterPlacement = Map.add coord tile st.letterPlacement} 
+    // let updateBoard tiles = 
+    //     let updatePlacement tile coord st =
+    //         match st.letterPlacement with
+    //         | FoundValue coord _ ->  failwith "There is already a tile at the coord"  //map when Map.containsKey coord map -> failwith "There is already a tile at the coord"
+    //         | _ -> {st with letterPlacement = Map.add coord tile st.letterPlacement} 
 
-        Seq.foldBack (fun (coord, tile) acc -> updatePlacement tile coord acc) tiles 
-
-    // let updateBoard tiles st = 
-    //     let updatePlacement (coord, tile) map =
-    //         match Map.tryFind coord map with
-    //         | Some _ -> failwith "There is already a tile at the coord"
-    //         | None -> Map.add coord tile map 
-    //     updatePlacement tiles st.letterPlacement
-    //     tiles
-    //     |> Seq.fold (fun acc (coord, tile) -> updatePlacement (coord, tile) acc) st.letterPlacement
-    //     |> fun updatedMap ->  updatedMap
-
+    //     Seq.foldBack (fun (coord, tile) acc -> updatePlacement tile coord acc) tiles 
+    
+    
 
 
 
 module MudBot =
-    open System.Threading
-
-    let handToList (hand : MultiSet.MultiSet<uint32>) = hand |> MultiSet.toList // Map.toSeq |> List.ofSeq   
     
-    // Allows for permutations even through async
-    let rec createMove (letters : List<char>) dict =
-        match letters with
-        | [] -> false
-        | x::xs -> 
-            //let isValidMove = 
-                match ScrabbleUtil.Dictionary.step x dict with
-                | Some (valid, _) when valid = true -> valid
-                | Some (_, node) -> createMove xs node
-                | None -> false
-            //isValidMove || createMove xs dict
+    open System.Threading.Tasks
 
-    // let rec generatePermutations (input : List<char>) = 
-    //     match input with
-    //     | [] -> [[]]
-    //     | _ ->
-    //         input 
-    //         |> List.collect (fun x -> 
-    //             let remaining = List.filter (fun y -> y <> x) input
-    //             generatePermutations remaining 
-    //             |> List.map (fun sublist -> x :: sublist))
+    let rec check_other_words (pieces : Map<uint32, tile>) (st : State.state) (pos : coord) dx dy (word : string) = 
+        match ((st.letterPlacement.ContainsKey pos)) with
+        | false -> word
+        | true -> match dx+dy with
+                    |  1 -> check_other_words pieces st (fst pos + dx, snd pos + dy) dx dy word+(string (fst (Set.toList (pieces.Item ((st.letterPlacement.Item pos)))).[0]))
+                    | -1 -> check_other_words pieces st (fst pos + dx, snd pos + dy) dx dy (string (fst (Set.toList (pieces.Item ((st.letterPlacement.Item pos)))).[0]))+word
 
-    // TODO: Change perm func to instead generate permutations in increasing order of length so first time is 2, then 3, then 4, etc
-    // let rec permHand (hand : List<string>) (acc : List<string>) =
-    //                     match hand with
-    //                     | [] -> List.rev acc
-    //                     | h::t -> 
-    //                         let newAcc = List.map (fun x -> h + x) acc @ acc
-    //                         permHand t newAcc
-  
-    let rec permutations (strings: string list) : string list =
-        let rec insertAtAllPositions e l =
-            match l with
-            | [] -> [[e]]
-            | h::t -> (e::l) :: (insertAtAllPositions e t |> List.map (fun x -> h::x))
+    let is_valid_word (pieces : Map<uint32, tile>) (st : State.state) (pos : coord) (direction : bool) (l : char) (rack : MultiSet.MultiSet<uint32>) =
+        let word = match direction with // true is horizontal and false is vertical
+                    | true -> check_other_words pieces st (fst pos - 1, snd pos) -1 0 (string l) |> (check_other_words pieces st (fst pos + 1, snd pos) +1 0)
+                    | false   -> check_other_words pieces st (fst pos, snd pos - 1) 0 -1 (string l) |> (check_other_words pieces st (fst pos, snd pos + 1) 0 +1)
+        if String.length word = 1 then true 
+        else Dictionary.lookup word st.dict
 
-        let rec aux acc xs =
-            match xs with
-            | [] -> acc
-            | h::t ->
-                let withH = acc |> List.collect (insertAtAllPositions h)
-                aux (withH @ acc) t
-                
-        let allPerms = aux [[]] strings
-        allPerms |> List.tail |> List.map (String.concat "") |> List.sort
+    let rec gen (direction : bool) (st : State.state) (anchor : coord) (pos : int32)(rack : MultiSet.MultiSet<uint32>) (arc : Dictionary.Dict) (pieces : Map<uint32, tile>) (word : string) (word_moves : (coord*(uint32*(char*int)))list) =    
+        let plays = []
+        let pos_coords = 
+            match direction with
+            | true  -> coord(fst anchor + pos, snd anchor)
+            | false -> coord(fst anchor, snd anchor + pos)
+        if not (st.square_fun pos_coords) then []
+        else 
+            if st.letterPlacement.ContainsKey pos_coords then 
+                go_on direction pos pieces (st.letterPlacement.Item pos_coords) (MultiSet.toList rack) word word_moves (Dictionary.step (fst (Set.toList (pieces.Item (st.letterPlacement.Item pos_coords))).[0]) arc) anchor st
+            else 
+                MultiSet.fold (fun plays letter _ -> go_on direction pos pieces letter (MultiSet.toList (MultiSet.remove letter 1u rack)) word word_moves (Dictionary.step (fst (Set.toList (pieces.Item letter)).[0]) arc) anchor st @ plays) plays rack
+
+    and go_on (direction : bool) (pos : int32) (pieces : Map<uint32, Set<char * int>>) (l : uint32) (rack : uint32 list) (word : string) (word_moves : (coord*(uint32*(char*int)))list) (new_arc : (bool*Dictionary.Dict) option) (anchor : coord) (st : State.state)= 
+        let plays = []
+        let letter = fst (Set.toList (pieces.Item l)).[0]
+        let pos_coords = 
+            match direction with
+            | true  -> coord(fst anchor + pos, snd anchor)
+            | false -> coord(fst anchor, snd anchor + pos)
+        if not (is_valid_word pieces st pos_coords (not direction) letter (MultiSet.ofList rack)) then plays 
+        else if pos <= 0 then
+            let next_pos_coords = 
+                match direction with
+                | true  -> coord(fst anchor + pos - 1, snd anchor)
+                | false -> coord(fst anchor, snd anchor + pos - 1)
+            let new_word = letter.ToString() + word
+            let word_moves = if st.letterPlacement.ContainsKey pos_coords then word_moves else (pos_coords, (l, ((fst (Set.toList (pieces.Item l)).[0]), (snd (Set.toList (pieces.Item l)).[0])))) :: word_moves
+            let plays = 
+                if Dictionary.lookup new_word st.dict && (not (st.letterPlacement.ContainsKey next_pos_coords)) then 
+                    if List.length word_moves > 0 then word_moves :: plays else plays
+                else
+                    plays
+
+            match new_arc with
+            | Some arc -> 
+                let plays = (gen direction st anchor (pos-1) (MultiSet.ofList rack) (snd arc) pieces new_word word_moves) @ plays
+                match Dictionary.step (char 0) (snd arc) with
+                | Some arc -> 
+                    if  (not (st.letterPlacement.ContainsKey next_pos_coords)) then 
+                        (gen direction st anchor 1 (MultiSet.ofList rack) (snd arc) pieces new_word word_moves) @ plays
+                    else plays
+                | None -> plays
+            | None -> plays
+
+        else
+            let next_pos_coords = 
+                match direction with
+                | true  -> coord(fst anchor + pos + 1, snd anchor)
+                | false -> coord(fst anchor, snd anchor + pos + 1)
+            let new_word = word + letter.ToString()
+            let word_moves = if st.letterPlacement.ContainsKey pos_coords then word_moves else (pos_coords, (l, ((fst (Set.toList (pieces.Item l)).[0]), (snd (Set.toList (pieces.Item l)).[0])))) :: word_moves
+            let plays = 
+                if Dictionary.lookup new_word st.dict && (not (st.letterPlacement.ContainsKey next_pos_coords)) then 
+                    if List.length word_moves > 0 then word_moves :: plays else plays
+                else
+                    plays
+            match new_arc with
+            | Some arc -> (gen direction st anchor (pos+1) (MultiSet.ofList rack) (snd arc) pieces new_word word_moves) @ plays
+            | None -> plays
+
+    let genStart (st : State.state) (pieces : Map<uint32, tile>) (anchor : coord)= 
+        let pos = 0
+        let rack = st.hand
+        let initArc = st.dict
+        let word = ""
+        let word_moves = []
+        let direction = true // True is horizontal and False is vertical
+
+        let horizontal_words =  async { return if (not (st.letterPlacement.ContainsKey (coord(fst anchor + 1, snd anchor)))) then gen direction st anchor pos rack initArc pieces word word_moves else []}
+        let vertical_words = async {return if (not (st.letterPlacement.ContainsKey (coord(fst anchor, snd anchor + 1)))) then (gen (not direction) st anchor pos rack initArc pieces word word_moves) else []}
+
+        (Async.RunSynchronously horizontal_words) @ (Async.RunSynchronously vertical_words)
+
+    let rec move_value (move : (coord*(uint32*(char*int)))list) = 
+        match move with
+        | []      -> 0 
+        | x :: xs -> x |> snd |> snd |> snd |> (+) (move_value xs)
+
+    let move pieces (st : State.state) : (coord*(uint32*(char*int)))list = 
+        let playable_moves = if st.letterPlacement.ContainsKey (coord(0, 0)) then 
+                                let tasks = (Map.fold (fun lst anchor letter  -> async {return genStart st pieces anchor} :: lst) [] st.letterPlacement)
+                                Array.fold (fun moves move -> move @ moves) [] (tasks |> Async.Parallel |> Async.RunSynchronously)
+                             else genStart st pieces (0, 0)
+        List.fold (fun (best_move : (coord*(uint32*(char*int32))) list) (move : 'b list) -> if move_value move > move_value best_move then move else best_move) [] playable_moves
 
 
-    let rec check (perm:List<string>) dict =
-        match perm with
-        | [] -> ""
-        | x::xs -> if createMove (Seq.toList x) dict then x else check (xs) dict
-
-    
 
 module Scrabble =
     open System.Threading
+    open MultiSet
+    open ScrabbleLib
+
+
+    let rec updateBoard (ms : (coord*(uint32*(char*int)))list) (board : Map<coord, uint32>) = 
+        match ms with
+        | [] -> board
+        | x :: xs -> (updateBoard xs board).Add (fst x, fst(snd x)) 
+
+    // let rec removePieces hand ms = 
+    //     match ms with
+    //     | [] -> hand
+    //     | x :: xs -> removePieces (MultiSet.removeSingle (fst (snd x)) hand) xs 
+
+    // let rec addPieces (newPieces : (uint32*uint32) list) (hand : MultiSet<uint32>)  = 
+    //     match newPieces with
+    //     | [] -> hand
+    //     | x :: xs -> addPieces xs (MultiSet.add (fst x) (snd x) hand)
 
     // List of starting letter frequence from Wikipedia. Will help the bot with finding words easier.
     // https://en.wikipedia.org/wiki/Letter_frequency#Relative_frequencies_of_the_first_letters_of_a_word_in_English_language
@@ -174,9 +240,7 @@ module Scrabble =
     let playGame cstream (pieces : Map<uint32,tile>) (st : State.state) =
 
         let rec aux (st : State.state) =
-            if State.playerNumber st = State.playerTurn st then
-                Thread.Sleep (1 * 500)
-                Print.printHand pieces (State.hand st)
+                
             //printfn "Updated hand: %A" (st.hand)
 
             // remove the force print when you move on from manual input (or when you have learnt the format)
@@ -184,285 +248,85 @@ module Scrabble =
             // create empty move
             
             let move = "" //insert bot moves
-
-
-            // TODO: Implement the while loop to keep creating new perms if the first one does not work (due to the board having pieces where it wants to play)
-            // OR ASYNC
-            if st.playerTurn = st.playerNumber then
-                
-                //change the console readline to find the necessary things for the bot
-                //for instance, check the first letter, can the bot make a word from it? do it recursively
-                //etc
-                
-                // old input reading
-                // let input = System.Console.ReadLine()
-                
-                // Helper func to convert chars to alphanumeric values
-                let char2num (char : char) = uint32((int char - int 'A') + 1)
-
-                debugPrint "lol"
-
-                // Check if board is empty and call this function with a unfinished word
-                let move = 
-                    if Map.isEmpty st.letterPlacement then  // if the board is empty
-                            // Create permutations of the hand
-
-                        // Convert alphanumeric hand to a list of strings
-                        //System.Char.ConvertToUtf32
-                        //https://stackoverflow.com/questions/5735698/how-to-convert-a-char-to-unicode-value-in-f
-                        
-                        let alphaNumericToStrings (hand : List<uint32>) = List.map (fun x -> string (fst ((Set.toList (Map.find x pieces)).Head))) hand
-
-                        let startingHand = alphaNumericToStrings (MudBot.handToList st.hand)
-                        //TODO: REMOVE THIS LATER
-                        //let startingHand = ["D"; "D" ; "E" ; "E" ; "E" ; "E" ; "E"]
-
-                        let result = MudBot.permutations startingHand 
-                        
-                        let moveString = MudBot.check result st.dict
-
-                        // If moveString == "" then the bot should pass
-                        if moveString = "" then
-                            [(0,0),(0u,(System.Char.MinValue, 0))]
-                        else
-
-                        //let moveChar = List.map (fun x -> char (x)) (Seq.toList moveString)
-
-                        let move =  List.map (fun x -> char2num x) (Seq.toList moveString)
-                                
-
-                        // Create a move going downwards
-                        let rec createMove move acc : list<(int * int) * (uint32 * (char * int))>  = 
-                            match move with
-                            | [] -> []
-                            | x::xs -> 
-                                let letter = (Set.toList (Map.find x pieces)).Head
-                                let tileID = x
-                                let coord = (0, acc)
-                                let newMove = (coord, (tileID, (letter)))
-                                newMove :: createMove xs (acc+1)
-
-                        createMove move 0                
-                        
-                    else
-                    // TODO:
-                    // FOR FINDING WORDS ON THE BOARD WHEN THE BOARD IS NOT EMPTY: 
-                    // Keep a list of all perm (Based on the current tile that you grabbed from the board)
-                    // Find the first word in the list and keep a int count of the index where the is
-                    // If the word does not fit the board, find the next word in the list
-                    // If you try all permutations for a tile on the board and none of them fit, then move to the next tile (generate new perm list)
-                    
-                    
-                        let alphaNumericToStrings (hand : List<uint32>) = List.map (fun x -> string (fst ((Set.toList (Map.find x pieces)).Head))) hand
-                    // Generate a move based on already existing tiles on the board
-                        let startingHand = alphaNumericToStrings (MudBot.handToList st.hand)
-                        //TODO: REMOVE AT THE END
-                        //let startingHand = ["A"; "A" ; "E" ; "E" ; "E" ; "E" ; "E"]
-
-                        // Convert letterPlacement to a list of coords and tiles
-                        let letterPlacement = Map.toSeq st.letterPlacement |> List.ofSeq
-
-                        // Convert starting hand to a list of strings
-                        let startingHand = List.map (fun x -> string (char x) ) startingHand
-
-                        
-                        // Generate permutations of the hand for each letterPlacement
-                        let rec perm (letterList : List<(coord * (uint32 * (char * int)))>) : string * coord = 
-                            match letterList with
-                            | [] -> "", (0, 0)
-                            | (coord, (tileID, (c, p))) :: tail -> 
-                                let c = string c 
-                                let result = MudBot.permutations (startingHand @ [c])
-                                let check = MudBot.check result st.dict
-                                if check <> "" then 
-                                    (check, coord)
-                                else 
-                                    perm tail
-                        
-                        // TODO: do async or while loop
-                        let checkedValue = (perm letterPlacement)
-                        let indexOfPlacedLetter = fst checkedValue |> Seq.toList |> List.findIndex (fun e -> e = fst (snd (Map.find (snd checkedValue) st.letterPlacement)))
-
-                        if fst checkedValue <> "" then
-                            let move = List.map (fun x -> char2num x) (Seq.toList (fst checkedValue))
-
-                            // Decide if the move should be placed horizontally or vertically
-                            let vertOrHor checkedValue = 
-                                match checkedValue with
-                                | (a, b) when (Map.containsKey (a,b-1) st.letterPlacement) && (Map.containsKey (a,b+1) st.letterPlacement) &&  (Map.containsKey (a-1,b) st.letterPlacement) && (Map.containsKey (a+1,b) st.letterPlacement) -> ("",0)
-                                | (a,b) when not (Map.containsKey (a, b-1) st.letterPlacement) && not (Map.containsKey (a, b+1) st.letterPlacement) -> ("ver",a - indexOfPlacedLetter )
-                                | (a,b) when not (Map.containsKey (a-1, b) st.letterPlacement) && not (Map.containsKey (a+1, b) st.letterPlacement) -> ("hor", b - indexOfPlacedLetter)
-                            
-                            
-                            // let rec checkMoveOnBoard dir pivot_coord move start_coord =
-                            //     match dir, move with
-                            //     | _, [] -> Success "Valid move"
-                            //     | "ver", _ -> if not Map.containsKey (start_coord, snd pivot_coord) st.letterPlacement then checkMoveOnBoard dir pivot_coord move (start_coord + 1) else Failure "Invalid move"
-                            //     | "hor", _ -> if not Map.containsKey (fst pivot_coord, start_coord) st.letterPlacement then checkMoveOnBoard dir pivot_coord move (start_coord + 1) else Failure "Invalid move"
-
-                                //   ABC(2,0)
-                                //   B
-                                //  ACT(0,2)
-
-
-                                // Create a move going downwards
-                                // list<(int * int) * (uint32 * (char * int))> 
-
-                            // TODO: implement failure states for this function that then returns to the permutation part
-                            let rec recursiveCheckerHor coord dir node =
-                                match coord, dir with
-                                | (a, b), "right" ->
-                                    if Map.containsKey (a+1,b) st.letterPlacement then 
-                                        match ScrabbleUtil.Dictionary.step (fst (snd (Map.find (a,b) st.letterPlacement))) node with
-                                        | Some (_, node) -> recursiveCheckerHor (a+1,b) "right" node
-                                        | None -> false
-                                    else 
-                                        match ScrabbleUtil.Dictionary.step (fst (snd (Map.find (a,b) st.letterPlacement))) node with
-                                        | Some (bool, _) -> true
-                                        | None -> false
-                                | (a, b), "left" -> if Map.containsKey (a-1, b) st.letterPlacement then recursiveCheckerHor (a-1,b) "left" node else recursiveCheckerHor (a,b) "right" node
-
-
-                            let rec recursiveCheckerVer coord dir node =
-                                match coord, dir with
-                                    | (a, b), "right" ->
-                                        if Map.containsKey (a+1,b) st.letterPlacement then 
-                                            match ScrabbleUtil.Dictionary.step (fst (snd (Map.find (a,b) st.letterPlacement))) node with
-                                            | Some (_, node) -> recursiveCheckerHor (a+1,b) "right" node
-                                            | None -> false
-                                        else 
-                                            match ScrabbleUtil.Dictionary.step (fst (snd (Map.find (a,b) st.letterPlacement))) node with
-                                            | Some (bool, _) -> true
-                                            | None -> false
-                                    | (a, b), "left" -> if Map.containsKey (a-1, b) st.letterPlacement then recursiveCheckerHor (a-1,b) "left" node else recursiveCheckerHor (a,b) "right" node
-
-
-                            // create move for vertical and horizontal
-                            let rec createMove move acc dir coord pivotCoord : list<(int * int ) * (uint32 * (char * int))>  = 
-                                match move, dir with
-                                | [], _ -> []
-                                | x::xs, _ when x = (match Map.tryFind pivotCoord st.letterPlacement with 
-                                                            | Some (tileID, _) -> tileID 
-                                                            | None -> 0u)
-                                                            -> createMove xs (acc+1) dir coord pivotCoord
-                                
-                                | x::xs, "ver" -> 
-                                    let letter = (Set.toList (Map.find x pieces)).Head
-                                    let tileID = x
-                                    let coord = (fst coord, acc)
-                                    
-                                    if Map.containsKey coord st.letterPlacement then [(0,0),(0u,(System.Char.MinValue, 0))]
-                                    else
-                                        let newMove = (coord, (tileID, (letter)))
-                                        match (if Map.containsKey (fst coord-1, acc) st.letterPlacement && Map.containsKey (fst coord+1, acc) st.letterPlacement then recursiveCheckerHor coord "left" st.dict else true) with
-                                        | true -> 
-                                            newMove :: createMove xs (acc+1) dir coord pivotCoord
-                                        | false -> 
-                                            match (if Map.containsKey (fst coord-1, acc) st.letterPlacement then recursiveCheckerHor coord "left" st.dict else true) with
-                                                    | true -> 
-                                                        newMove :: createMove xs (acc+1) dir coord pivotCoord
-                                                    | false -> match (if Map.containsKey (fst coord+1, acc) st.letterPlacement then recursiveCheckerHor coord "right" st.dict else true) with
-                                                                | true ->
-                                                                newMove :: createMove xs (acc+1) dir coord pivotCoord
-                                                                | false -> [(0,0),(0u,(System.Char.MinValue, 0))]
-                                            
-
-                                | x::xs, "hor" ->
-                                    let letter = (Set.toList (Map.find x pieces)).Head
-                                    let tileID = x
-                                    let coord = (acc, snd coord)
-                                    if Map.containsKey coord st.letterPlacement then [(0,0),(0u,(System.Char.MinValue, 0))]  
-                                    else
-                                        let newMove = (coord, (tileID, (letter)))
-                                        match (if Map.containsKey (acc, snd coord) st.letterPlacement then recursiveCheckerVer coord "up" st.dict else true) with
-                                                    | true -> 
-                                                        newMove :: createMove xs (acc+1) dir coord pivotCoord
-                                                    | false -> [(0,0),(0u,(System.Char.MinValue, 0))]
-                            if (fst (vertOrHor (snd checkedValue))) = "ver" then
-                                createMove move ((snd (snd checkedValue))-1) "ver" (fst (snd checkedValue),snd (vertOrHor (snd checkedValue)))  (snd checkedValue)
-                            elif (fst (vertOrHor (snd checkedValue))) = "hor" then
-                                createMove move ((fst (snd checkedValue))-1) "hor" (snd (vertOrHor (snd checkedValue)), snd (snd checkedValue)) (snd checkedValue)
-                            else
-                                [(0,0),(0u,(System.Char.MinValue, 0))]
-
-                        else 
-                            [(0,0),(0u,(System.Char.MinValue, 0))]
-                    
-                
-                let bool inp  = 
-                    match inp with
-                    | [(0,0), (0u,(System.Char.MinValue, 0))] -> false
-                    | inp  -> true
-
-                let boolReal = bool move
-                
-                let serverMsg move = 
-                    match move with
-                    | [(0,0),(0u,(System.Char.MinValue, 0))] -> SMPass
-                    | _ -> SMPlay move
-
-                debugPrint (sprintf "Player %d -> Server:\n%A\n" (State.playerNumber st) move) // keep the debug lines. They are useful.
-                send cstream (serverMsg move)
+            //val mkState: d         : Dict -> pn        : uint32 -> h         : MultiSet<uint32> -> pT        : uint32 -> nOP       : uint32 -> players   : Map<uint32,bool> -> lP        : Map<coord,uint32> ->square_fun: (coord -> bool)
             
+            if (not (st.players.Item st.playerTurn)) then aux (State.mkState st.dict st.playerNumber st.hand (((st.playerTurn)%st.numberOfPlayers)+1u) st.numberOfPlayers st.players  st.letterPlacement st.square_fun)
+            else 
+                if st.playerTurn = st.playerNumber then
+                    Thread.Sleep (1 * 500)
+                    Print.printHand pieces (State.hand st)
+                    let move = MudBot.move pieces st
+
+                    let serverMsg move = 
+                        match move with
+                        | [(0,0),(0u,(System.Char.MinValue, 0))] -> SMPass
+                        | _ -> SMPlay move
+
+                    debugPrint (sprintf "Player %d -> Server:\n%A\n" (State.playerNumber st) move) // keep the debug lines. They are useful.
+                    send cstream (serverMsg move)
                 
-            
-            let msg = recv cstream
-            debugPrint (sprintf "Player %d <- Server:\n%A\n" (State.playerNumber st) move) // keep the debug lines. They are useful.
-
-
-            // pid = playerid
-            // ms = letters on the board
-            // points = points from a play
-            match msg with
-            | RCM (CMPlaySuccess(ms, points, newPieces)) ->
-                (* Successful play by you. Update your state (remove old tiles, add the new ones, change turn, etc) *)
-                // The message CMPlaySuccess is sent to the player who made the move
-
-                // place letters on the board
-                let boardWithLetters = State.updateBoard ms st
-
-                debugPrint (sprintf "THIS MESSAGE IS A TEST: %A\n" boardWithLetters.letterPlacement)
-
-                // create a new hand with old tiles removed and new tiles added
-                let newHand = (State.removeTiles ms st.hand)
-                let newHand' = State.addNewTiles newPieces newHand
-
-                // update st with the new playernumber via changeTurn
-                let newTurn = State.changeTurn st.playerNumber st.numberOfPlayers
-                let st' = { st with hand = newHand' ; playerTurn = newTurn ; letterPlacement = boardWithLetters.letterPlacement}
                     
-                aux st'
-
-            // Successful play by you. Update your state (remove old tiles, add the new ones, etc.)
-            | RCM (CMPlayed (pid, ms, points)) ->
-                (* Successful play by other player. Update your state *)
-
-                // place letters on the board
-                let boardWithLetters = State.updateBoard ms st
-
-                // update st with new playernumber and new points
-                let newTurn = State.changeTurn pid st.numberOfPlayers
-                let st' = {st with playerTurn = newTurn ; letterPlacement = boardWithLetters.letterPlacement}
                 
-                aux st'
+                let msg = recv cstream
+                debugPrint (sprintf "Player %d <- Server:\n%A\n" (State.playerNumber st) move) // keep the debug lines. They are useful.
 
-            // Pass 
-            | RCM (CMPassed (pid )) -> 
-                  (* Passed play. Update your state *)
 
-                let newTurn = State.changeTurn pid st.numberOfPlayers
-                let st' = { st with playerTurn = newTurn }
-                aux st'
-            | RCM (CMPlayFailed (pid, ms)) ->
-                (* Failed play. Update your state *) // this is seen from the other player
+                // pid = playerid
+                // ms = letters on the board
+                // points = points from a play
+                match msg with
+                | RCM (CMPlaySuccess(ms, points, newPieces)) ->
+                    (* Successful play by you. Update your state (remove old tiles, add the new ones, change turn, etc) *)
+                    // The message CMPlaySuccess is sent to the player who made the move
 
-                let newTurn = State.changeTurn pid st.numberOfPlayers
-                let st' = { st with playerTurn = newTurn } // This state needs to be updated
+                    // place letters on the board
+                    let ms_seq = List.map (fun (coord, (tileID, _))  -> (coord, tileID)) ms |> List.collect (fun (coord, tileID) -> [(coord, tileID); (coord, tileID)]) |> List.toSeq
+                    let boardWithLetters = updateBoard ms st.letterPlacement
 
-                aux st'
-            | RCM (CMGameOver _) -> ()
-            | RCM a -> failwith (sprintf "not implmented: %A" a)
-            | RGPE err -> printfn "Gameplay Error:\n%A" err; aux st
+
+                    //debugPrint (sprintf "THIS MESSAGE IS A TEST: %A\n" boardWithLetters.letterPlacement)
+
+                    // create a new hand with old tiles removed and new tiles added
+                    let newHand = (State.removeTiles ms st.hand)
+                    let newHand' = State.addNewTiles newPieces newHand
+
+                    // update st with the new playernumber via changeTurn
+                    let newTurn = State.changeTurn st.playerNumber st.numberOfPlayers
+                    let st' = { st with hand = newHand' ; playerTurn = newTurn ; letterPlacement = boardWithLetters}
+                        
+                    aux st'
+
+                // Successful play by you. Update your state (remove old tiles, add the new ones, etc.)
+                | RCM (CMPlayed (pid, ms, points)) ->
+                    (* Successful play by other player. Update your state *)
+                    let ms_seq = List.map (fun (coord, (tileID, _))  -> (coord, tileID)) ms |> List.collect (fun (coord, tileID) -> [(coord, tileID); (coord, tileID)]) |> List.toSeq
+
+                    // place letters on the board
+                    let boardWithLetters = updateBoard ms st.letterPlacement
+
+                    // update st with new playernumber and new points
+                    let newTurn = State.changeTurn pid st.numberOfPlayers
+                    let st' = {st with playerTurn = newTurn ; letterPlacement = boardWithLetters}
+                    
+                    aux st'
+
+                // Pass 
+                | RCM (CMPassed (pid )) -> 
+                    (* Passed play. Update your state *)
+
+                    let newTurn = State.changeTurn pid st.numberOfPlayers
+                    let st' = { st with playerTurn = newTurn }
+                    aux st'
+                | RCM (CMPlayFailed (pid, ms)) ->
+                    (* Failed play. Update your state *) // this is seen from the other player
+
+                    let newTurn = State.changeTurn pid st.numberOfPlayers
+                    let st' = { st with playerTurn = newTurn } // This state needs to be updated
+
+                    aux st'
+                | RCM (CMGameOver _) -> ()
+                | RCM a -> failwith (sprintf "not implmented: %A" a)
+                | RGPE err -> printfn "Gameplay Error:\n%A" err; aux st
 
 
         aux st
@@ -493,9 +357,30 @@ module Scrabble =
 
         //let dict = dictf true // Uncomment if using a gaddag for your dictionary
         let dict = dictf false // Uncomment if using a trie for your dictionary
-        let board = Parser.mkBoard boardP
-                  
+        // let board = Parser.mkBoard boardP
+
+        // let board = Parser.mkBoard boardP
+        
         let handSet = List.fold (fun acc (x, k) -> MultiSet.add x k acc) MultiSet.empty hand
 
-        fun () -> playGame cstream tiles (State.mkState board dict playerNumber handSet playerTurn numPlayers  Map.empty)
+        //theirs
+        //https://github.com/zqueamish/scrabble-bot/blob/main/ScrabbleBot/Scrabble.fs
+        // let dict = dictf true // Uncomment if using a gaddag for your dictionary
+        // //let dict = dictf false // Uncomment if using a trie for your dictionary
+        // let board = simpleBoardLangParser.parseSimpleBoardProg boardP
+        // let rec mkPlayers (n : uint32) =
+        //     match n with
+        //     | 0u -> Map.empty
+        //     | n -> (mkPlayers (n-1u)).Add (n, true)
+
+        // let handSet = List.fold (fun acc (x, k) -> MultiSet.add x k acc) MultiSet.empty hand
+        // fun () -> playGame cstream tiles (State.mkState Map.empty dict playerNumber handSet playerTurn (mkPlayers numPlayers) numPlayers board)
+
+        let board = ScrabbleLib.simpleBoardLangParser.parseSimpleBoardProg boardP
+        let rec mkPlayers (n : uint32) =
+            match n with
+            | 0u -> Map.empty
+            | n -> (mkPlayers (n-1u)).Add (n, true)
+
+        fun () -> playGame cstream tiles (State.mkState dict playerNumber handSet playerTurn numPlayers (mkPlayers numPlayers)   Map.empty board)
         

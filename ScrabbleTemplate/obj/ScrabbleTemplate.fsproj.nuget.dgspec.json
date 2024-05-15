@@ -4,14 +4,14 @@
     "C:\\Users\\jonas\\Desktop\\scrabble\\scrabble\\ScrabbleTemplate\\ScrabbleTemplate.fsproj": {}
   },
   "projects": {
-    "c:\\Users\\jonas\\Desktop\\scrabble\\scrabble\\LocalPlayer\\LocalPlayer.fsproj": {
+    "C:\\Users\\jonas\\Desktop\\scrabble\\scrabble\\LocalPlayer\\LocalPlayer.fsproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "c:\\Users\\jonas\\Desktop\\scrabble\\scrabble\\LocalPlayer\\LocalPlayer.fsproj",
+        "projectUniqueName": "C:\\Users\\jonas\\Desktop\\scrabble\\scrabble\\LocalPlayer\\LocalPlayer.fsproj",
         "projectName": "LocalPlayer",
-        "projectPath": "c:\\Users\\jonas\\Desktop\\scrabble\\scrabble\\LocalPlayer\\LocalPlayer.fsproj",
+        "projectPath": "C:\\Users\\jonas\\Desktop\\scrabble\\scrabble\\LocalPlayer\\LocalPlayer.fsproj",
         "packagesPath": "C:\\Users\\jonas\\.nuget\\packages\\",
-        "outputPath": "c:\\Users\\jonas\\Desktop\\scrabble\\scrabble\\LocalPlayer\\obj\\",
+        "outputPath": "C:\\Users\\jonas\\Desktop\\scrabble\\scrabble\\LocalPlayer\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
           "C:\\Users\\jonas\\AppData\\Roaming\\NuGet\\NuGet.Config",
@@ -195,8 +195,8 @@
           "net7.0": {
             "targetAlias": "net7.0",
             "projectReferences": {
-              "c:\\Users\\jonas\\Desktop\\scrabble\\scrabble\\LocalPlayer\\LocalPlayer.fsproj": {
-                "projectPath": "c:\\Users\\jonas\\Desktop\\scrabble\\scrabble\\LocalPlayer\\LocalPlayer.fsproj"
+              "C:\\Users\\jonas\\Desktop\\scrabble\\scrabble\\LocalPlayer\\LocalPlayer.fsproj": {
+                "projectPath": "C:\\Users\\jonas\\Desktop\\scrabble\\scrabble\\LocalPlayer\\LocalPlayer.fsproj"
               },
               "C:\\Users\\jonas\\Desktop\\scrabble\\scrabble\\ScrabbleBot\\ScrabbleBot.fsproj": {
                 "projectPath": "C:\\Users\\jonas\\Desktop\\scrabble\\scrabble\\ScrabbleBot\\ScrabbleBot.fsproj"

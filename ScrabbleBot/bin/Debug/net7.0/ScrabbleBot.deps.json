@@ -10,6 +10,7 @@
         "dependencies": {
           "FParsec": "1.1.1",
           "FSharp.Core": "7.0.200",
+          "ScrabbleLib": "1.0.0.0",
           "ScrabbleUtil": "1.0.0.0"
         },
         "runtime": {
@@ -80,6 +81,14 @@
           }
         }
       },
+      "ScrabbleLib/1.0.0.0": {
+        "runtime": {
+          "ScrabbleLib.dll": {
+            "assemblyVersion": "1.0.0.0",
+            "fileVersion": "1.0.0.0"
+          }
+        }
+      },
       "ScrabbleUtil/1.0.0.0": {
         "runtime": {
           "ScrabbleUtil.dll": {
@@ -109,6 +118,11 @@
       "sha512": "sha512-NmgUnpNH6Zu9B0SPIhojyo38gnPdkdYFYQfbd6zosEH32kbGY/g/Klk7PfOWe1NAe/O1YOMmK9KhwQ2OWsWEbg==",
       "path": "fsharp.core/7.0.200",
       "hashPath": "fsharp.core.7.0.200.nupkg.sha512"
+    },
+    "ScrabbleLib/1.0.0.0": {
+      "type": "reference",
+      "serviceable": false,
+      "sha512": ""
     },
     "ScrabbleUtil/1.0.0.0": {
       "type": "reference",
