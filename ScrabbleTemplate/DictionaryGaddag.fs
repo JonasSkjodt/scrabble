@@ -1,4 +1,5 @@
 module DictionaryGaddag
+    //https://nullwords.wordpress.com/2013/02/27/gaddag-data-structure/
 
     type Dict = {map: Map<char, Dict*bool>;}
 

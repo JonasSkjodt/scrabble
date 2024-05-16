@@ -91,7 +91,6 @@ module State =
         | p when p = numP -> 1u
         | _ -> pId + 1u
         
-    let private (|FoundValue|_|) key map = Map.tryFind key map
 
     // let updateBoard tiles = 
     //     let updatePlacement tile coord st =
@@ -109,46 +108,49 @@ module MudBot =
     
     open System.Threading.Tasks
 
-    let rec check_other_words (pieces : Map<uint32, tile>) (st : State.state) (pos : coord) dx dy (word : string) = 
-        match ((st.letterPlacement.ContainsKey pos)) with
+    let rec check_other_words (pieces : Map<uint32, tile>) (st : State.state) (pos : coord) x y (word : string) = 
+        match (st.letterPlacement.ContainsKey pos) with
         | false -> word
-        | true -> match dx+dy with
-                    |  1 -> check_other_words pieces st (fst pos + dx, snd pos + dy) dx dy word+(string (fst (Set.toList (pieces.Item ((st.letterPlacement.Item pos)))).[0]))
-                    | -1 -> check_other_words pieces st (fst pos + dx, snd pos + dy) dx dy (string (fst (Set.toList (pieces.Item ((st.letterPlacement.Item pos)))).[0]))+word
+        | true -> match x+y with
+                    |  1 -> check_other_words pieces st (fst pos + x, snd pos + y) x y word+(string (fst (Set.toList (pieces.Item ((st.letterPlacement.Item pos)))).[0]))
+                    | -1 -> check_other_words pieces st (fst pos + x, snd pos + y) x y (string (fst (Set.toList (pieces.Item ((st.letterPlacement.Item pos)))).[0]))+word
 
-    let is_valid_word (pieces : Map<uint32, tile>) (st : State.state) (pos : coord) (direction : bool) (l : char) (rack : MultiSet.MultiSet<uint32>) =
-        let word = match direction with // true is horizontal and false is vertical
-                    | true -> check_other_words pieces st (fst pos - 1, snd pos) -1 0 (string l) |> (check_other_words pieces st (fst pos + 1, snd pos) +1 0)
-                    | false   -> check_other_words pieces st (fst pos, snd pos - 1) 0 -1 (string l) |> (check_other_words pieces st (fst pos, snd pos + 1) 0 +1)
+    let is_valid_word (pieces : Map<uint32, tile>) (st : State.state) (pos : coord) (dir) (l : char) (rack : MultiSet.MultiSet<uint32>) =
+        let word = match dir with // horizontal for true, false vertical
+                    | "hor" -> check_other_words pieces st (fst pos - 1, snd pos) -1 0 (string l) |> (check_other_words pieces st (fst pos + 1, snd pos) +1 0)
+                    | "ver"   -> check_other_words pieces st (fst pos, snd pos - 1) 0 -1 (string l) |> (check_other_words pieces st (fst pos, snd pos + 1) 0 +1)
         if String.length word = 1 then true 
         else Dictionary.lookup word st.dict
 
-    let rec gen (direction : bool) (st : State.state) (anchor : coord) (pos : int32)(rack : MultiSet.MultiSet<uint32>) (arc : Dictionary.Dict) (pieces : Map<uint32, tile>) (word : string) (word_moves : (coord*(uint32*(char*int)))list) =    
+    // Move generation inspired from Gordon's Scrabble bot implementation
+    // https://ericsink.com/downloads/faster-scrabble-gordon.pdf
+    let rec gen (pos : int32) (word : string) (rack : MultiSet.MultiSet<uint32>) (arc : Dictionary.Dict) (anch_sqr : coord) dir  (st : State.state)  (pieces : Map<uint32, tile>)  (word_moves : (coord*(uint32*(char*int)))list) =    
         let plays = []
         let pos_coords = 
-            match direction with
-            | true  -> coord(fst anchor + pos, snd anchor)
-            | false -> coord(fst anchor, snd anchor + pos)
+            match dir with // Add the position offset to the anchor square coordinates (depending on the direction we are planning to go)
+            | "hor"  -> coord(fst anch_sqr + pos, snd anch_sqr)
+            | "ver" -> coord(fst anch_sqr, snd anch_sqr + pos)
         if not (st.square_fun pos_coords) then []
         else 
             if st.letterPlacement.ContainsKey pos_coords then 
-                go_on direction pos pieces (st.letterPlacement.Item pos_coords) (MultiSet.toList rack) word word_moves (Dictionary.step (fst (Set.toList (pieces.Item (st.letterPlacement.Item pos_coords))).[0]) arc) anchor st
+                go_on dir pos pieces (st.letterPlacement.Item pos_coords) (MultiSet.toList rack) word word_moves (Dictionary.step (fst (Set.toList (pieces.Item (st.letterPlacement.Item pos_coords))).[0]) arc) anch_sqr st
             else 
-                MultiSet.fold (fun plays letter _ -> go_on direction pos pieces letter (MultiSet.toList (MultiSet.remove letter 1u rack)) word word_moves (Dictionary.step (fst (Set.toList (pieces.Item letter)).[0]) arc) anchor st @ plays) plays rack
+                MultiSet.fold (fun plays letter _ -> go_on dir pos pieces letter (MultiSet.toList (MultiSet.remove letter 1u rack)) word word_moves (Dictionary.step (fst (Set.toList (pieces.Item letter)).[0]) arc) anch_sqr st @ plays) plays rack
 
-    and go_on (direction : bool) (pos : int32) (pieces : Map<uint32, Set<char * int>>) (l : uint32) (rack : uint32 list) (word : string) (word_moves : (coord*(uint32*(char*int)))list) (new_arc : (bool*Dictionary.Dict) option) (anchor : coord) (st : State.state)= 
+    and go_on (dir) (pos : int32) (pieces : Map<uint32, Set<char * int>>) (l : uint32) (rack : uint32 list) (word : string) (word_moves : (coord*(uint32*(char*int)))list) (new_arc : (bool*Dictionary.Dict) option) (anchor : coord) (st : State.state)= 
         let plays = []
         let letter = fst (Set.toList (pieces.Item l)).[0]
         let pos_coords = 
-            match direction with
-            | true  -> coord(fst anchor + pos, snd anchor)
-            | false -> coord(fst anchor, snd anchor + pos)
-        if not (is_valid_word pieces st pos_coords (not direction) letter (MultiSet.ofList rack)) then plays 
+            match dir with
+            | "hor"  -> coord(fst anchor + pos, snd anchor)
+            | "ver" -> coord(fst anchor, snd anchor + pos)
+        let rev_dir = if dir = "hor" then "ver" else "hor"
+        if not (is_valid_word pieces st pos_coords rev_dir letter (MultiSet.ofList rack)) then plays 
         else if pos <= 0 then
             let next_pos_coords = 
-                match direction with
-                | true  -> coord(fst anchor + pos - 1, snd anchor)
-                | false -> coord(fst anchor, snd anchor + pos - 1)
+                match dir with
+                | "hor"  -> coord(fst anchor + pos - 1, snd anchor)
+                | "ver" -> coord(fst anchor, snd anchor + pos - 1)
             let new_word = letter.ToString() + word
             let word_moves = if st.letterPlacement.ContainsKey pos_coords then word_moves else (pos_coords, (l, ((fst (Set.toList (pieces.Item l)).[0]), (snd (Set.toList (pieces.Item l)).[0])))) :: word_moves
             let plays = 
@@ -159,20 +161,21 @@ module MudBot =
 
             match new_arc with
             | Some arc -> 
-                let plays = (gen direction st anchor (pos-1) (MultiSet.ofList rack) (snd arc) pieces new_word word_moves) @ plays
+        
+                let plays = (gen (pos-1) new_word (MultiSet.ofList rack) (snd arc) anchor dir st pieces word_moves) @ plays
                 match Dictionary.step (char 0) (snd arc) with
                 | Some arc -> 
                     if  (not (st.letterPlacement.ContainsKey next_pos_coords)) then 
-                        (gen direction st anchor 1 (MultiSet.ofList rack) (snd arc) pieces new_word word_moves) @ plays
+                        (gen 1 new_word (MultiSet.ofList rack) (snd arc) anchor dir st pieces word_moves) @ plays
                     else plays
                 | None -> plays
             | None -> plays
 
         else
             let next_pos_coords = 
-                match direction with
-                | true  -> coord(fst anchor + pos + 1, snd anchor)
-                | false -> coord(fst anchor, snd anchor + pos + 1)
+                match dir with
+                | "hor"  -> coord(fst anchor + pos + 1, snd anchor)
+                | "ver" -> coord(fst anchor, snd anchor + pos + 1)
             let new_word = word + letter.ToString()
             let word_moves = if st.letterPlacement.ContainsKey pos_coords then word_moves else (pos_coords, (l, ((fst (Set.toList (pieces.Item l)).[0]), (snd (Set.toList (pieces.Item l)).[0])))) :: word_moves
             let plays = 
@@ -181,51 +184,44 @@ module MudBot =
                 else
                     plays
             match new_arc with
-            | Some arc -> (gen direction st anchor (pos+1) (MultiSet.ofList rack) (snd arc) pieces new_word word_moves) @ plays
+            | Some arc -> (gen (pos+1) new_word (MultiSet.ofList rack) (snd arc) anchor dir st pieces word_moves) @ plays
             | None -> plays
 
-    let genStart (st : State.state) (pieces : Map<uint32, tile>) (anchor : coord)= 
+    let genStart (st : State.state) (pieces : Map<uint32, tile>) (anchor : coord) = 
         let pos = 0
         let rack = st.hand
-        let initArc = st.dict
+        let startingDict = st.dict
         let word = ""
         let word_moves = []
-        let direction = true // True is horizontal and False is vertical
-
-        let horizontal_words =  async { return if (not (st.letterPlacement.ContainsKey (coord(fst anchor + 1, snd anchor)))) then gen direction st anchor pos rack initArc pieces word word_moves else []}
-        let vertical_words = async {return if (not (st.letterPlacement.ContainsKey (coord(fst anchor, snd anchor + 1)))) then (gen (not direction) st anchor pos rack initArc pieces word word_moves) else []}
-
-        (Async.RunSynchronously horizontal_words) @ (Async.RunSynchronously vertical_words)
-
-    let rec move_value (move : (coord*(uint32*(char*int)))list) = 
-        match move with
-        | []      -> 0 
-        | x :: xs -> x |> snd |> snd |> snd |> (+) (move_value xs)
-
-    let move pieces (st : State.state) : (coord*(uint32*(char*int)))list = 
-        let playable_moves = if st.letterPlacement.ContainsKey (coord(0, 0)) then 
-                                let tasks = (Map.fold (fun lst anchor letter  -> async {return genStart st pieces anchor} :: lst) [] st.letterPlacement)
-                                Array.fold (fun moves move -> move @ moves) [] (tasks |> Async.Parallel |> Async.RunSynchronously)
-                             else genStart st pieces (0, 0)
-        List.fold (fun (best_move : (coord*(uint32*(char*int32))) list) (move : 'b list) -> if move_value move > move_value best_move then move else best_move) [] playable_moves
-
-    // let move pieces (st: State.state) : (coord*(uint32*(char*int))) list =
-    //     let playable_moves =
-    //         if st.letterPlacement.ContainsKey (coord(0, 0)) then
-    //             // try to convert anchors to array for parallel processing
-    //             let anchors = Map.toArray st.letterPlacement
-    //             // Generate all possible moves in parallel
-    //             // https://stackoverflow.com/questions/30246799/f-how-to-do-list-map-in-parallel
-    //             let moves = anchors |> Array.Parallel.map (fun (anchor, _) -> genStart st pieces anchor)
-    //             // take the generated moves array and make it into a single list
-    //             Array.fold (fun acc move -> move @ acc) [] moves
-    //         else
-    //             // If the (0, 0) coordinate is not in the letterPlacement, start from there
-    //             genStart st pieces (0, 0)
+        //TODO: perhaps switch to old system "hor" "ver"
+        let direction = "hor" //true // horizontal for true, false vertical
+                
+        let hor_words = if (not (st.letterPlacement.ContainsKey (coord(fst anchor + 1, snd anchor)))) 
+                        then gen pos word rack startingDict anchor direction st pieces word_moves else []
+        let ver_words = if (not (st.letterPlacement.ContainsKey (coord(fst anchor, snd anchor + 1)))) 
+                         then (gen pos word rack startingDict anchor ("ver") st pieces word_moves) else []
+                        //  then (gen pos word rack startingDict anchor (not direction) st pieces word_moves) else []
         
-    //     // Select the move with the highest value
-    //     List.fold (fun (best_move: (coord*(uint32*(char*int))) list) move ->
-    //         if move_value move > move_value best_move then move else best_move) [] playable_moves
+
+        hor_words @ ver_words
+
+    let move pieces (st: State.state) : (coord*(uint32*(char*int))) list =
+        let playable_moves =
+            if st.letterPlacement.ContainsKey (coord(0, 0)) then
+                // try to convert anchors to array for parallel processing
+                let anchors = Map.toArray st.letterPlacement
+                // Generate all possible moves in parallel
+                // https://stackoverflow.com/questions/30246799/f-how-to-do-list-map-in-parallel
+                let moves = anchors |> Array.map (fun (anchor, _) -> genStart st pieces anchor)
+                // take the generated moves array and make it into a single list
+                Array.fold (fun acc move -> move @ acc) [] moves
+            else
+                // If the (0, 0) coordinate is not in the letterPlacement, start from there
+                genStart st pieces (0, 0)
+                
+        // Find the longest move
+        List.fold (fun (longest_move) move -> 
+            if List.length move > List.length longest_move then move else longest_move) [] playable_moves
 
 module Scrabble =
 
@@ -264,78 +260,78 @@ module Scrabble =
             
             let move = "" //insert bot moves
             
-            if (not (st.players.Item st.playerTurn)) then aux (State.mkState st.dict st.playerNumber st.hand (((st.playerTurn)%st.numberOfPlayers)+1u) st.numberOfPlayers st.players  st.letterPlacement st.square_fun)
-            else 
-                if st.playerTurn = st.playerNumber then
-                    Thread.Sleep (1 * 500)
-                    Print.printHand pieces (State.hand st)
-                    let move = MudBot.move pieces st
 
-                    let serverMsg move = 
-                        match move with
-                        | [(0,0),(0u,(System.Char.MinValue, 0))] -> SMPass
-                        | _ -> SMPlay move
+            if st.playerTurn = st.playerNumber then
+                Thread.Sleep (1 * 500)
+                Print.printHand pieces (State.hand st)
+                let move = MudBot.move pieces st
+                //debugPrint (sprintf "THIS IS THE PLAYER MOVE: %A" move)
 
-                    debugPrint (sprintf "Player %d -> Server:\n%A\n" (State.playerNumber st) move) // keep the debug lines. They are useful.
-                    send cstream (serverMsg move)
-                                
-                let msg = recv cstream
-                debugPrint (sprintf "Player %d <- Server:\n%A\n" (State.playerNumber st) move) // keep the debug lines. They are useful.
+                let serverMsg move = 
+                    match move with
+                    | [] -> SMPass
+                    | _ -> SMPlay move
 
-                // pid = playerid
-                // ms = letters on the board
-                // points = points from a play
-                match msg with
-                | RCM (CMPlaySuccess(ms, points, newPieces)) ->
-                    (* Successful play by you. Update your state (remove old tiles, add the new ones, change turn, etc) *)
-                    // The message CMPlaySuccess is sent to the player who made the move
+                debugPrint (sprintf "Player %d -> Server:\n%A\n" (State.playerNumber st) move) // keep the debug lines. They are useful.
+                send cstream (serverMsg move)
+                            
+            let msg = recv cstream
+            debugPrint (sprintf "Player %d <- Server:\n%A\n" (State.playerNumber st) move) // keep the debug lines. They are useful.
 
-                    // place letters on the board
-                    let ms_seq = List.map (fun (coord, (tileID, _))  -> (coord, tileID)) ms |> List.collect (fun (coord, tileID) -> [(coord, tileID); (coord, tileID)]) |> List.toSeq
-                    let boardWithLetters = updateBoard ms st.letterPlacement
+            // pid = playerid
+            // ms = letters on the board
+            // points = points from a play
+            match msg with
+            | RCM (CMPlaySuccess(ms, points, newPieces)) ->
+                (* Successful play by you. Update your state (remove old tiles, add the new ones, change turn, etc) *)
+                // The message CMPlaySuccess is sent to the player who made the move
+
+                // place letters on the board
+                let ms_seq = List.map (fun (coord, (tileID, _))  -> (coord, tileID)) ms |> List.collect (fun (coord, tileID) -> [(coord, tileID); (coord, tileID)]) |> List.toSeq
+                let boardWithLetters = updateBoard ms st.letterPlacement
 
 
-                    // create a new hand with old tiles removed and new tiles added
-                    let newHand = (State.removeTiles ms st.hand)
-                    let newHand' = State.addNewTiles newPieces newHand
+                // create a new hand with old tiles removed and new tiles added
+                let newHand = (State.removeTiles ms st.hand)
+                let newHand' = State.addNewTiles newPieces newHand
 
-                    // update st with the new playernumber via changeTurn
-                    let newTurn = State.changeTurn st.playerNumber st.numberOfPlayers
-                    let st' = { st with hand = newHand' ; playerTurn = newTurn ; letterPlacement = boardWithLetters}
-                        
-                    aux st'
-
-                // Successful play by you. Update your state (remove old tiles, add the new ones, etc.)
-                | RCM (CMPlayed (pid, ms, points)) ->
-                    (* Successful play by other player. Update your state *)
-                    let ms_seq = List.map (fun (coord, (tileID, _))  -> (coord, tileID)) ms |> List.collect (fun (coord, tileID) -> [(coord, tileID); (coord, tileID)]) |> List.toSeq
-
-                    // place letters on the board
-                    let boardWithLetters = updateBoard ms st.letterPlacement
-
-                    // update st with new playernumber and new points
-                    let newTurn = State.changeTurn pid st.numberOfPlayers
-                    let st' = {st with playerTurn = newTurn ; letterPlacement = boardWithLetters}
+                // update st with the new playernumber via changeTurn
+                let newTurn = State.changeTurn st.playerNumber st.numberOfPlayers
+                let st' = { st with hand = newHand' ; playerTurn = newTurn ; letterPlacement = boardWithLetters}
                     
-                    aux st'
+                aux st'
 
-                // Pass 
-                | RCM (CMPassed (pid )) -> 
-                    (* Passed play. Update your state *)
+            // Successful play by you. Update your state (remove old tiles, add the new ones, etc.)
+            | RCM (CMPlayed (pid, ms, points)) ->
+                (* Successful play by other player. Update your state *)
+                let ms_seq = List.map (fun (coord, (tileID, _))  -> (coord, tileID)) ms |> List.collect (fun (coord, tileID) -> [(coord, tileID); (coord, tileID)]) |> List.toSeq
 
-                    let newTurn = State.changeTurn pid st.numberOfPlayers
-                    let st' = { st with playerTurn = newTurn }
-                    aux st'
-                | RCM (CMPlayFailed (pid, ms)) ->
-                    (* Failed play. Update your state *) // this is seen from the other player
+                // place letters on the board
+                let boardWithLetters = updateBoard ms st.letterPlacement
 
-                    let newTurn = State.changeTurn pid st.numberOfPlayers
-                    let st' = { st with playerTurn = newTurn } // This state needs to be updated
+                // update st with new playernumber and new points
+                let newTurn = State.changeTurn pid st.numberOfPlayers
+                let st' = {st with playerTurn = newTurn ; letterPlacement = boardWithLetters}
+                
+                aux st'
 
-                    aux st'
-                | RCM (CMGameOver _) -> ()
-                | RCM a -> failwith (sprintf "not implmented: %A" a)
-                | RGPE err -> printfn "Gameplay Error:\n%A" err; aux st
+            // Pass 
+            | RCM (CMPassed (pid )) -> 
+                (* Passed play. Update your state *)
+
+                let newTurn = State.changeTurn pid st.numberOfPlayers
+                let st' = { st with playerTurn = newTurn }
+                aux st'
+            | RCM (CMPlayFailed (pid, ms)) ->
+                (* Failed play. Update your state *) // this is seen from the other player
+
+                let newTurn = State.changeTurn pid st.numberOfPlayers
+                let st' = { st with playerTurn = newTurn } // This state needs to be updated
+
+                aux st'
+            | RCM (CMGameOver _) -> ()
+            | RCM a -> failwith (sprintf "not implmented: %A" a)
+            | RGPE err -> printfn "Gameplay Error:\n%A" err; aux st
 
         aux st
 

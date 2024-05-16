@@ -5,6 +5,9 @@ module DictionaryTrie
 // right side is for characters that are greater than the current character
 // middle is a bit funky please just google it if you are curious
 // We insert M as the root node to make the tree more balanced (m is the middle of the alphabet)
+
+// After hours of tears and attempts we have concluded that a Gaddag is just easier to use when it comes to generating moves in scrabble
+// THIS IS DEPRECATED CODE BUT IT DOES WORK
     
     type CTrie =
         | Leaf of char * string
