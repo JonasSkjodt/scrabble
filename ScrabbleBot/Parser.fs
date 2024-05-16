@@ -120,7 +120,7 @@ module internal Parser
     let stmParse = pstring "not implemented"
 
     (* The rest of your parser goes here *)
-    //TODO: Rename and refactor this part and add comments
+    //TODO: Refactor this part and add comments 
     type word   = (char * int) list
     type squareFun = word -> int -> int -> Result<int, Error>
     type square = Map<int, squareFun>

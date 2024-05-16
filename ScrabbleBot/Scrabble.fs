@@ -108,22 +108,36 @@ module MudBot =
     
     open System.Threading.Tasks
 
+    //TODO: Refactor check_other_words and is_valid_word
     let rec check_other_words (pieces : Map<uint32, tile>) (st : State.state) (pos : coord) x y (word : string) = 
         match (st.letterPlacement.ContainsKey pos) with
         // If the position is in the letterPlacement, check if the position is in the pieces map
-        | true -> match x+y with
-                    |  1 -> check_other_words pieces st (fst pos + x, snd pos + y) x y word+(string (fst (Set.toList (pieces.Item ((st.letterPlacement.Item pos)))).[0]))
-                    | -1 -> check_other_words pieces st (fst pos + x, snd pos + y) x y (string (fst (Set.toList (pieces.Item ((st.letterPlacement.Item pos)))).[0]))+word
+        | true -> 
+            match x+y with
+            // 1 0 or 0 1 checks
+            |  1 -> check_other_words pieces st (fst pos + x, snd pos + y) x y word+(string (fst (Set.toList (pieces.Item ((st.letterPlacement.Item pos)))).[0]))
+            // 0 -1 or -1 0 checks
+            | -1 -> check_other_words pieces st (fst pos + x, snd pos + y) x y (string (fst (Set.toList (pieces.Item ((st.letterPlacement.Item pos)))).[0]))+word
         
         | false -> word
 
+    let checkWord pos L rack dir st pieces = 
+        let rec checkHorAndVer pos dir word (st :State.state) pieces = 
+            // This dir is not hor and ver but instead left or right, up or down to determine the direction of where to look
+            if (st.letterPlacement.ContainsKey pos) then
+                match dir with
+                | dir when dir = "left" || dir = "up" -> checkHorAndVer 
+                | dir when dir = "right" || dir = "down" -> checkHorAndVer 
+            else word
+        match dir with
+        | "hor" -> check_other_words pieces st (fst pos - 1, snd pos) "left" (string l) |> (check_other_words pieces st (fst pos + 1, snd pos) "right")
+        | "ver" -> check_other_words pieces st (fst pos, snd pos - 1) "up" (string l) |> (check_other_words pieces st (fst pos, snd pos + 1) "down")
 
     let is_valid_word (pieces : Map<uint32, tile>) (st : State.state) (pos : coord) (dir) (l : char) (rack : MultiSet.MultiSet<uint32>) =
-        
         let word = match dir with
                     // If the direction is horizontal, check the words to the left and right of the position
                     | "hor" -> check_other_words pieces st (fst pos - 1, snd pos) -1 0 (string l) |> (check_other_words pieces st (fst pos + 1, snd pos) +1 0)
-                    
+
                     // If the direction is vertical, check the words above and below the position
                     | "ver"   -> check_other_words pieces st (fst pos, snd pos - 1) 0 -1 (string l) |> (check_other_words pieces st (fst pos, snd pos + 1) 0 +1)
         if String.length word = 1 then true 
@@ -145,24 +159,25 @@ module MudBot =
                 //TODO: Is blank letters handled correctly?
                 //TODO: Change this to be more readable and add a comment about it
                 // Go in here if there is a letter on the offsetCoords square thus we do not place letters from the rack
-                go_on pos (st.letterPlacement.Item offsetCoords) word (MultiSet.toList rack) (Dictionary.step (fst (Set.toList (pieces.Item (st.letterPlacement.Item offsetCoords))).[0]) arc) dir pieces  word_moves anch_sqr st
+                goOn pos (st.letterPlacement.Item offsetCoords) word (MultiSet.toList rack) (Dictionary.step (fst (Set.toList (pieces.Item (st.letterPlacement.Item offsetCoords))).[0]) arc) dir pieces  word_moves anch_sqr st
             else 
                 // Go in here if there is no letter on the offsetCoords square thus we place letters from the rack
-                MultiSet.fold (fun plays L _ -> go_on pos L word (MultiSet.toList (MultiSet.remove L 1u rack)) (Dictionary.step (fst (Set.toList (pieces.Item L)).[0]) arc) dir pieces word_moves anch_sqr st @ plays)  plays rack
+                MultiSet.fold (fun plays L _ -> goOn pos L word (MultiSet.toList (MultiSet.remove L 1u rack)) (Dictionary.step (fst (Set.toList (pieces.Item L)).[0]) arc) dir pieces word_moves anch_sqr st @ plays)  plays rack
 
     // pos, l, word, rack, newarc, oldarc
-    and go_on (pos : int32) (L : uint32) (word : string) (rack : uint32 list) (new_arc : (bool*Dictionary.Dict) option) dir (pieces : Map<uint32, Set<char * int>>) (word_moves : (coord*(uint32*(char*int)))list) (anchor : coord) (st : State.state)= 
+    //TODO refactor goOn to PDF standards
+    and goOn (pos : int32) (L : uint32) (word : string) (rack : uint32 list) (new_arc : (bool*Dictionary.Dict) option) dir (pieces : Map<uint32, Set<char * int>>) (word_moves : (coord*(uint32*(char*int)))list) (anchor : coord) (st : State.state)= 
         
         let plays = []
         let letter = fst (Set.toList (pieces.Item L)).[0]
-        let pos_coords = 
+        let offsetCoords = 
             match dir with
             | "hor"  -> coord(fst anchor + pos, snd anchor)
             | "ver" -> coord(fst anchor, snd anchor + pos)
         let rev_dir = if dir = "hor" then "ver" else "hor"
         
         // If the word is not in the dictionary, return the list of possible moves
-        if not (is_valid_word pieces st pos_coords rev_dir letter (MultiSet.ofList rack)) then plays 
+        if not (is_valid_word pieces st offsetCoords rev_dir letter (MultiSet.ofList rack)) then plays 
         else if pos <= 0 then
             let next_pos_coords = 
                 match dir with
@@ -170,7 +185,7 @@ module MudBot =
                 | "ver" -> coord(fst anchor, snd anchor + pos - 1)
             let new_word = letter.ToString() + word
             // If the position is not in the letterPlacement, add the word to the list of possible moves
-            let word_moves = if st.letterPlacement.ContainsKey pos_coords then word_moves else (pos_coords, (L, ((fst (Set.toList (pieces.Item L)).[0]), (snd (Set.toList (pieces.Item L)).[0])))) :: word_moves
+            let word_moves = if st.letterPlacement.ContainsKey offsetCoords then word_moves else (offsetCoords, (L, ((fst (Set.toList (pieces.Item L)).[0]), (snd (Set.toList (pieces.Item L)).[0])))) :: word_moves
             // If the word is in the dictionary and the next position is empty, add the word to the list of possible moves
             let plays = 
                 if Dictionary.lookup new_word st.dict && (not (st.letterPlacement.ContainsKey next_pos_coords)) then 
@@ -180,7 +195,6 @@ module MudBot =
 
             match new_arc with
             | Some arc -> // if there is a new arc, continue generating moves
-        
                 let plays = (gen (pos-1) new_word (MultiSet.ofList rack) (snd arc) anchor dir st pieces word_moves) @ plays
                 match Dictionary.step (char 0) (snd arc) with //NOTE: This might be old arc
                 | Some arc -> 
@@ -197,7 +211,7 @@ module MudBot =
                 | "hor"  -> coord(fst anchor + pos + 1, snd anchor)
                 | "ver" -> coord(fst anchor, snd anchor + pos + 1)
             let new_word = word + letter.ToString()
-            let word_moves = if st.letterPlacement.ContainsKey pos_coords then word_moves else (pos_coords, (L, ((fst (Set.toList (pieces.Item L)).[0]), (snd (Set.toList (pieces.Item L)).[0])))) :: word_moves
+            let word_moves = if st.letterPlacement.ContainsKey offsetCoords then word_moves else (offsetCoords, (L, ((fst (Set.toList (pieces.Item L)).[0]), (snd (Set.toList (pieces.Item L)).[0])))) :: word_moves
             let plays = 
                 if Dictionary.lookup new_word st.dict && (not (st.letterPlacement.ContainsKey next_pos_coords)) then 
                     if List.length word_moves > 0 then word_moves :: plays else plays
@@ -207,14 +221,14 @@ module MudBot =
             | Some arc -> (gen (pos+1) new_word (MultiSet.ofList rack) (snd arc) anchor dir st pieces word_moves) @ plays
             | None -> plays
 
+    //TODO look into refactor slightly
     let genStart (st : State.state) (pieces : Map<uint32, tile>) (anchor : coord) = 
         let pos = 0
         let rack = st.hand
         let startingDict = st.dict
         let word = ""
         let word_moves = []
-        //TODO: perhaps switch to old system "hor" "ver"
-        let direction = "hor" //true // horizontal for true, false vertical
+        let direction = "hor" //true
                 
         let hor_words = if (not (st.letterPlacement.ContainsKey (coord(fst anchor + 1, snd anchor)))) 
                         then gen pos word rack startingDict anchor direction st pieces word_moves else []
@@ -225,13 +239,13 @@ module MudBot =
 
         hor_words @ ver_words
 
-    let move pieces (st: State.state) : (coord*(uint32*(char*int))) list =
+    //FINISHED
+    let move pieces (st: State.state) =
         let playable_moves =
             if st.letterPlacement.ContainsKey (coord(0, 0)) then
-                // try to convert anchors to array for parallel processing
+                // try to convert anchors to array
                 let anchors = Map.toArray st.letterPlacement
-                // Generate all possible moves in parallel
-                // https://stackoverflow.com/questions/30246799/f-how-to-do-list-map-in-parallel
+                // Generate all possible moves
                 let moves = anchors |> Array.map (fun (anchor, _) -> genStart st pieces anchor)
                 // take the generated moves array and make it into a single list
                 Array.fold (fun acc move -> move @ acc) [] moves
@@ -247,25 +261,18 @@ module Scrabble =
 
     open System.Threading
 
+    //TODO: refactor slightly maybe maybe using the ms seq we had before
     let rec updateBoard (ms : (coord*(uint32*(char*int)))list) (board : Map<coord, uint32>) = 
         match ms with
         | [] -> board
         | x :: xs -> (updateBoard xs board).Add (fst x, fst(snd x)) 
 
-    // let rec removePieces hand ms = 
-    //     match ms with
-    //     | [] -> hand
-    //     | x :: xs -> removePieces (MultiSet.removeSingle (fst (snd x)) hand) xs 
-
-    // let rec addPieces (newPieces : (uint32*uint32) list) (hand : MultiSet<uint32>)  = 
-    //     match newPieces with
-    //     | [] -> hand
-    //     | x :: xs -> addPieces xs (MultiSet.add (fst x) (snd x) hand)
 
     // List of starting letter frequence from Wikipedia. Will help the bot with finding words easier.
     // https://en.wikipedia.org/wiki/Letter_frequency#Relative_frequencies_of_the_first_letters_of_a_word_in_English_language
-    let startLetters = ['S' ; 'C' ; 'P' ; 'D' ; 'R' ; 'B' ; 'A' ; 'M' ; 'T' ; 'F' ; 'I' ; 'E' ; 'H' ; 'G' ; 'L' ; 'U' ; 'W' ; 'O' ; 'N' ; 'V' ; 'J' ; 'K' ; 'Q' ; 'Y' ; 'Z' ; 'X' ]
-
+    //let startLetters = ['S' ; 'C' ; 'P' ; 'D' ; 'R' ; 'B' ; 'A' ; 'M' ; 'T' ; 'F' ; 'I' ; 'E' ; 'H' ; 'G' ; 'L' ; 'U' ; 'W' ; 'O' ; 'N' ; 'V' ; 'J' ; 'K' ; 'Q' ; 'Y' ; 'Z' ; 'X' ]
+    // Ended up not being useful
+    
     // The pieces map is probably the single worst data type I have ever seen and used in my life. I would like to personally thank the person who made it :)
 
     let playGame cstream (pieces : Map<uint32,tile>) (st : State.state) =
