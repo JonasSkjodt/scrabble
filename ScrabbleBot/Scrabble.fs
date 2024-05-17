@@ -49,21 +49,18 @@ module State =
         hand            : MultiSet.MultiSet<uint32>   
         playerTurn      : uint32
         numberOfPlayers : uint32
-        players         : Map<uint32, bool>
         letterPlacement : Map<coord, uint32>
         board           : coord -> bool
     }
 
-    let mkState d pn h pT nOP players lP square_fun= {dict = d;  playerNumber = pn; hand = h; playerTurn = pT; numberOfPlayers = nOP; players = players; letterPlacement = lP; board = square_fun}
+    let mkState d pn h pT nOP lP square_fun= {dict = d;  playerNumber = pn; hand = h; playerTurn = pT; numberOfPlayers = nOP; letterPlacement = lP; board = square_fun}
 
-    //let board st            = st.board
     let dict st             = st.dict
     let playerNumber st     = st.playerNumber
     let hand st             = st.hand
     let playerTurn st       = st.playerTurn
     let numberOfPlayers st  = st.numberOfPlayers
-    let letterPlacement st  = st.letterPlacement
-    
+    let letterPlacement st  = st.letterPlacement    
 
     let rec removeTiles (move : list<coord * (uint32 * (char * int))>) hand =
                     match move with
@@ -75,34 +72,25 @@ module State =
     let rec addNewTiles (newPieces : (uint32 * uint32) list ) hand =
                     match newPieces with
                     | [] -> hand
-                    //| newTile :: tail -> addNewTiles tail (MultiSet.addSingle (fst newTile) hand)
                     | newTile :: tail -> addNewTiles tail (MultiSet.add (fst newTile) (snd newTile) hand)
+
+    let rec updateBoard ms (board : Map<coord, uint32>) = 
+        match ms with
+        | [] -> board
+        | x :: xs -> (updateBoard xs board).Add (fst x, x 
+                                                        |> snd 
+                                                        |> fst)  
     
     let changeTurn pId numP= 
         match pId with
         | p when p = numP -> 1u
         | _ -> pId + 1u
-        
-
-    // let updateBoard tiles = 
-    //     let updatePlacement tile coord st =
-    //         match st.letterPlacement with
-    //         | FoundValue coord _ ->  failwith "There is already a tile at the coord"  //map when Map.containsKey coord map -> failwith "There is already a tile at the coord"
-    //         | _ -> {st with letterPlacement = Map.add coord tile st.letterPlacement} 
-
-    //     Seq.foldBack (fun (coord, tile) acc -> updatePlacement tile coord acc) tiles 
-    
-    
-
-
 
 module MudBot =
-    
-    open System.Threading.Tasks
 
-    //TODO write more comments for the checkword function
+    //checkword
     let checkWord pos l (rack: MultiSet.MultiSet<uint32>) dir (st: State.state) (pieces : Map<uint32, tile>) =
-        //delta x, delta y
+        //x, y are the directions we are going to check
         let rec checkHorAndVer pos x y word =
             match st.letterPlacement.ContainsKey pos with
             | true ->
@@ -113,32 +101,45 @@ module MudBot =
                             |> List.head 
                             |> fst 
                             |> string
-                checkHorAndVer newPos x y (if x < 0 || y < 0 then letter + word else word + letter)
+                checkHorAndVer newPos x y (if x < 0 || y < 0 then letter + word 
+                                          else word + letter)
             | false -> word
 
+        // Check if the word is valid
         let validWord (pos: coord) (dir: string) (l: char) =
             let word =
                 match dir with
                 | "hor" ->
-                    let leftWord = checkHorAndVer (fst pos - 1, snd pos) -1 0 ""
-                    let rightWord = checkHorAndVer (fst pos + 1, snd pos) 1 0 ""
+                    let leftWord = checkHorAndVer (fst pos - 1,
+                                                  snd pos)
+                                                  -1 0 ""
+                    let rightWord = checkHorAndVer (fst pos + 1,
+                                                   snd pos)
+                                                   1 0 ""
+
                     leftWord + string l + rightWord
+                    
                 | "ver" ->
-                    let upWord = checkHorAndVer (fst pos, snd pos - 1) 0 -1 ""
-                    let downWord = checkHorAndVer (fst pos, snd pos + 1) 0 1 ""
+                    let upWord = checkHorAndVer (fst pos,
+                                                 snd pos - 1) 
+                                                 0 -1 ""            
+                    let downWord = checkHorAndVer (fst pos,
+                                                  snd pos + 1)
+                                                  0 1 ""
+
                     upWord + string l + downWord
 
                 | _ -> failwith "Invalid direction"
                 
+            // Check if the word is in the dictionary
             if String.length word > 1 then
-                st.dict |> Dictionary.lookup word
+                st.dict 
+                |> Dictionary.lookup word
             else
                 true
 
         validWord pos dir l
-
     
-
     // Move generation inspired from Gordon's Scrabble bot implementation
     // https://ericsink.com/downloads/faster-scrabble-gordon.pdf
     let rec gen pos word rack arc anch_sqr dir (st : State.state) (pieces : Map<uint32, tile>) wordTiles =    
@@ -174,7 +175,7 @@ module MudBot =
                         (Dictionary.step ((Map.find L pieces)
                         |> Set.toList
                         |> List.head
-                        |> fst) arc) 
+                        |> fst) arc)
                         dir pieces wordTiles anch_sqr 
                         st @ plays
                         ) playable_words rack
@@ -192,28 +193,43 @@ module MudBot =
             | "ver" -> coord((fst anchor), (snd anchor) + pos)
 
         // Check if the move is valid
-        if not (checkWord offsetCoords letter (MultiSet.ofList rack) (if dir = "hor" then "ver" else "hor") st pieces) then
-            playableWords
+        if not (checkWord offsetCoords letter 
+                         (MultiSet.ofList rack) 
+                         (if dir = "hor" then "ver" else "hor") 
+                         st pieces) then playableWords
         else
             let (new_word, next_pos_coords) =
                 match pos with
                 | pos when pos <= 0 ->
                     (letter.ToString() + word, 
                     match dir with
-                    | "hor" -> coord((fst anchor) + pos - 1, snd anchor)
-                    | "ver" -> coord(fst anchor, (snd anchor) + pos - 1)
+                    | "hor" -> coord(
+                                    (fst anchor) + pos - 1, 
+                                     snd anchor)
+                    | "ver" -> coord(
+                                    fst anchor, 
+                                     (snd anchor) + pos - 1)
                     )
                 // When pos > 0
                 | _ ->
                     (word + letter.ToString(),
                     match dir with
-                    | "hor" -> coord((fst anchor) + pos + 1, snd anchor)
-                    | "ver" -> coord(fst anchor, (snd anchor) + pos + 1)
+                    | "hor" -> coord(
+                                    (fst anchor) + pos + 1,
+                                     snd anchor)
+                    | "ver" -> coord(
+                                    fst anchor, 
+                                     (snd anchor) + pos + 1)
                     )
 
             let wordTiles =
                 if st.letterPlacement.ContainsKey offsetCoords then wordTiles
-                else (offsetCoords, (L, ((Set.toList (pieces.Item L)) |> List.head))) :: wordTiles
+                else (offsetCoords, 
+                     (L, 
+                     (Map.find L pieces 
+                     |> Set.toList 
+                     |> List.head)
+                     )) :: wordTiles
 
             // Check if the new_word is in the dictionary and next position is not occupied.
             let plays =
@@ -241,27 +257,28 @@ module MudBot =
             | None -> plays
 
     let startWordGeneration (st : State.state) pieces anchor = 
-        let pos = 0
         let rack = st.hand
         let startingDict = st.dict
-        let word = ""
         let wordTiles = []
-        let dir = "hor" //true
+        let dir = "hor"
                 
         let hor_words = if (not (st.letterPlacement.ContainsKey (coord(fst anchor + 1, snd anchor)))) 
-                        then gen pos word rack startingDict anchor dir st pieces wordTiles else []
+                        then gen 0 "" rack startingDict anchor dir st pieces wordTiles else []
         let ver_words = if (not (st.letterPlacement.ContainsKey (coord(fst anchor, snd anchor + 1)))) 
-                         then (gen pos word rack startingDict anchor ("ver") st pieces wordTiles) else []
+                         then (gen 0 "" rack startingDict anchor ("ver") st pieces wordTiles) else []
 
         hor_words @ ver_words
 
     let move pieces (st: State.state) =
         let playable_moves =
             if st.letterPlacement.ContainsKey (coord(0, 0)) then
-                // try to convert anchors to array
+                // convert anchors to array
                 let anchors = Map.toArray st.letterPlacement
                 // Generate all possible moves
-                let moves = anchors |> Array.map (fun (anchor, _) -> startWordGeneration st pieces anchor)
+                let moves =
+                    anchors
+                    |> Array.map (fun (anchor, _) ->
+                        startWordGeneration st pieces anchor)
                 // take the generated moves array and make it into a single list
                 Array.fold (fun acc move -> move @ acc) [] moves
             else
@@ -270,43 +287,21 @@ module MudBot =
                 
         // Find the longest move
         List.fold (fun (longest_move) move -> 
-            if List.length move > List.length longest_move then move else longest_move) [] playable_moves
+            if List.length move > List.length longest_move then move 
+            else longest_move) [] playable_moves
 
 module Scrabble =
-
     open System.Threading
-
-    //TODO: refactor slightly maybe maybe using the ms seq we had before
-    let rec updateBoard (ms : (coord*(uint32*(char*int)))list) (board : Map<coord, uint32>) = 
-        match ms with
-        | [] -> board
-        | x :: xs -> (updateBoard xs board).Add (fst x, fst(snd x)) 
-
-
-    // List of starting letter frequence from Wikipedia. Will help the bot with finding words easier.
-    // https://en.wikipedia.org/wiki/Letter_frequency#Relative_frequencies_of_the_first_letters_of_a_word_in_English_language
-    //let startLetters = ['S' ; 'C' ; 'P' ; 'D' ; 'R' ; 'B' ; 'A' ; 'M' ; 'T' ; 'F' ; 'I' ; 'E' ; 'H' ; 'G' ; 'L' ; 'U' ; 'W' ; 'O' ; 'N' ; 'V' ; 'J' ; 'K' ; 'Q' ; 'Y' ; 'Z' ; 'X' ]
-    // Ended up not being useful
-    
-    // The pieces map is probably the single worst data type I have ever seen and used in my life. I would like to personally thank the person who made it :)
-
     let playGame cstream (pieces : Map<uint32,tile>) (st : State.state) =
 
         let rec aux (st : State.state) =
-                
-            //printfn "Updated hand: %A" (st.hand)
-
-            // remove the force print when you move on from manual input (or when you have learnt the format)
-            //forcePrint "Input move (format '(<x-coordinate> <y-coordinate> <piece id><character><point-value> )*', note the absence of space between the last inputs)\n\n"
-            // create empty move
-            
             let move = "" //insert bot moves
             
 
             if st.playerTurn = st.playerNumber then
                 Thread.Sleep (1 * 500)
                 Print.printHand pieces (State.hand st)
-                let move = MudBot.move pieces st
+                let move = MudBot.move pieces st //start the mudbot move
                 //debugPrint (sprintf "THIS IS THE PLAYER MOVE: %A" move)
 
                 let serverMsg move = 
@@ -329,9 +324,7 @@ module Scrabble =
                 // The message CMPlaySuccess is sent to the player who made the move
 
                 // place letters on the board
-                let ms_seq = List.map (fun (coord, (tileID, _))  -> (coord, tileID)) ms |> List.collect (fun (coord, tileID) -> [(coord, tileID); (coord, tileID)]) |> List.toSeq
-                let boardWithLetters = updateBoard ms st.letterPlacement
-
+                let boardWithLetters = State.updateBoard ms st.letterPlacement
 
                 // create a new hand with old tiles removed and new tiles added
                 let newHand = (State.removeTiles ms st.hand)
@@ -346,10 +339,9 @@ module Scrabble =
             // Successful play by you. Update your state (remove old tiles, add the new ones, etc.)
             | RCM (CMPlayed (pid, ms, points)) ->
                 (* Successful play by other player. Update your state *)
-                let ms_seq = List.map (fun (coord, (tileID, _))  -> (coord, tileID)) ms |> List.collect (fun (coord, tileID) -> [(coord, tileID); (coord, tileID)]) |> List.toSeq
-
+                
                 // place letters on the board
-                let boardWithLetters = updateBoard ms st.letterPlacement
+                let boardWithLetters = State.updateBoard ms st.letterPlacement
 
                 // update st with new playernumber and new points
                 let newTurn = State.changeTurn pid st.numberOfPlayers
@@ -399,12 +391,7 @@ module Scrabble =
         //let dict = dictf false // Uncomment if using a trie for your dictionary
         
         let handSet = List.fold (fun acc (x, k) -> MultiSet.add x k acc) MultiSet.empty hand
-
         let board = ScrabbleLib.simpleBoardLangParser.parseSimpleBoardProg boardP
-        let rec mkPlayers (n : uint32) =
-            match n with
-            | 0u -> Map.empty
-            | n -> (mkPlayers (n-1u)).Add (n, true)
 
-        fun () -> playGame cstream tiles (State.mkState dict playerNumber handSet playerTurn numPlayers (mkPlayers numPlayers) Map.empty board)
+        fun () -> playGame cstream tiles (State.mkState dict playerNumber handSet playerTurn numPlayers Map.empty board)
         

@@ -29,7 +29,7 @@ let spawnMultiples name dict bot =
 [<EntryPoint>]
 let main argv =
     
-    ScrabbleUtil.DebugPrint.toggleDebugPrint true // Change to false to supress debug output
+    ScrabbleUtil.DebugPrint.toggleDebugPrint false // Change to false to supress debug output
 
     System.Console.BackgroundColor <- System.ConsoleColor.White
     System.Console.ForegroundColor <- System.ConsoleColor.Black
@@ -58,9 +58,6 @@ let main argv =
     let port       = 13001
 
     let dictAPI =
-        // Uncomment if you have implemented a dictionary. last element None if you have not implemented a GADDAG
-        //Some (DictionarySimple.empty, DictionarySimple.insert, DictionarySimple.lookup) //DictionarySimple.step, Some DictionarySimple.reverse) 
-        // (DictionaryTrie.empty, DictionaryTrie.insert, DictionaryTrie.step, None)
         Some (DictionaryGaddag.empty, DictionaryGaddag.insert, DictionaryGaddag.step, Some DictionaryGaddag.reverse)
         
     // this dicitonary is built on a Ternary Search Trie 
