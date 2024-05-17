@@ -109,39 +109,72 @@ module MudBot =
     open System.Threading.Tasks
 
     //TODO: Refactor check_other_words and is_valid_word
-    let rec check_other_words (pieces : Map<uint32, tile>) (st : State.state) (pos : coord) x y (word : string) = 
-        match (st.letterPlacement.ContainsKey pos) with
-        // If the position is in the letterPlacement, check if the position is in the pieces map
-        | true -> 
-            match x+y with
-            // 1 0 or 0 1 checks
-            |  1 -> check_other_words pieces st (fst pos + x, snd pos + y) x y word+(string (fst (Set.toList (pieces.Item ((st.letterPlacement.Item pos)))).[0]))
-            // 0 -1 or -1 0 checks
-            | -1 -> check_other_words pieces st (fst pos + x, snd pos + y) x y (string (fst (Set.toList (pieces.Item ((st.letterPlacement.Item pos)))).[0]))+word
+    // let rec check_other_words (pieces : Map<uint32, tile>) (st : State.state) (pos : coord) x y (word : string) = 
+    //     match (st.letterPlacement.ContainsKey pos) with
+    //     // If the position is in the letterPlacement, check if the position is in the pieces map
+    //     | true -> 
+    //         match x+y with
+    //         // 1 0 or 0 1 checks
+    //         |  1 -> check_other_words pieces st (fst pos + x, snd pos + y) x y word+(string (fst (Set.toList (pieces.Item ((st.letterPlacement.Item pos)))).[0]))
+    //         // 0 -1 or -1 0 checks
+    //         | -1 -> check_other_words pieces st (fst pos + x, snd pos + y) x y (string (fst (Set.toList (pieces.Item ((st.letterPlacement.Item pos)))).[0]))+word
         
-        | false -> word
+    //     | false -> word
 
-    let checkWord pos L rack dir st pieces = 
-        let rec checkHorAndVer pos dir word (st :State.state) pieces = 
-            // This dir is not hor and ver but instead left or right, up or down to determine the direction of where to look
-            if (st.letterPlacement.ContainsKey pos) then
+    // let checkWord pos L rack dir st pieces = 
+    //     let rec checkHorAndVer pos dir word (st :State.state) pieces = 
+    //         // This dir is not hor and ver but instead left or right, up or down to determine the direction of where to look
+    //         if (st.letterPlacement.ContainsKey pos) then
+    //             match dir with
+    //             | dir when dir = "left" || dir = "up" -> checkHorAndVer 
+    //             | dir when dir = "right" || dir = "down" -> checkHorAndVer 
+    //         else word
+    //     match dir with
+    //     | "hor" -> check_other_words pieces st (fst pos - 1, snd pos) "left" (string l) |> (check_other_words pieces st (fst pos + 1, snd pos) "right")
+    //     | "ver" -> check_other_words pieces st (fst pos, snd pos - 1) "up" (string l) |> (check_other_words pieces st (fst pos, snd pos + 1) "down")
+    // let is_valid_word (pieces : Map<uint32, tile>) (st : State.state) (pos : coord) (dir) (l : char) (rack : MultiSet.MultiSet<uint32>) =
+    //     let word = match dir with
+    //                 // If the direction is horizontal, check the words to the left and right of the position
+    //                 | "hor" -> check_other_words pieces st (fst pos - 1, snd pos) -1 0 (string l) |> (check_other_words pieces st (fst pos + 1, snd pos) +1 0)
+
+    //                 // If the direction is vertical, check the words above and below the position
+    //                 | "ver"   -> check_other_words pieces st (fst pos, snd pos - 1) 0 -1 (string l) |> (check_other_words pieces st (fst pos, snd pos + 1) 0 +1)
+    //     if String.length word = 1 then true 
+    //     else Dictionary.lookup word st.dict
+
+    //new one
+    let checkWord (pos: coord) (l: char) (rack: MultiSet.MultiSet<uint32>) (dir: string) (st: State.state) (pieces: Map<uint32, tile>) =
+        //delta x, delta y
+        let rec checkHorAndVer (pos: coord) (dx: int) (dy: int) (word: string) =
+            match st.letterPlacement.ContainsKey pos with
+            | true ->
+                let newPos = (fst pos + dx, snd pos + dy)
+                let tile = pieces.[st.letterPlacement.[pos]]
+                let letter = fst (Set.toList tile).[0] |> string
+                checkHorAndVer newPos dx dy (if dx < 0 || dy < 0 then letter + word else word + letter)
+            | false -> word
+
+        let validWord (pos: coord) (dir: string) (l: char) =
+            let word =
                 match dir with
-                | dir when dir = "left" || dir = "up" -> checkHorAndVer 
-                | dir when dir = "right" || dir = "down" -> checkHorAndVer 
-            else word
-        match dir with
-        | "hor" -> check_other_words pieces st (fst pos - 1, snd pos) "left" (string l) |> (check_other_words pieces st (fst pos + 1, snd pos) "right")
-        | "ver" -> check_other_words pieces st (fst pos, snd pos - 1) "up" (string l) |> (check_other_words pieces st (fst pos, snd pos + 1) "down")
+                | "hor" ->
+                    let leftWord = checkHorAndVer (fst pos - 1, snd pos) -1 0 ""
+                    let rightWord = checkHorAndVer (fst pos + 1, snd pos) 1 0 ""
+                    leftWord + string l + rightWord
+                | "ver" ->
+                    let upWord = checkHorAndVer (fst pos, snd pos - 1) 0 -1 ""
+                    let downWord = checkHorAndVer (fst pos, snd pos + 1) 0 1 ""
+                    upWord + string l + downWord
 
-    let is_valid_word (pieces : Map<uint32, tile>) (st : State.state) (pos : coord) (dir) (l : char) (rack : MultiSet.MultiSet<uint32>) =
-        let word = match dir with
-                    // If the direction is horizontal, check the words to the left and right of the position
-                    | "hor" -> check_other_words pieces st (fst pos - 1, snd pos) -1 0 (string l) |> (check_other_words pieces st (fst pos + 1, snd pos) +1 0)
+                | _ -> failwith "Invalid direction"
+            if String.length word > 1 then
+                st.dict |> Dictionary.lookup word
+            else
+                true
 
-                    // If the direction is vertical, check the words above and below the position
-                    | "ver"   -> check_other_words pieces st (fst pos, snd pos - 1) 0 -1 (string l) |> (check_other_words pieces st (fst pos, snd pos + 1) 0 +1)
-        if String.length word = 1 then true 
-        else Dictionary.lookup word st.dict
+        validWord pos dir l
+
+    
 
     // Move generation inspired from Gordon's Scrabble bot implementation
     // https://ericsink.com/downloads/faster-scrabble-gordon.pdf
@@ -177,7 +210,8 @@ module MudBot =
         let rev_dir = if dir = "hor" then "ver" else "hor"
         
         // If the word is not in the dictionary, return the list of possible moves
-        if not (is_valid_word pieces st offsetCoords rev_dir letter (MultiSet.ofList rack)) then plays 
+        //OLD if not (is_valid_word pieces st offsetCoords rev_dir letter (MultiSet.ofList rack)) then plays
+        if not (checkWord offsetCoords letter (MultiSet.ofList rack) rev_dir st pieces) then plays
         else if pos <= 0 then
             let next_pos_coords = 
                 match dir with
