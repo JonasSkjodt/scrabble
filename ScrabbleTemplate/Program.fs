@@ -58,6 +58,7 @@ let main argv =
     let port       = 13001
 
     let dictAPI =
+        //Some (DictionaryTrie.empty, DictionaryTrie.insert, DictionaryTrie.step, None)
         Some (DictionaryGaddag.empty, DictionaryGaddag.insert, DictionaryGaddag.step, Some DictionaryGaddag.reverse)
         
     // this dicitonary is built on a Ternary Search Trie 

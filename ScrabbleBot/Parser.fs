@@ -120,20 +120,9 @@ module internal Parser
     let stmParse = pstring "not implemented"
 
     (* The rest of your parser goes here *)
-    //TODO: Refactor this part and add comments
-    // moved from  
     type word   = (char * int) list
     type squareFun = word -> int -> int -> Result<int, Error>
-    
     type square = Map<int, squareFun>
-    
-    //let parseSquareProg (sqp:Map<int,string>) = sqp |> Map.map (fun _ p -> (stmntToSquareFun (getSuccess (run stmntParse p))))
-
-    // let parseBoardProg (s:string) (sqs:Map<int, square>) : boardFun2 =
-    //     //printf "Inside parseboardProg: %A \n" sqs
-    //     stmntToBoardFun (getSuccess (run stmntParse s)) sqs
-
-
 
     type boardFun2 = coord -> Result<square option, Error>
         

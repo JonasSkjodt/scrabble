@@ -130,7 +130,7 @@ module MudBot =
                     upWord + string l + downWord
 
                 | _ -> failwith "Invalid direction"
-                
+
             // Check if the word is in the dictionary
             if String.length word > 1 then
                 st.dict 
@@ -290,14 +290,16 @@ module MudBot =
             if List.length move > List.length longest_move then move 
             else longest_move) [] playable_moves
 
+
 module Scrabble =
     open System.Threading
     let playGame cstream (pieces : Map<uint32,tile>) (st : State.state) =
 
+        // Pieces has got to be the single worst datatype i have ever seen in my whole life. Thank you to however made it. Especially love the PDF definition
+
         let rec aux (st : State.state) =
             let move = "" //insert bot moves
             
-
             if st.playerTurn = st.playerNumber then
                 Thread.Sleep (1 * 500)
                 Print.printHand pieces (State.hand st)

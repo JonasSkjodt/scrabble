@@ -51,3 +51,44 @@ module DictionaryGaddag
                         | Some res -> match reverse (snd res) with
                                         | None -> false
                                         | Some res -> search xs (snd res)
+
+
+    // type GaddagNode = {
+    //     Transitions: Map<char, GaddagNode>
+    //     IsTerminal: bool
+    // }
+
+    // let emptyNode = { Transitions = Map.empty; IsTerminal = false }
+
+    // let step (node: GaddagNode) (c: char) : GaddagNode option =
+    //     match node.Transitions.TryGetValue(c) with
+    //     | true, nextNode -> Some nextNode
+    //     | _ -> None
+
+    // let insertWord (root: GaddagNode) (word: string) : GaddagNode =
+    //     let rec insert node (chars: char list) : GaddagNode =
+    //         match chars with
+    //         | [] -> { node with IsTerminal = true }
+    //         | c::cs ->
+    //             let nextNode =
+    //                 match node.Transitions.TryGetValue(c) with
+    //                 | true, nextNode -> nextNode
+    //                 | _ -> emptyNode
+    //             let updatedTransitions = node.Transitions.Add(c, insert nextNode cs)
+    //             { node with Transitions = updatedTransitions }
+
+    //     let addWithBreakpoint prefix suffix =
+    //         let reversedPrefix = List.rev prefix
+    //         let chars = reversedPrefix @ ['>'] @ suffix
+    //         insert root chars
+
+    //     let charList = List.ofSeq word
+    //     let breaks = List.mapi (fun i _ -> List.splitAt i charList) [1..List.length charList]
+    //     let withBreakpoints = breaks |> List.collect (fun (prefix, suffix) -> [addWithBreakpoint prefix suffix])
+
+    //     withBreakpoints |> List.iter (fun f -> ignore f)
+    //     root
+
+    // let createGaddag (words: string list) : GaddagNode =
+    //     let root = emptyNode
+    //     words |> List.fold (fun node word -> insertWord node word) root
