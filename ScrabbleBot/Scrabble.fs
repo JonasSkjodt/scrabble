@@ -1,10 +1,4 @@
-﻿//ASYNC GONE; TIMEOUT GONE; 
-//think about life
-//think about the future
-//think about the past
-//think about the present
-
-namespace ScrabbleClient
+﻿namespace ScrabbleClient
 
 open ScrabbleUtil
 open ScrabbleUtil.ServerCommunication
@@ -50,16 +44,14 @@ module State =
 
 
     type state = {
-        //board           : Parser.board
         dict            : ScrabbleUtil.Dictionary.Dict
         playerNumber    : uint32
         hand            : MultiSet.MultiSet<uint32>   
         playerTurn      : uint32
         numberOfPlayers : uint32
-        players       : Map<uint32, bool>
-        //letterPlacement : Map<coord, uint32 * (char * int)>
+        players         : Map<uint32, bool>
         letterPlacement : Map<coord, uint32>
-        board    : coord -> bool
+        board           : coord -> bool
     }
 
     let mkState d pn h pT nOP players lP square_fun= {dict = d;  playerNumber = pn; hand = h; playerTurn = pT; numberOfPlayers = nOP; players = players; letterPlacement = lP; board = square_fun}
@@ -108,50 +100,20 @@ module MudBot =
     
     open System.Threading.Tasks
 
-    //TODO: Refactor check_other_words and is_valid_word
-    // let rec check_other_words (pieces : Map<uint32, tile>) (st : State.state) (pos : coord) x y (word : string) = 
-    //     match (st.letterPlacement.ContainsKey pos) with
-    //     // If the position is in the letterPlacement, check if the position is in the pieces map
-    //     | true -> 
-    //         match x+y with
-    //         // 1 0 or 0 1 checks
-    //         |  1 -> check_other_words pieces st (fst pos + x, snd pos + y) x y word+(string (fst (Set.toList (pieces.Item ((st.letterPlacement.Item pos)))).[0]))
-    //         // 0 -1 or -1 0 checks
-    //         | -1 -> check_other_words pieces st (fst pos + x, snd pos + y) x y (string (fst (Set.toList (pieces.Item ((st.letterPlacement.Item pos)))).[0]))+word
-        
-    //     | false -> word
-
-    // let checkWord pos L rack dir st pieces = 
-    //     let rec checkHorAndVer pos dir word (st :State.state) pieces = 
-    //         // This dir is not hor and ver but instead left or right, up or down to determine the direction of where to look
-    //         if (st.letterPlacement.ContainsKey pos) then
-    //             match dir with
-    //             | dir when dir = "left" || dir = "up" -> checkHorAndVer 
-    //             | dir when dir = "right" || dir = "down" -> checkHorAndVer 
-    //         else word
-    //     match dir with
-    //     | "hor" -> check_other_words pieces st (fst pos - 1, snd pos) "left" (string l) |> (check_other_words pieces st (fst pos + 1, snd pos) "right")
-    //     | "ver" -> check_other_words pieces st (fst pos, snd pos - 1) "up" (string l) |> (check_other_words pieces st (fst pos, snd pos + 1) "down")
-    // let is_valid_word (pieces : Map<uint32, tile>) (st : State.state) (pos : coord) (dir) (l : char) (rack : MultiSet.MultiSet<uint32>) =
-    //     let word = match dir with
-    //                 // If the direction is horizontal, check the words to the left and right of the position
-    //                 | "hor" -> check_other_words pieces st (fst pos - 1, snd pos) -1 0 (string l) |> (check_other_words pieces st (fst pos + 1, snd pos) +1 0)
-
-    //                 // If the direction is vertical, check the words above and below the position
-    //                 | "ver"   -> check_other_words pieces st (fst pos, snd pos - 1) 0 -1 (string l) |> (check_other_words pieces st (fst pos, snd pos + 1) 0 +1)
-    //     if String.length word = 1 then true 
-    //     else Dictionary.lookup word st.dict
-
-    //new one
-    let checkWord (pos: coord) (l: char) (rack: MultiSet.MultiSet<uint32>) (dir: string) (st: State.state) (pieces: Map<uint32, tile>) =
+    //TODO write more comments for the checkword function
+    let checkWord pos l (rack: MultiSet.MultiSet<uint32>) dir (st: State.state) (pieces : Map<uint32, tile>) =
         //delta x, delta y
-        let rec checkHorAndVer (pos: coord) (dx: int) (dy: int) (word: string) =
+        let rec checkHorAndVer pos x y word =
             match st.letterPlacement.ContainsKey pos with
             | true ->
-                let newPos = (fst pos + dx, snd pos + dy)
+                let newPos = (fst pos + x, snd pos + y)
                 let tile = pieces.[st.letterPlacement.[pos]]
-                let letter = fst (Set.toList tile).[0] |> string
-                checkHorAndVer newPos dx dy (if dx < 0 || dy < 0 then letter + word else word + letter)
+                let letter = tile 
+                            |> Set.toList 
+                            |> List.head 
+                            |> fst 
+                            |> string
+                checkHorAndVer newPos x y (if x < 0 || y < 0 then letter + word else word + letter)
             | false -> word
 
         let validWord (pos: coord) (dir: string) (l: char) =
@@ -167,6 +129,7 @@ module MudBot =
                     upWord + string l + downWord
 
                 | _ -> failwith "Invalid direction"
+                
             if String.length word > 1 then
                 st.dict |> Dictionary.lookup word
             else
@@ -178,8 +141,8 @@ module MudBot =
 
     // Move generation inspired from Gordon's Scrabble bot implementation
     // https://ericsink.com/downloads/faster-scrabble-gordon.pdf
-    let rec gen (pos : int32) (word : string) (rack : MultiSet.MultiSet<uint32>) (arc : Dictionary.Dict) (anch_sqr : coord) dir  (st : State.state)  (pieces : Map<uint32, tile>)  (word_moves : (coord*(uint32*(char*int)))list) =    
-        let plays = []
+    let rec gen pos word rack arc anch_sqr dir (st : State.state) (pieces : Map<uint32, tile>) wordTiles =    
+        let playable_words = []
         let offsetCoords = // Add the position offset to the anchor square coordinates (depending on the direction we are planning to go)
             match dir with 
             | "hor"  -> coord((fst anch_sqr) + pos, snd anch_sqr)
@@ -189,103 +152,121 @@ module MudBot =
         else
             //if letters remain on the rack
             if st.letterPlacement.ContainsKey offsetCoords then
-                //TODO: Is blank letters handled correctly?
-                //TODO: Change this to be more readable and add a comment about it
                 // Go in here if there is a letter on the offsetCoords square thus we do not place letters from the rack
-                goOn pos (st.letterPlacement.Item offsetCoords) word (MultiSet.toList rack) (Dictionary.step (fst (Set.toList (pieces.Item (st.letterPlacement.Item offsetCoords))).[0]) arc) dir pieces  word_moves anch_sqr st
+                goOn 
+                    pos (st.letterPlacement.Item offsetCoords)
+                    word
+                    (MultiSet.toList rack)
+                    (Dictionary.step
+                    (Map.find
+                    (Map.find offsetCoords st.letterPlacement) pieces
+                    |> Set.toList
+                    |> List.head
+                    |> fst) arc) // Create newArc by stepping 
+                    dir pieces wordTiles anch_sqr st // The rest of the args
             else 
                 // Go in here if there is no letter on the offsetCoords square thus we place letters from the rack
-                MultiSet.fold (fun plays L _ -> goOn pos L word (MultiSet.toList (MultiSet.remove L 1u rack)) (Dictionary.step (fst (Set.toList (pieces.Item L)).[0]) arc) dir pieces word_moves anch_sqr st @ plays)  plays rack
+                MultiSet.fold (fun plays L _ ->
+                    goOn
+                        pos L
+                        word
+                        (MultiSet.toList (MultiSet.remove L 1u rack))
+                        (Dictionary.step ((Map.find L pieces)
+                        |> Set.toList
+                        |> List.head
+                        |> fst) arc) 
+                        dir pieces wordTiles anch_sqr 
+                        st @ plays
+                        ) playable_words rack
+    
+    and goOn pos L word rack newArc dir pieces wordTiles anchor (st: State.state) = 
 
-    // pos, l, word, rack, newarc, oldarc
-    //TODO refactor goOn to PDF standards
-    and goOn (pos : int32) (L : uint32) (word : string) (rack : uint32 list) (new_arc : (bool*Dictionary.Dict) option) dir (pieces : Map<uint32, Set<char * int>>) (word_moves : (coord*(uint32*(char*int)))list) (anchor : coord) (st : State.state)= 
-        
-        let plays = []
-        let letter = fst (Set.toList (pieces.Item L)).[0]
+        let playableWords = []
+        let letter = Map.find L pieces 
+                    |> Set.toList 
+                    |> List.head 
+                    |> fst
         let offsetCoords = 
             match dir with
-            | "hor"  -> coord(fst anchor + pos, snd anchor)
-            | "ver" -> coord(fst anchor, snd anchor + pos)
-        let rev_dir = if dir = "hor" then "ver" else "hor"
-        
-        // If the word is not in the dictionary, return the list of possible moves
-        //OLD if not (is_valid_word pieces st offsetCoords rev_dir letter (MultiSet.ofList rack)) then plays
-        if not (checkWord offsetCoords letter (MultiSet.ofList rack) rev_dir st pieces) then plays
-        else if pos <= 0 then
-            let next_pos_coords = 
-                match dir with
-                | "hor"  -> coord(fst anchor + pos - 1, snd anchor)
-                | "ver" -> coord(fst anchor, snd anchor + pos - 1)
-            let new_word = letter.ToString() + word
-            // If the position is not in the letterPlacement, add the word to the list of possible moves
-            let word_moves = if st.letterPlacement.ContainsKey offsetCoords then word_moves else (offsetCoords, (L, ((fst (Set.toList (pieces.Item L)).[0]), (snd (Set.toList (pieces.Item L)).[0])))) :: word_moves
-            // If the word is in the dictionary and the next position is empty, add the word to the list of possible moves
-            let plays = 
-                if Dictionary.lookup new_word st.dict && (not (st.letterPlacement.ContainsKey next_pos_coords)) then 
-                    if List.length word_moves > 0 then word_moves :: plays else plays
-                else
-                    plays
+            | "hor"  -> coord((fst anchor) + pos, (snd anchor))
+            | "ver" -> coord((fst anchor), (snd anchor) + pos)
 
-            match new_arc with
-            | Some arc -> // if there is a new arc, continue generating moves
-                let plays = (gen (pos-1) new_word (MultiSet.ofList rack) (snd arc) anchor dir st pieces word_moves) @ plays
-                match Dictionary.step (char 0) (snd arc) with //NOTE: This might be old arc
-                | Some arc -> 
-                    //if new arc doesnt contain the letter directly left and there is room to the right, then continue
-                    if  (not (st.letterPlacement.ContainsKey next_pos_coords)) then 
-                        (gen 1 new_word (MultiSet.ofList rack) (snd arc) anchor dir st pieces word_moves) @ plays
-                    else plays
-                | None -> plays // if there is no new arc, return the list of possible moves
-            | None -> plays // if there is no new arc, return the list of possible moves
-
+        // Check if the move is valid
+        if not (checkWord offsetCoords letter (MultiSet.ofList rack) (if dir = "hor" then "ver" else "hor") st pieces) then
+            playableWords
         else
-            let next_pos_coords = 
-                match dir with
-                | "hor"  -> coord(fst anchor + pos + 1, snd anchor)
-                | "ver" -> coord(fst anchor, snd anchor + pos + 1)
-            let new_word = word + letter.ToString()
-            let word_moves = if st.letterPlacement.ContainsKey offsetCoords then word_moves else (offsetCoords, (L, ((fst (Set.toList (pieces.Item L)).[0]), (snd (Set.toList (pieces.Item L)).[0])))) :: word_moves
-            let plays = 
-                if Dictionary.lookup new_word st.dict && (not (st.letterPlacement.ContainsKey next_pos_coords)) then 
-                    if List.length word_moves > 0 then word_moves :: plays else plays
+            let (new_word, next_pos_coords) =
+                match pos with
+                | pos when pos <= 0 ->
+                    (letter.ToString() + word, 
+                    match dir with
+                    | "hor" -> coord((fst anchor) + pos - 1, snd anchor)
+                    | "ver" -> coord(fst anchor, (snd anchor) + pos - 1)
+                    )
+                // When pos > 0
+                | _ ->
+                    (word + letter.ToString(),
+                    match dir with
+                    | "hor" -> coord((fst anchor) + pos + 1, snd anchor)
+                    | "ver" -> coord(fst anchor, (snd anchor) + pos + 1)
+                    )
+
+            let wordTiles =
+                if st.letterPlacement.ContainsKey offsetCoords then wordTiles
+                else (offsetCoords, (L, ((Set.toList (pieces.Item L)) |> List.head))) :: wordTiles
+
+            // Check if the new_word is in the dictionary and next position is not occupied.
+            let plays =
+                if Dictionary.lookup new_word st.dict && not (st.letterPlacement.ContainsKey next_pos_coords) then
+                    if List.length wordTiles > 0 then wordTiles :: playableWords
+                    else playableWords
                 else
-                    plays
-            match new_arc with
-            | Some arc -> (gen (pos+1) new_word (MultiSet.ofList rack) (snd arc) anchor dir st pieces word_moves) @ plays
+                    playableWords
+
+            // Handle arcs
+            match newArc with
+            | Some arc ->
+                let arcPlays =
+                    // Update the position
+                    let pos = if pos <= 0 then pos - 1 else pos + 1
+                    gen pos new_word (MultiSet.ofList rack) (snd arc) anchor dir st pieces wordTiles
+                let plays = arcPlays @ plays
+                match Dictionary.step (char 0) (snd arc) with
+                | Some newArc when not (st.letterPlacement.ContainsKey next_pos_coords) ->
+                    let arcPlays =
+                        let pos = if pos <= 0 then 1 else pos + 1
+                        gen pos new_word (MultiSet.ofList rack) (snd newArc) anchor dir st pieces wordTiles
+                    arcPlays @ plays
+                | _ -> plays
             | None -> plays
 
-    //TODO look into refactor slightly
-    let genStart (st : State.state) (pieces : Map<uint32, tile>) (anchor : coord) = 
+    let startWordGeneration (st : State.state) pieces anchor = 
         let pos = 0
         let rack = st.hand
         let startingDict = st.dict
         let word = ""
-        let word_moves = []
-        let direction = "hor" //true
+        let wordTiles = []
+        let dir = "hor" //true
                 
         let hor_words = if (not (st.letterPlacement.ContainsKey (coord(fst anchor + 1, snd anchor)))) 
-                        then gen pos word rack startingDict anchor direction st pieces word_moves else []
+                        then gen pos word rack startingDict anchor dir st pieces wordTiles else []
         let ver_words = if (not (st.letterPlacement.ContainsKey (coord(fst anchor, snd anchor + 1)))) 
-                         then (gen pos word rack startingDict anchor ("ver") st pieces word_moves) else []
-                        //  then (gen pos word rack startingDict anchor (not direction) st pieces word_moves) else []
-        
+                         then (gen pos word rack startingDict anchor ("ver") st pieces wordTiles) else []
 
         hor_words @ ver_words
 
-    //FINISHED
     let move pieces (st: State.state) =
         let playable_moves =
             if st.letterPlacement.ContainsKey (coord(0, 0)) then
                 // try to convert anchors to array
                 let anchors = Map.toArray st.letterPlacement
                 // Generate all possible moves
-                let moves = anchors |> Array.map (fun (anchor, _) -> genStart st pieces anchor)
+                let moves = anchors |> Array.map (fun (anchor, _) -> startWordGeneration st pieces anchor)
                 // take the generated moves array and make it into a single list
                 Array.fold (fun acc move -> move @ acc) [] moves
             else
                 // If the (0, 0) coordinate is not in the letterPlacement, start from there
-                genStart st pieces (0, 0)
+                startWordGeneration st pieces (0, 0)
                 
         // Find the longest move
         List.fold (fun (longest_move) move -> 
