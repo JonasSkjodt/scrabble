@@ -35,13 +35,13 @@ let main argv =
     //let board        = ScrabbleUtil.StandardBoard.standardBoard ()
     let board      = ScrabbleUtil.InfiniteBoard.infiniteBoard ()
 
-//    let board      = ScrabbleUtil.RandomBoard.randomBoard ()
-//    let board      = ScrabbleUtil.RandomBoard.randomBoardSeed (Some 42)
-//    let board      = ScrabbleUtil.InfiniteRandomBoard.infiniteRandomBoard ()
-//    let board      = ScrabbleUtil.InfiniteRandomBoard.infiniteRandomBoardSeed (Some 42)
+    //let board      = ScrabbleUtil.RandomBoard.randomBoard ()
+    //let board      = ScrabbleUtil.RandomBoard.randomBoardSeed (Some 42)
+    //let board      = ScrabbleUtil.InfiniteRandomBoard.infiniteRandomBoard ()
+    //let board      = ScrabbleUtil.InfiniteRandomBoard.infiniteRandomBoardSeed (Some 42)
 
-//    let board      = ScrabbleUtil.HoleBoard.holeBoard ()
-//    let board      = ScrabbleUtil.InfiniteHoleBoard.infiniteHoleBoard ()
+    //let board      = ScrabbleUtil.HoleBoard.holeBoard ()
+    //let board      = ScrabbleUtil.InfiniteHoleBoard.infiniteHoleBoard ()
 
     let words     = 
         try readLines "../../../Dictionaries/English.txt" 
@@ -49,7 +49,7 @@ let main argv =
 
 
     let handSize   = 7u
-    let timeout    = None
+    let timeout    = Some 2000u
     let tiles      = ScrabbleUtil.English.tiles 1u
     let seed       = None
     let port       = 13001

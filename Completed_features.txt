@@ -1,6 +1,6 @@
 
 Multi-player: yes
-Dictionary(Trie): yes
+Dictionary(Gaddag): yes
 playing on all boards: no
 parallelism: no
-Respect the timeout flag: no
+Respect the timeout flag: yes, with: Some 2000u
