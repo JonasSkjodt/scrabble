@@ -21,7 +21,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\ScrabbleBot\ScrabbleBot.fsproj" />
-    <ProjectReference Include="..\LocalPlayer\LocalPlayer.fsproj" />
   </ItemGroup>
 
   <ItemGroup>

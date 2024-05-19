@@ -294,13 +294,10 @@ module Scrabble =
     open System.Threading
     let playGame cstream (pieces : Map<uint32,tile>) (st : State.state) =
 
-        // Pieces has got to be the single worst datatype i have ever seen in my whole life. Thank you to however made it. Especially love the PDF definition
-
         let rec aux (st : State.state) =
             let move = "" //insert bot moves
             
             if st.playerTurn = st.playerNumber then
-                Thread.Sleep (1 * 500)
                 Print.printHand pieces (State.hand st)
                 let move = MudBot.move pieces st //start the mudbot move
 
