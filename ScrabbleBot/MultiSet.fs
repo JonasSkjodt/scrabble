@@ -56,14 +56,7 @@ module internal MultiSet
         | R (m) -> Map.foldBack f m x
     
     // yellow
-    // let ofList lst = List.fold (fun acc elem -> addSingle elem acc) empty lst
-    // let toList s = foldBack (fun elem num acc -> List.init (int32 num) (fun _ -> elem) @ acc) s []
-
     let rec ofList (lst : 'a list) : MultiSet<'a> = List.fold (fun acc elem -> addSingle elem acc) empty lst
-            // match lst with
-            // | [] -> empty
-            // | x :: xs -> addSingle x (ofList xs)
-
     let toList (ms : MultiSet<'a>) : 'a list = foldBack (fun item count acc -> List.replicate (int count) item @ acc) ms []
 
 

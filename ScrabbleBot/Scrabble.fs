@@ -88,7 +88,6 @@ module State =
 
 module MudBot =
 
-    //checkword
     let checkWord pos l (rack: MultiSet.MultiSet<uint32>) dir (st: State.state) (pieces : Map<uint32, tile>) =
         //x, y are the directions we are going to check
         let rec checkHorAndVer pos x y word =

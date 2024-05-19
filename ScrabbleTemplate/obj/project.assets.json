@@ -243,20 +243,6 @@
           }
         }
       },
-      "LocalPlayer/1.0.0": {
-        "type": "project",
-        "framework": ".NETCoreApp,Version=v7.0",
-        "dependencies": {
-          "FParsec": "1.1.1",
-          "FSharp.Core": "7.0.200"
-        },
-        "compile": {
-          "bin/placeholder/LocalPlayer.dll": {}
-        },
-        "runtime": {
-          "bin/placeholder/LocalPlayer.dll": {}
-        }
-      },
       "ScrabbleBot/1.0.0": {
         "type": "project",
         "framework": ".NETCoreApp,Version=v7.0",
@@ -938,11 +924,6 @@
         "system.threading.tasks.nuspec"
       ]
     },
-    "LocalPlayer/1.0.0": {
-      "type": "project",
-      "path": "../LocalPlayer/LocalPlayer.fsproj",
-      "msbuildProject": "../LocalPlayer/LocalPlayer.fsproj"
-    },
     "ScrabbleBot/1.0.0": {
       "type": "project",
       "path": "../ScrabbleBot/ScrabbleBot.fsproj",
@@ -954,7 +935,6 @@
       "FSharp.Core >= 7.0.200",
       "FSharp.Quotations.Evaluator >= 2.1.0",
       "FsPickler >= 5.3.2",
-      "LocalPlayer >= 1.0.0",
       "ScrabbleBot >= 1.0.0"
     ]
   },
@@ -986,9 +966,6 @@
         "net7.0": {
           "targetAlias": "net7.0",
           "projectReferences": {
-            "C:\\Users\\jonas\\Desktop\\scrabble\\scrabble\\LocalPlayer\\LocalPlayer.fsproj": {
-              "projectPath": "C:\\Users\\jonas\\Desktop\\scrabble\\scrabble\\LocalPlayer\\LocalPlayer.fsproj"
-            },
             "C:\\Users\\jonas\\Desktop\\scrabble\\scrabble\\ScrabbleBot\\ScrabbleBot.fsproj": {
               "projectPath": "C:\\Users\\jonas\\Desktop\\scrabble\\scrabble\\ScrabbleBot\\ScrabbleBot.fsproj"
             }

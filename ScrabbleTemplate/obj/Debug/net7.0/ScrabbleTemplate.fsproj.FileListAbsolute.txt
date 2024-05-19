@@ -218,14 +218,12 @@ C:\Users\jonas\Desktop\scrabble\scrabble\ScrabbleTemplate\bin\Debug\net7.0\ru\FS
 C:\Users\jonas\Desktop\scrabble\scrabble\ScrabbleTemplate\bin\Debug\net7.0\tr\FSharp.Core.resources.dll
 C:\Users\jonas\Desktop\scrabble\scrabble\ScrabbleTemplate\bin\Debug\net7.0\zh-Hans\FSharp.Core.resources.dll
 C:\Users\jonas\Desktop\scrabble\scrabble\ScrabbleTemplate\bin\Debug\net7.0\zh-Hant\FSharp.Core.resources.dll
-C:\Users\jonas\Desktop\scrabble\scrabble\ScrabbleTemplate\bin\Debug\net7.0\LocalPlayer.dll
 C:\Users\jonas\Desktop\scrabble\scrabble\ScrabbleTemplate\bin\Debug\net7.0\Oxyphenbutazone.dll
 C:\Users\jonas\Desktop\scrabble\scrabble\ScrabbleTemplate\bin\Debug\net7.0\ScrabbleBot.dll
 C:\Users\jonas\Desktop\scrabble\scrabble\ScrabbleTemplate\bin\Debug\net7.0\ScrabbleLib.dll
 C:\Users\jonas\Desktop\scrabble\scrabble\ScrabbleTemplate\bin\Debug\net7.0\ScrabbleServer.dll
 C:\Users\jonas\Desktop\scrabble\scrabble\ScrabbleTemplate\bin\Debug\net7.0\ScrabbleUtil.dll
 C:\Users\jonas\Desktop\scrabble\scrabble\ScrabbleTemplate\bin\Debug\net7.0\ScrabbleBot.pdb
-C:\Users\jonas\Desktop\scrabble\scrabble\ScrabbleTemplate\bin\Debug\net7.0\LocalPlayer.pdb
 C:\Users\jonas\Desktop\scrabble\scrabble\ScrabbleTemplate\obj\Debug\net7.0\ScrabbleTemplate.fsproj.AssemblyReference.cache
 C:\Users\jonas\Desktop\scrabble\scrabble\ScrabbleTemplate\obj\Debug\net7.0\ScrabbleTemplate.AssemblyInfoInputs.cache
 C:\Users\jonas\Desktop\scrabble\scrabble\ScrabbleTemplate\obj\Debug\net7.0\ScrabbleTemplate.AssemblyInfo.fs

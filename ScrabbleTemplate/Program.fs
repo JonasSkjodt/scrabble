@@ -5,9 +5,6 @@
 // parallelism: no
 // Respect the timeout flag: no
 
-
-
-// open DictionaryTrie
 open DictionaryGaddag
 
 let time f =
@@ -58,23 +55,14 @@ let main argv =
     let port       = 13001
 
     let dictAPI =
-        //Some (DictionaryTrie.empty, DictionaryTrie.insert, DictionaryTrie.step, None)
         Some (DictionaryGaddag.empty, DictionaryGaddag.insert, DictionaryGaddag.step, Some DictionaryGaddag.reverse)
         
     // this dicitonary is built on a Ternary Search Trie 
     let (dictionary, playerTime) = time (fun () -> ScrabbleUtil.Dictionary.mkDict words dictAPI)
 
 
-    // Uncomment one of these lines for the number of players you want to play against
-
-    // One player and one bot
-    //let players    = [("BOT", dictionary, Oxyphenbutazone.Scrabble.startGame); ("Player 1", dictionary, ScrabbleClient.Scrabble.startGame)]  //ScrabbleClient is the name of the namespace in scrabble.fs and scrabble.fsi
-    
-    // Two players
+    //multiplayer
     let players    = [("Player 1", dictionary, ScrabbleClient.Scrabble.startGame); ("Player 2", dictionary, ScrabbleClient.Scrabble.startGame)]  //ScrabbleClient is the name of the namespace in scrabble.fs and scrabble.fsi
-    //let playersLocal    = [("Player 1", dictionary, LocalPlayer.Scrabble.startGame); ("Player 2", dictionary, LocalPlayer.Scrabble.startGame)]
-    // Two bots
-    //let players = spawnMultiples "OxyphenButazone" dictionary Oxyphenbutazone.Scrabble.startGame 2
     
     do ScrabbleServer.Comm.startGame 
           board dictionary handSize timeout tiles seed port players
