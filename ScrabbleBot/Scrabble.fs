@@ -53,7 +53,7 @@ module State =
         board           : coord -> bool
     }
 
-    let mkState d pn h pT nOP lP square_fun= {dict = d;  playerNumber = pn; hand = h; playerTurn = pT; numberOfPlayers = nOP; letterPlacement = lP; board = square_fun}
+    let mkState d pn h pT nOP lP squareFun= {dict = d;  playerNumber = pn; hand = h; playerTurn = pT; numberOfPlayers = nOP; letterPlacement = lP; board = squareFun}
 
     let dict st             = st.dict
     let playerNumber st     = st.playerNumber
@@ -142,20 +142,20 @@ module MudBot =
     
     // Move generation inspired from Gordon's Scrabble bot implementation
     // https://ericsink.com/downloads/faster-scrabble-gordon.pdf
-    let rec gen pos word rack arc anch_sqr dir (st : State.state) (pieces : Map<uint32, tile>) wordTiles =    
-        let playable_words = []
+    let rec gen pos word rack arc anchSqr dir (st : State.state) (pieces : Map<uint32, tile>) wordTiles =    
+        let possibleWords = []
         let offsetCoords = // Add the position offset to the anchor square coordinates (depending on the direction we are planning to go)
             match dir with 
-            | "hor"  -> coord((fst anch_sqr) + pos, snd anch_sqr)
-            | "ver" -> coord(fst anch_sqr, (snd anch_sqr) + pos)
-        // If a letter, x, is already on this square then go_on
+            | "hor"  -> coord((fst anchSqr) + pos, snd anchSqr)
+            | "ver" -> coord(fst anchSqr, (snd anchSqr) + pos)
+        // If a letter, x, is already on this square then goOn
         if not (st.board offsetCoords) then [] // 
         else
             //if letters remain on the rack
             if st.letterPlacement.ContainsKey offsetCoords then
                 // Go in here if there is a letter on the offsetCoords square thus we do not place letters from the rack
                 goOn 
-                    pos (st.letterPlacement.Item offsetCoords)
+                    pos (Map.find offsetCoords st.letterPlacement)
                     word
                     (MultiSet.toList rack)
                     (Dictionary.step
@@ -164,7 +164,7 @@ module MudBot =
                     |> Set.toList
                     |> List.head
                     |> fst) arc) // Create newArc by stepping 
-                    dir pieces wordTiles anch_sqr st // The rest of the args
+                    dir pieces wordTiles anchSqr st // The rest of the args
             else 
                 // Go in here if there is no letter on the offsetCoords square thus we place letters from the rack
                 MultiSet.fold (fun plays L _ ->
@@ -176,13 +176,13 @@ module MudBot =
                         |> Set.toList
                         |> List.head
                         |> fst) arc)
-                        dir pieces wordTiles anch_sqr 
+                        dir pieces wordTiles anchSqr 
                         st @ plays
-                        ) playable_words rack
+                        ) possibleWords rack
     
     and goOn pos L word rack newArc dir pieces wordTiles anchor (st: State.state) = 
 
-        let playableWords = []
+        let possibleWords = []
         let letter = Map.find L pieces 
                     |> Set.toList 
                     |> List.head 
@@ -196,9 +196,9 @@ module MudBot =
         if not (checkWord offsetCoords letter 
                          (MultiSet.ofList rack) 
                          (if dir = "hor" then "ver" else "hor") 
-                         st pieces) then playableWords
+                         st pieces) then possibleWords
         else
-            let (new_word, next_pos_coords) =
+            let (newWord, nextPosCoords) =
                 match pos with
                 | pos when pos <= 0 ->
                     (letter.ToString() + word, 
@@ -231,13 +231,13 @@ module MudBot =
                      |> List.head)
                      )) :: wordTiles
 
-            // Check if the new_word is in the dictionary and next position is not occupied.
+            // Check if the newWord is in the dictionary and next position is not occupied.
             let plays =
-                if Dictionary.lookup new_word st.dict && not (st.letterPlacement.ContainsKey next_pos_coords) then
-                    if List.length wordTiles > 0 then wordTiles :: playableWords
-                    else playableWords
+                if Dictionary.lookup newWord st.dict && not (st.letterPlacement.ContainsKey nextPosCoords) then
+                    if List.length wordTiles > 0 then wordTiles :: possibleWords
+                    else possibleWords
                 else
-                    playableWords
+                    possibleWords
 
             // Handle arcs
             match newArc with
@@ -245,13 +245,13 @@ module MudBot =
                 let arcPlays =
                     // Update the position
                     let pos = if pos <= 0 then pos - 1 else pos + 1
-                    gen pos new_word (MultiSet.ofList rack) (snd arc) anchor dir st pieces wordTiles
+                    gen pos newWord (MultiSet.ofList rack) (snd arc) anchor dir st pieces wordTiles
                 let plays = arcPlays @ plays
                 match Dictionary.step (char 0) (snd arc) with
-                | Some newArc when not (st.letterPlacement.ContainsKey next_pos_coords) ->
+                | Some newArc when not (st.letterPlacement.ContainsKey nextPosCoords) ->
                     let arcPlays =
                         let pos = if pos <= 0 then 1 else pos + 1
-                        gen pos new_word (MultiSet.ofList rack) (snd newArc) anchor dir st pieces wordTiles
+                        gen pos newWord (MultiSet.ofList rack) (snd newArc) anchor dir st pieces wordTiles
                     arcPlays @ plays
                 | _ -> plays
             | None -> plays
@@ -262,15 +262,15 @@ module MudBot =
         let wordTiles = []
         let dir = "hor"
                 
-        let hor_words = if (not (st.letterPlacement.ContainsKey (coord(fst anchor + 1, snd anchor)))) 
+        let horWords = if (not (st.letterPlacement.ContainsKey (coord(fst anchor + 1, snd anchor)))) 
                         then gen 0 "" rack startingDict anchor dir st pieces wordTiles else []
-        let ver_words = if (not (st.letterPlacement.ContainsKey (coord(fst anchor, snd anchor + 1)))) 
+        let verWords = if (not (st.letterPlacement.ContainsKey (coord(fst anchor, snd anchor + 1)))) 
                          then (gen 0 "" rack startingDict anchor ("ver") st pieces wordTiles) else []
 
-        hor_words @ ver_words
+        horWords @ verWords
 
     let move pieces (st: State.state) =
-        let playable_moves =
+        let possibleWords =
             if st.letterPlacement.ContainsKey (coord(0, 0)) then
                 // convert anchors to array
                 let anchors = Map.toArray st.letterPlacement
@@ -286,9 +286,9 @@ module MudBot =
                 startWordGeneration st pieces (0, 0)
                 
         // Find the longest move
-        List.fold (fun (longest_move) move -> 
-            if List.length move > List.length longest_move then move 
-            else longest_move) [] playable_moves
+        List.fold (fun (longestMove) move -> 
+            if List.length move > List.length longestMove then move 
+            else longestMove) [] possibleWords
 
 
 module Scrabble =
@@ -304,7 +304,6 @@ module Scrabble =
                 Thread.Sleep (1 * 500)
                 Print.printHand pieces (State.hand st)
                 let move = MudBot.move pieces st //start the mudbot move
-                //debugPrint (sprintf "THIS IS THE PLAYER MOVE: %A" move)
 
                 let serverMsg move = 
                     match move with

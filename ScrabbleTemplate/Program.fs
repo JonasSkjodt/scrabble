@@ -7,7 +7,7 @@
 
 
 
-open DictionaryTrie
+// open DictionaryTrie
 open DictionaryGaddag
 
 let time f =
@@ -75,8 +75,6 @@ let main argv =
     //let playersLocal    = [("Player 1", dictionary, LocalPlayer.Scrabble.startGame); ("Player 2", dictionary, LocalPlayer.Scrabble.startGame)]
     // Two bots
     //let players = spawnMultiples "OxyphenButazone" dictionary Oxyphenbutazone.Scrabble.startGame 2
-    
-
     
     do ScrabbleServer.Comm.startGame 
           board dictionary handSize timeout tiles seed port players

@@ -1,94 +1,73 @@
-module DictionaryGaddag
-    //https://nullwords.wordpress.com/2013/02/27/gaddag-data-structure/
+module DictionaryGaddag 
 
-    type Dict = {map: Map<char, Dict*bool>;}
+    (* Assignment 4 - GADDAG Dictionary *)
+    type Dict = 
+    | Node of Map<char, bool*Dict>
 
-    let empty () = {map = Map.empty}
+    let empty () = Node Map.empty<char,bool*Dict>
 
-    let rec insertRest str =
-        match str with
-        | [] -> empty ()
-        | [s] -> {map = (empty ()).map.Add (s, (empty (), true))}
-        | s :: xs -> {map = (empty ()).map.Add (s, (insertRest xs, false))}
+    let insert (str : string) dict =
+        let rec insertChars chars dict =
+            match chars, dict with
+            | [], _ -> dict
+            
+            |x::xs, Node n -> 
+                match Map.tryFind x n with
+                | Some (bool, dic) when xs = [] -> Node (Map.add x (true, dic) n)
+                | Some (bool, dic) ->  Node (Map.add x (bool, (insertChars xs dic)) n)
+                | None when xs = [] -> Node (Map.add x (true, empty ()) n)
+                | None -> Node (Map.add x (false, (insertChars xs (empty ())) ) n)
 
-    let rec insertNext str dict = 
-        match str with
-        | [] -> empty ()
-        | [s] when dict.map.ContainsKey(s) -> {map = dict.map.Add (s, ((fst (dict.map.Item s)), true))}
-        | [s] -> {map = dict.map.Add (s, (empty (), true))}
-        | s :: xs when dict.map.ContainsKey(s) -> {map = dict.map.Add (s,(insertNext xs (fst (dict.map.Item s)), snd (dict.map.Item s)))}
-        | s :: xs -> {map = dict.map.Add(s, (insertRest xs, false))}
-        
-    let rec insertGaddag str dict (tmp : list<char>) =
-        match str with
-        | [] -> dict
-        | s :: xs -> insertGaddag xs (insertNext (s::tmp@xs) dict) (s::tmp)
+        // Shift string with specialChar    
+        let lstA = []
+        let rec createSpecial lstA (lstB : list<char>) dict = // lstB is basically chars but gets shifted thus the new name
+            let tupLst = 
+                match lstB with
+                | [] -> (lstA, [])
+                | x::xs -> ([x] @ lstA, xs) 
+            let lstA = fst tupLst
+            let lstB = snd tupLst
+            let str = lstA @ [(char 0)] @ lstB
 
-    let insert str dict = insertGaddag (Seq.toList str) dict [(char 0)]
+            let dict = insertChars str dict
+            match lstB with 
+            | [] -> dict
+            | _ -> createSpecial lstA lstB dict
 
-    let step c dict = 
-        match dict.map.ContainsKey c with
-        | true -> Some(snd (dict.map.Item c), fst (dict.map.Item c))
-        | false -> None
+        match createSpecial lstA (Seq.toList str) dict with 
+        | Node n -> Node n
 
-    let reverse dict = step (char 0) dict
-
-    let rec search str dict =
-        match str with
-        | [] -> false
-        | [s] when dict.map.ContainsKey(s) -> snd (dict.map.Item s)
-        | s :: xs when dict.map.ContainsKey(s) -> search xs (fst (dict.map.Item s))
-        | _ -> false
-
-    let lookup str dict = 
-        match (Seq.toList str) with
-        | [] -> false
-        | [s] -> match step s dict with
-                    | None -> false
-                    | Some res -> fst res
-        | s :: xs -> match step s dict with
-                        | None -> false
-                        | Some res -> match reverse (snd res) with
-                                        | None -> false
-                                        | Some res -> search xs (snd res)
+    let step char dict =  
+        match dict with
+        | Node n -> Map.tryFind char n 
 
 
-    // type GaddagNode = {
-    //     Transitions: Map<char, GaddagNode>
-    //     IsTerminal: bool
-    // }
+    let reverse dict = step (char 0) dict 
 
-    // let emptyNode = { Transitions = Map.empty; IsTerminal = false }
+    let lookup (str : string) dict = 
+        let rec recLook str dict = 
+            match str with
+            | [] -> false
+            | x::xs when xs = [] -> 
+                match step x dict with
+                | Some (b, _) -> b
+                | None -> false
+            | x::xs -> 
+                match step x dict with
+                | Some (b, dict) -> recLook xs dict
+                | None -> false
 
-    // let step (node: GaddagNode) (c: char) : GaddagNode option =
-    //     match node.Transitions.TryGetValue(c) with
-    //     | true, nextNode -> Some nextNode
-    //     | _ -> None
+        let lookupChar chars dict =
+            match chars, dict with
+            | x::xs, Node n when xs = [] -> 
+                match (step x dict) with
+                | Some (b, _) -> b
+                | None -> false
+            | x::xs, n -> 
+                match step x n with 
+                | Some (_, dict) ->  match reverse dict with 
+                                            | Some (b, dict) -> recLook xs dict
+                                            | None -> false
+                | None -> false
 
-    // let insertWord (root: GaddagNode) (word: string) : GaddagNode =
-    //     let rec insert node (chars: char list) : GaddagNode =
-    //         match chars with
-    //         | [] -> { node with IsTerminal = true }
-    //         | c::cs ->
-    //             let nextNode =
-    //                 match node.Transitions.TryGetValue(c) with
-    //                 | true, nextNode -> nextNode
-    //                 | _ -> emptyNode
-    //             let updatedTransitions = node.Transitions.Add(c, insert nextNode cs)
-    //             { node with Transitions = updatedTransitions }
-
-    //     let addWithBreakpoint prefix suffix =
-    //         let reversedPrefix = List.rev prefix
-    //         let chars = reversedPrefix @ ['>'] @ suffix
-    //         insert root chars
-
-    //     let charList = List.ofSeq word
-    //     let breaks = List.mapi (fun i _ -> List.splitAt i charList) [1..List.length charList]
-    //     let withBreakpoints = breaks |> List.collect (fun (prefix, suffix) -> [addWithBreakpoint prefix suffix])
-
-    //     withBreakpoints |> List.iter (fun f -> ignore f)
-    //     root
-
-    // let createGaddag (words: string list) : GaddagNode =
-    //     let root = emptyNode
-    //     words |> List.fold (fun node word -> insertWord node word) root
+        lookupChar (Seq.toList str) dict
